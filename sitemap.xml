@@ -98,6 +98,13 @@
     <priority>0.2</priority>
   </url>
   
+  <url>
+    <loc>http://w0s1np.github.io/tags/javasec-JDBC/</loc>
+    <lastmod>2022-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
 
   
 </urlset>
