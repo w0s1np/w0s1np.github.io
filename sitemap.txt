@@ -9,4 +9,4 @@ http://w0s1np.github.io/2022/03/31/java-RMI%D1%A7%CF%B0/
 http://w0s1np.github.io/2022/03/31/hello-world/
 http://w0s1np.github.io/
 http://w0s1np.github.io/tags/javasec/
-http://w0s1np.github.io/tags/javasec-JDBC/
+http://w0s1np.github.io/tags/JDBC/
