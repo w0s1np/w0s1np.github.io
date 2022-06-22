@@ -431,6 +431,51 @@
             
         
         <article class="index-post">
+            <a class="abstract-title" href="/2022/06/22/Java-XMLDecoder%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/">
+                
+                <span class="abstract-title-text">Java-XMLDecoder反序列化分析</span>
+            </a>
+            <div class="abstract-content">
+                Java-XMLDecoder反序列化分析概述XMLDecoder是java自带的以SAX方式解析xml的类，其在反序列化经过特殊构造的数据时可执行任意命令。
+在Java中有两种原生解析xml的方式，分别是SAX和DOM。两者区别在于：
+
+Dom解析功能强大，可增删改查，操作时会将xml文档以文档对象的方式读取到内存中，因此适用于小文档
+Sax解析是从头到尾逐行逐个元素读取内容，修改较为不便，但适用于只读的大文档
+
+在SAX中，读取到文档开头、结尾，元素的开头和结尾以及编码转换等操作时会触发一些回调方法，我们可以在这些回调方法中进行相应事件处理：
+
+startDocument：开始读取X...
+            </div>
+            <!-- read more -->
+            
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2022/06/22">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/06/22</span>
+                </div>
+                <!-- tags -->
+                
+                    <div class= abstract-tags >
+    
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="javasec">javasec</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="XML">XML</a>
+    
+</div>
+
+                
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+    
+        
+        
+        
+        
+            
+        
+        <article class="index-post">
             <a class="abstract-title" href="/2022/06/22/JDBC/">
                 
                 <span class="abstract-title-text">JDBC</span>
@@ -835,7 +880,20 @@ Serv...
         
         
         
+        
+        
+        
+        
+        
     
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         
@@ -874,7 +932,7 @@ Serv...
     
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 8
+        Total : 9
         </div>
         <!-- search  -->
         
@@ -888,6 +946,12 @@ Serv...
             <div class="archive-year"> 2022 </div>
             <ul class="year-list">
             
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/22</span>
+            <a class="archive-post-title" href="/2022/06/22/Java-XMLDecoder%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/">Java-XMLDecoder反序列化分析</a>
+        </li>
+    
         
         <li class="archive-post-item">
             <span class="archive-post-date">06/22</span>
@@ -950,6 +1014,11 @@ Serv...
             <span class="sidebar-tag-name" data-tags="JDBC">
                 <span class="iconfont-archer">&#xe606;</span>
                 JDBC
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="XML">
+                <span class="iconfont-archer">&#xe606;</span>
+                XML
             </span>
         
     </div>
