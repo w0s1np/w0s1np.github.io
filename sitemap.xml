@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://w0s1np.github.io/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/</loc>
+    
+    <lastmod>2022-08-05</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://w0s1np.github.io/2022/07/18/2022-DSCTF/</loc>
     
     <lastmod>2022-07-18</lastmod>
@@ -103,36 +112,36 @@
 
   <url>
     <loc>http://w0s1np.github.io/</loc>
-    <lastmod>2022-07-18</lastmod>
+    <lastmod>2022-08-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   
   <url>
-    <loc>http://w0s1np.github.io/tags/wp/</loc>
-    <lastmod>2022-07-18</lastmod>
+    <loc>http://w0s1np.github.io/tags/javasec/</loc>
+    <lastmod>2022-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://w0s1np.github.io/tags/javasec/</loc>
-    <lastmod>2022-07-18</lastmod>
+    <loc>http://w0s1np.github.io/tags/wp/</loc>
+    <lastmod>2022-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://w0s1np.github.io/tags/JDBC/</loc>
-    <lastmod>2022-07-18</lastmod>
+    <lastmod>2022-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://w0s1np.github.io/tags/XML/</loc>
-    <lastmod>2022-07-18</lastmod>
+    <lastmod>2022-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>

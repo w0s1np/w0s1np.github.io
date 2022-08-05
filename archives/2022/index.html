@@ -431,6 +431,54 @@
             
         
         <article class="index-post">
+            <a class="abstract-title" href="/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/">
+                
+                <span class="abstract-title-text">第六届强网杯Web wp</span>
+            </a>
+            <div class="abstract-content">
+                rcefile简单测下功能点，就上传和查看。
+
+
+这里进行了一个文件重命名操作。
+看到cookie里面有userdata数据：
+
+一看就是序列化的内容，但是不太清楚功能点，同时尝试上传php等后缀文件都失败。。。猜测是进行了白名单过滤。
+后面队友扫了下目录，发现有www.zip，现在看下逻辑就是：
+基本上文件都include了的config.inc.php：
+
+这里就有一个反序列化userdata的地方，但是没有pop链子，再简单搜了下，sql_autoload_register()，原题。。。黑名单都差不多
+
+直接上传inc或者phar文件，再序列化这个被重命名的类名即可：
+12345...
+            </div>
+            <!-- read more -->
+            
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2022/08/05">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/08/05</span>
+                </div>
+                <!-- tags -->
+                
+                    <div class= abstract-tags >
+    
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="wp">wp</a>
+    
+</div>
+
+                
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+    
+        
+        
+        
+        
+            
+        
+        <article class="index-post">
             <a class="abstract-title" href="/2022/07/18/2022-DSCTF/">
                 
                 <span class="abstract-title-text">2022 DSCTF</span>
@@ -780,38 +828,11 @@ Serv...
         </article>
         <div class="index-post-divider"></div>
     
-        
-        
-        
-        
-            
-        
-        <article class="index-post">
-            <a class="abstract-title" href="/2022/03/31/hello-world/">
-                
-                <span class="abstract-title-text">Hello World</span>
-            </a>
-            <div class="abstract-content">
-                Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick StartCreate a new post1$ hexo new &quot;My New Post&quot;
-
-More info: Writing
-Run server1$ hexo ...
-            </div>
-            <!-- read more -->
-            
-            <div class="abstract-post-meta">
-                <!-- date -->
-                <div class="abstract-date" title="Last updated: 2022/03/31">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/03/31</span>
-                </div>
-                <!-- tags -->
-                
-            </div>
-        </article>
-        <div class="index-post-divider"></div>
-    
     <!-- paginator  -->
+    
+        <nav class="page-nav">
+            <span class="page-number current">1</span><a class="page-number" href="/archives/2022/page/2/">2</a><a class="extend next" rel="next" href="/archives/2022/page/2/">NEXT &gt;</a>
+        </nav>
     
 </main>
 
@@ -964,7 +985,20 @@ Run server1$ hexo ...
         
         
         
+        
+        
+        
+        
+        
     
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         
@@ -1017,7 +1051,7 @@ Run server1$ hexo ...
     
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 10
+        Total : 11
         </div>
         <!-- search  -->
         
@@ -1031,6 +1065,12 @@ Run server1$ hexo ...
             <div class="archive-year"> 2022 </div>
             <ul class="year-list">
             
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/05</span>
+            <a class="archive-post-title" href="/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/">第六届强网杯Web wp</a>
+        </li>
+    
         
         <li class="archive-post-item">
             <span class="archive-post-date">07/18</span>
@@ -1097,14 +1137,14 @@ Run server1$ hexo ...
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
-            <span class="sidebar-tag-name" data-tags="wp">
-                <span class="iconfont-archer">&#xe606;</span>
-                wp
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="javasec">
                 <span class="iconfont-archer">&#xe606;</span>
                 javasec
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="wp">
+                <span class="iconfont-archer">&#xe606;</span>
+                wp
             </span>
         
             <span class="sidebar-tag-name" data-tags="JDBC">
