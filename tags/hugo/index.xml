@@ -2,15 +2,15 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Hugo | 末流双非的救赎之道</title>
-    <link>http://localhost:1313/tags/hugo/</link>
-      <atom:link href="http://localhost:1313/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://w0s1np.github.io/tags/hugo/</link>
+      <atom:link href="https://w0s1np.github.io/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
     <description>无人扶我青云志，我自踏雪至山巅。</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Tue, 01 Oct 2024 11:57:44 +0800</lastBuildDate>
     <item>
       <title>Hello</title>
-      <link>http://localhost:1313/blog/hello.html/</link>
+      <link>https://w0s1np.github.io/blog/hello.html/</link>
       <pubDate>Tue, 01 Oct 2024 11:57:44 +0800</pubDate>
-      <guid>http://localhost:1313/blog/hello.html/</guid>
+      <guid>https://w0s1np.github.io/blog/hello.html/</guid>
       <description>&lt;p&gt;Hello world!&lt;/p&gt;
 </description>
     </item>
