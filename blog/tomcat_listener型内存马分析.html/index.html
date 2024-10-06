@@ -216,33 +216,33 @@ RequestFacade requestFacade = (RequestFacade) sre.getServletRequest(); Field req
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">run</span><span class="p">:</span><span class="n">63</span><span class="p">,</span><span class="w"> </span><span class="n">TaskThread$WrappingRunnable</span><span class="w"> </span><span class="p">(</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">tomcat</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">threads</span><span class="p">)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">run</span><span class="p">:</span><span class="n">745</span><span class="p">,</span><span class="w"> </span><span class="n">Thread</span><span class="w"> </span><span class="p">(</span><span class="n">java</span><span class="p">.</span><span class="na">lang</span><span class="p">)</span><span class="w">
 </span></span></span></code></pre></div><p>往回看 Listener 是在<code>StandardContext#fireRequestInitEvent</code>中被调用</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226699.png" alt="image.png"></p>
 <p>通过 getApplicationEventListeners 得到 instances 数组，再遍历 instances，将其转型为 ServletRequestListener，最后传入 ServletRequestEvent 并调用 requestInitialized  方法。</p>
 <p>看看 getApplicationEventListeners 方法：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%201.png" alt="image.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%202.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226903.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226450.png" alt="image.png"></p>
 <p>可以看到 instances 其实就是获取的 StandardContext 的 applicationEventListenersList 属性，而其本质为 List,。所以我们这里只要想办法控制这一个属性就行。</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%203.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226594.png" alt="image.png"></p>
 <p>同时在 StandardContext 中提供了对应的 add 方法。</p>
 <p>所以我们只需要反射获取 StandardContext ，再调用此 add 方法，加入我们自定义的 listener 实例，即可成功加载。</p>
 <h1 id="0x03-获取request和response">0x03 获取Request和Response</h1>
 <p>因为 requestInitialized 只传入了 ServletRequestEvent ，没有类似 doFilter 的 ServletRequest 和 ServletResponse, 所以我们需要手动获取能够达到类似功能的对象。</p>
 <p>所以这里想办法在传入的 ServletRequestEvent 里面做手脚</p>
 <p>查看 ServletRequestEvent 的定义</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%204.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226566.png" alt="image.png"></p>
 <p>其中的 ServletRequest 为接口, 但因为多态的特性看不出来 request 具体是什么</p>
 <p>下个断点看下：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%205.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226116.png" alt="image.png"></p>
 <p>发现是 RequestFacade ，查看一下其定义：</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%206.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226868.png" alt="image.png"></p>
 <p>RequestFacade 实现了 HttpServletRequest 接口, 到这里其实已经可以正常解析 request 请求了</p>
 <p>现在还差一个 response</p>
 <p>注意到 RequestFacade 存在 request 属性, 声明类型为 Request, 于是查看 Request 的定义</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%207.png" alt="image.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%208.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226286.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226436.png" alt="image.png"></p>
 <p>发现其存在 response 属性, 声明类型为 Response</p>
 <p>查看 Response 的定义</p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%209.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062226352.png" alt="image.png"></p>
 <p>Response 也实现了 HttpServletResponse 接口, 那么同样的也可以正常处理 response 响应</p>
 <p>其实两者都是 tomcat 内部的对象, 封装了底层的 http 请求, 而 RequestFacade 是 Request 的又一层封装</p>
 <p>利用反射来实现上面获取的过程：</p>
@@ -310,8 +310,8 @@ RequestFacade requestFacade = (RequestFacade) sre.getServletRequest(); Field req
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&#34;inject success&#34;</span><span class="p">);</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">%&gt;</span><span class="w">
-</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2010.png" alt="image.png"></p>
-<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image%2011.png" alt="image.png"></p>
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062227079.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410062227412.png" alt="image.png"></p>
 <h1 id="参考">参考</h1>
 <p><a href="https://exp10it.io/2022/11/tomcat-listener-">https://exp10it.io/2022/11/tomcat-listener-</a>型内存马分析/#获取-request-和-response</p>
 
