@@ -1,0 +1,101 @@
+from scapy.all import *
+from netfilterqueue import NetfilterQueue
+import random
+
+# 从 PCAP 文件中随机加载指定数量的不同的良性数据包
+def load_benign_packets(pcap_file, num_packets=5):
+    packets = []
+    all_packets = rdpcap(pcap_file)
+    valid_packets = [pkt[IP] for pkt in all_packets if IP in pkt and (TCP in pkt or UDP in pkt)]
+
+    if len(valid_packets) >= num_packets:
+        packets = random.sample(valid_packets, num_packets)
+        print(f"Loaded {len(packets)} benign packets.")
+    else:
+        print("Not enough valid packets found in benign traffic.")
+    return packets
+
+# 插入的流量发送函数
+def send_combined_packets(original_pkt, benign_pkt):
+    try:
+
+        send(benign_pkt, verbose=False)
+        send(benign_pkt, verbose=False)
+        # 发送原始数据包
+        send(original_pkt)
+
+        # 使用 sendp 发送插入的良性数据包
+        send(benign_pkt, verbose=False)
+        send(benign_pkt, verbose=False)
+
+        print(f"Sent original packet: {original_pkt.summary()}")
+        print(f"Sent inserted benign packet: {benign_pkt.summary()}")
+    except Exception as e:
+        print(f"Error sending packets: {e}")
+
+# 流量回调函数
+def process_packet(packet):
+    try:
+        pkt = IP(packet.get_payload())  # 获取原始 IP 数据包
+
+        packet.accept()
+
+        if IP in pkt and TCP in pkt:
+            five_tuple = (pkt.src, pkt.dst, pkt.sport, pkt.dport, pkt.proto)
+
+            if five_tuple not in flows:
+                print(f"New flow detected: {five_tuple}")
+                flows[five_tuple] = True
+
+                # 插入良性流
+                if benign_packets:
+                    benign_pkt = random.choice(benign_packets).copy()
+
+                    # 调整五元组
+                    benign_pkt[IP].src = pkt.src
+                    benign_pkt[IP].dst = pkt.dst
+                    benign_pkt[TCP].sport = pkt.sport
+                    benign_pkt[TCP].dport = pkt.dport
+
+                    # 确保良性数据包的序列号和确认号符合当前流的要求
+                    if pkt[TCP].flags.S:  # 如果是 SYN 包
+                        benign_pkt[TCP].seq = random.randint(10000, 20000)
+                        benign_pkt[TCP].ack = 0
+                    else:  # 非 SYN 包
+                        data_length = len(pkt[TCP].payload)
+                        benign_pkt[TCP].seq = pkt[TCP].ack
+                        benign_pkt[TCP].ack = pkt[TCP].seq + data_length
+
+                    # 删除校验和以便自动重新计算
+                    del benign_pkt[IP].chksum
+                    del benign_pkt[TCP].chksum
+
+                    # 发送原始和良性数据包
+                    send_combined_packets(pkt, benign_pkt)
+
+        #packet.accept()  # 继续处理原始数据包
+    except Exception as e:
+        print(f"Error processing packet: {e}")
+        packet.accept()  # 如果有错误，也继续处理原始数据包
+
+# 主程序
+def main():
+    try:
+        queue = NetfilterQueue()
+        queue.bind(1, process_packet)
+        print("NetfilterQueue started.")
+        try:
+            queue.run()
+        except KeyboardInterrupt:
+            print("Exiting...")
+            queue.unbind()
+    except Exception as e:
+        print(f"Error in main function: {e}")
+
+if __name__ == "__main__":
+    try:
+        benign_packets = load_benign_packets('skype1.pcap', num_packets=20)
+        flows = {}
+        main()
+    except Exception as e:
+        print(f"Error at startup: {e}")
