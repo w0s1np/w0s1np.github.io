@@ -192,10 +192,13 @@ poc package payload; import com.sun.org.apache.xalan.internal.xsltc.trax.Templat
 //InvokerTransformerprivate void writeObject(ObjectOutputStream os) throws IOException { FunctorUtils.checkUnsafeSerialization(InvokerTransformer.class); os.defaultWriteObject(); } private void readObject(ObjectInputStream is) throws ClassNotFoundException, IOException { FunctorUtils.checkUnsafeSerialization(InvokerTransformer.class); is.defaultReadObject(); } //FunctorUtilsstatic void checkUnsafeSerialization(Class clazz) { String unsafeSerializableProperty; try { unsafeSerializableProperty = (String) AccessController.doPrivileged(new PrivilegedAction() { public Object run() { return System.getProperty(UNSAFE_SERIALIZABLE_PROPERTY); } }); } catch (SecurityException ex) { unsafeSerializableProperty = null; } if (!&#34;true&#34;.equalsIgnoreCase(unsafeSerializableProperty)) { throw new UnsupportedOperationException( &#34;Serialization support for &#34; &#43; clazz.getName() &#43; &#34; is disabled for security reasons. &#34; &#43; &#34;To enable it set system property &#39;&#34; &#43; UNSAFE_SERIALIZABLE_PROPERTY &#43; &#34;&#39; to &#39;true&#39;, &#34; &#43; &#34;but you must ensure that your application does not de-serialize objects from untrusted sources.&#34;); }} " />
 <meta property="og:locale" content="en-us" /><meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
 
-
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link href="https://fonts.gstatic.com" rel="preconnect" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/base.css">
 <link rel="stylesheet" href="/css/index.css">
 <link href="/index.xml" rel="alternate" type="application/rss+xml" title="末流双非的救赎之道">
+<script src="/js/jquery3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -1250,6 +1253,7 @@ poc package payload; import com.sun.org.apache.xalan.internal.xsltc.trax.Templat
 </span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="s">&#34;but you must ensure that your application does not de-serialize objects from untrusted sources.&#34;</span><span class="p">);</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}}</span><span class="w">
 </span></span></span></code></pre></div>
+      <div class="weekly-pagination"></div>
     </article>
 
     
@@ -1278,12 +1282,13 @@ poc package payload; import com.sun.org.apache.xalan.internal.xsltc.trax.Templat
     
   </section>
   <footer class="footer">
-  <p>© 2024 - 2024 Powered by
-    <a href="https://github.com/w0s1np" target="_blank">Github</a>
+  <p>© 2020 - 2024 Powered by
+    <a href="https://github.com/dlzmoe" target="_blank">Github</a>
     / <a href="/index.xml" target="_blank">RSS</a>
   </p>
 </footer>
 
+<script src="/js/main.js"></script>
 
 </body>
 

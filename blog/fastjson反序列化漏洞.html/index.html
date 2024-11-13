@@ -258,10 +258,13 @@ poc { &#34;a&#34;:{ &#34;@type&#34;:&#34;java.lang.Class&#34;, &#34;val&#34;:&#3
 " />
 <meta property="og:locale" content="en-us" /><meta property="og:image" content="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/image-20241001120146127.png" />
 
-
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link href="https://fonts.gstatic.com" rel="preconnect" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/base.css">
 <link rel="stylesheet" href="/css/index.css">
 <link href="/index.xml" rel="alternate" type="application/rss+xml" title="末流双非的救赎之道">
+<script src="/js/jquery3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -938,6 +941,7 @@ poc { &#34;a&#34;:{ &#34;@type&#34;:&#34;java.lang.Class&#34;, &#34;val&#34;:&#3
 </span></span></span></code></pre></div><h1 id="总结">总结</h1>
 <p>主要还是利用FastJson反序列化时候会调用 get、set 方法的一个动态调用，当我们设置一串 json时，调用 set 方法来设置我们可控值，再在 get 处找利用点。其实还是需要找链子。</p>
 
+      <div class="weekly-pagination"></div>
     </article>
 
     
@@ -966,12 +970,13 @@ poc { &#34;a&#34;:{ &#34;@type&#34;:&#34;java.lang.Class&#34;, &#34;val&#34;:&#3
     
   </section>
   <footer class="footer">
-  <p>© 2024 - 2024 Powered by
-    <a href="https://github.com/w0s1np" target="_blank">Github</a>
+  <p>© 2020 - 2024 Powered by
+    <a href="https://github.com/dlzmoe" target="_blank">Github</a>
     / <a href="/index.xml" target="_blank">RSS</a>
   </p>
 </footer>
 
+<script src="/js/main.js"></script>
 
 </body>
 

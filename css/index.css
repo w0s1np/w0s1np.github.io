@@ -1,20 +1,19 @@
 body {
   width: 100%;
-  max-width: 680px;
+  max-width: 666px;
   margin: 0 auto;
-  padding: 20px;
-  font-size: 16px;
+  padding: 20px 15px;
+  font-size: 17px;
   line-height: 1.8;
-  color: #374151;
-  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  color: #122840;
+  color: oklch(0.355192 0.032071 262.989);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 a {
-  color: #0000ff;
-}
-
-li::marker {
-  color: #d1d5db;
+  color: #122840;
+  color: oklch(0.355192 0.032071 262.989);
+  text-decoration: underline;
 }
 
 table {
@@ -30,7 +29,7 @@ table {
   margin-bottom: 12px;
 }
 .headnav .logo {
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
   font-size: 18px;
 }
@@ -46,6 +45,9 @@ table {
   text-decoration: none;
   padding: 0 5px;
   margin: 0 5px;
+}
+.headnav ul a:hover {
+  text-decoration: underline;
 }
 
 .container {
@@ -84,15 +86,23 @@ table {
 .posts-item {
   width: 100%;
   display: flex;
-  align-items: flex-start;
-  padding-bottom: 4px;
+  flex-direction: column;
+  padding-bottom: 20px;
 }
 .posts-item .date {
   white-space: nowrap;
   font-size: 14px;
-  padding-top: 4px;
-  margin-right: 14px;
+  opacity: 0.4;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+}
+.posts-item a {
+  font-size: 20px;
+  text-decoration: none;
+  border-bottom: 1px solid #dfdfdf;
+  transition: all 0.1s linear;
+}
+.posts-item a:hover {
+  border-bottom: 1px solid #999;
 }
 
 .body-title {
@@ -153,6 +163,10 @@ table {
   .container .posts {
     padding-left: 0;
   }
+
+  .headnav .logo {
+    font-size: 26px;
+  }
 }
 .tags-list {
   list-style: none;
@@ -168,5 +182,4 @@ table {
 
 .indexpost {
   padding-bottom: 20px;
-  border-bottom: 2px solid #e5e7eb;
 }
