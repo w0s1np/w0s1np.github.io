@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Java Agent 内存马 - w0s1np&#39;s blog</title>
@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.135.0 with theme even" />
 
 
-<link rel="canonical" href="http://w0s1np.github.io/post/java-agent-%E5%86%85%E5%AD%98%E9%A9%AC/" />
+<link rel="canonical" href="http://localhost:1313/post/java-agent-%E5%86%85%E5%AD%98%E9%A9%AC/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -39,7 +39,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:url" content="http://w0s1np.github.io/post/java-agent-%E5%86%85%E5%AD%98%E9%A9%AC/">
+<meta property="og:url" content="http://localhost:1313/post/java-agent-%E5%86%85%E5%AD%98%E9%A9%AC/">
   <meta property="og:site_name" content="w0s1np&#39;s blog">
   <meta property="og:title" content="Java Agent 内存马">
   <meta property="og:description" content="Hack the word!">
@@ -155,24 +155,32 @@
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
   <ul>
-    <li>
+    <li><a href="#java-agent介绍">Java Agent介绍</a>
       <ul>
-        <li><a href="#java-agent介绍">Java Agent介绍</a>
+        <li><a href="#premain静态instrument">premain(静态Instrument)</a>
           <ul>
-            <li><a href="#premain静态instrument">premain(静态Instrument)</a></li>
-            <li><a href="#agentmain动态instrument">agentmain(动态Instrument)</a></li>
-            <li><a href="#instrumentation-修改字节码">Instrumentation 修改字节码</a></li>
+            <li><a href="#实验">实验</a></li>
           </ul>
         </li>
-        <li><a href="#java-agent-内存马">Java Agent 内存马</a>
+        <li><a href="#agentmain动态instrument">agentmain(动态Instrument)</a>
           <ul>
-            <li><a href="#applicationfilterchaindofilter">ApplicationFilterChain#doFilter</a></li>
-            <li><a href="#standardwrappervalveinvoke">StandardWrapperValve#invoke</a></li>
+            <li><a href="#实验-1">实验</a></li>
           </ul>
         </li>
-        <li><a href="#参考">参考</a></li>
+        <li><a href="#instrumentation-修改字节码">Instrumentation 修改字节码</a></li>
       </ul>
     </li>
+    <li><a href="#java-agent-内存马">Java Agent 内存马</a>
+      <ul>
+        <li><a href="#applicationfilterchaindofilter">ApplicationFilterChain#doFilter</a>
+          <ul>
+            <li><a href="#poc">poc</a></li>
+          </ul>
+        </li>
+        <li><a href="#standardwrappervalveinvoke">StandardWrapperValve#invoke</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
   </ul>
 </nav>
   </div>

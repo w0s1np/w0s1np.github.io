@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Thymeleaf 模版注入 - w0s1np&#39;s blog</title>
@@ -16,10 +16,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="w0s1np" /><meta name="description" content="跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,
-如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的
-ModelAndView进行渲染的;这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用
-ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.
+<meta name="author" content="w0s1np" /><meta name="description" content="跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的ModelAndView进行渲染的;
+这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.
 " /><meta name="keywords" content="w0s1np, blog, ctf, sec, pentest" />
 
 
@@ -30,7 +28,7 @@ ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达�
 <meta name="generator" content="Hugo 0.135.0 with theme even" />
 
 
-<link rel="canonical" href="http://w0s1np.github.io/post/thymeleaf-%E6%A8%A1%E7%89%88%E6%B3%A8%E5%85%A5/" />
+<link rel="canonical" href="http://localhost:1313/post/thymeleaf-%E6%A8%A1%E7%89%88%E6%B3%A8%E5%85%A5/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -43,13 +41,11 @@ ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达�
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:url" content="http://w0s1np.github.io/post/thymeleaf-%E6%A8%A1%E7%89%88%E6%B3%A8%E5%85%A5/">
+<meta property="og:url" content="http://localhost:1313/post/thymeleaf-%E6%A8%A1%E7%89%88%E6%B3%A8%E5%85%A5/">
   <meta property="og:site_name" content="w0s1np&#39;s blog">
   <meta property="og:title" content="Thymeleaf 模版注入">
-  <meta property="og:description" content="跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,
-如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的
-ModelAndView进行渲染的;这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用
-ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.">
+  <meta property="og:description" content="跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的ModelAndView进行渲染的;
+这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
     <meta property="article:section" content="post">
@@ -60,20 +56,16 @@ ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达�
     <meta property="article:tag" content="Ssti">
 
   <meta itemprop="name" content="Thymeleaf 模版注入">
-  <meta itemprop="description" content="跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,
-如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的
-ModelAndView进行渲染的;这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用
-ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.">
+  <meta itemprop="description" content="跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的ModelAndView进行渲染的;
+这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.">
   <meta itemprop="datePublished" content="2025-04-22T14:34:57+08:00">
   <meta itemprop="dateModified" content="2025-04-22T14:34:57+08:00">
-  <meta itemprop="wordCount" content="14325">
+  <meta itemprop="wordCount" content="14527">
   <meta itemprop="keywords" content="Java,Thymeleaf,Ssti">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Thymeleaf 模版注入">
-  <meta name="twitter:description" content="跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,
-如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的
-ModelAndView进行渲染的;这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用
-ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.">
+  <meta name="twitter:description" content="跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的ModelAndView进行渲染的;
+这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.">
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -157,7 +149,7 @@ ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达�
         <div class="post-category">
             <a href="/categories/ssti/"> ssti </a>
             </div>
-          <span class="more-meta"> 14325 words </span>
+          <span class="more-meta"> 14527 words </span>
           <span class="more-meta"> 29 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -168,47 +160,85 @@ ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达�
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
   <ul>
-    <li>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#模版引擎">模版引擎</a>
       <ul>
-        <li><a href="#前言">前言</a></li>
-        <li><a href="#模版引擎">模版引擎</a>
+        <li><a href="#模版引擎简介">模版引擎简介</a></li>
+        <li><a href="#thymeleaf">Thymeleaf</a></li>
+        <li><a href="#语法">语法</a>
           <ul>
-            <li><a href="#模版引擎简介">模版引擎简介</a></li>
-            <li><a href="#thymeleaf">Thymeleaf</a></li>
-            <li><a href="#语法">语法</a></li>
+            <li><a href="#标签">标签</a></li>
+            <li><a href="#链接表达式">链接表达式</a></li>
+            <li><a href="#变量表达式">变量表达式</a>
+              <ul>
+                <li><a href="#字符串">字符串</a></li>
+                <li><a href="#javabean">javabean</a></li>
+                <li><a href="#map对象">Map对象</a></li>
+                <li><a href="#list合集">List合集</a></li>
+              </ul>
+            </li>
+            <li><a href="#选择变量表达式">选择变量表达式</a></li>
+            <li><a href="#消息表达式">消息表达式</a></li>
+            <li><a href="#片段表达式">片段表达式</a></li>
+            <li><a href="#预处理">预处理</a></li>
           </ul>
         </li>
-        <li><a href="#spring-mvc">Spring MVC</a>
-          <ul>
-            <li><a href="#核心组件">核心组件</a></li>
-            <li><a href="#解析流程">解析流程</a></li>
-            <li><a href="#解析流程小结">解析流程小结</a></li>
-          </ul>
-        </li>
-        <li><a href="#poc分析">poc分析</a>
-          <ul>
-            <li><a href="#利用条件">利用条件</a></li>
-            <li><a href="#redirect和forward无法利用原因">redirect和forward无法利用原因</a></li>
-            <li><a href="#无法回显问题">无法回显问题</a></li>
-            <li><a href="#path-uri">Path URI</a></li>
-          </ul>
-        </li>
-        <li><a href="#查找漏洞">查找漏洞</a>
-          <ul>
-            <li><a href="#黑盒更换主题等页面打payload">黑盒:更换主题等页面打payload</a></li>
-            <li><a href="#白盒">白盒</a></li>
-          </ul>
-        </li>
-        <li><a href="#poc变形">poc变形</a></li>
-        <li><a href="#参考">参考</a></li>
       </ul>
     </li>
+    <li><a href="#spring-mvc">Spring MVC</a>
+      <ul>
+        <li><a href="#核心组件">核心组件</a>
+          <ul>
+            <li><a href="#前端控制器dispatcherservlet">前端控制器DispatcherServlet</a></li>
+            <li><a href="#处理器映射器handlermapping">处理器映射器HandlerMapping</a></li>
+            <li><a href="#处理器适配器handleradapter">处理器适配器HandlerAdapter</a></li>
+            <li><a href="#处理器handler">处理器Handler</a></li>
+            <li><a href="#视图解析器viewresolver">视图解析器ViewResolver</a></li>
+          </ul>
+        </li>
+        <li><a href="#解析流程">解析流程</a>
+          <ul>
+            <li><a href="#获取handler">获取handler</a></li>
+            <li><a href="#执行interceptorsprehandle">执行interceptors#preHandle</a></li>
+            <li><a href="#调用handler获取modelandview">调用handler	获取ModelAndView</a></li>
+            <li><a href="#执行interceptorsposthandle">执行interceptors#postHandle</a></li>
+            <li><a href="#执行模板渲染">执行模板渲染</a></li>
+            <li><a href="#调用栈">调用栈</a></li>
+          </ul>
+        </li>
+        <li><a href="#解析流程小结">解析流程小结</a></li>
+      </ul>
+    </li>
+    <li><a href="#poc分析">poc分析</a>
+      <ul>
+        <li><a href="#利用条件">利用条件</a></li>
+        <li><a href="#redirect和forward无法利用原因">redirect和forward无法利用原因</a></li>
+        <li><a href="#无法回显问题">无法回显问题</a></li>
+        <li><a href="#path-uri">Path URI</a></li>
+      </ul>
+    </li>
+    <li><a href="#查找漏洞">查找漏洞</a>
+      <ul>
+        <li><a href="#黑盒更换主题等页面打payload">黑盒:更换主题等页面打payload</a></li>
+        <li><a href="#白盒">白盒</a>
+          <ul>
+            <li><a href="#模板参数外部可控">模板参数外部可控</a></li>
+            <li><a href="#查找含参数getmapping路由-无return">查找含参数@GetMapping路由 无return</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#poc变形">poc变形</a></li>
+    <li><a href="#参考">参考</a></li>
   </ul>
 </nav>
   </div>
 </div>
     <div class="post-content">
-      <h2 id="前言">前言</h2>
+      <p>跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的ModelAndView进行渲染的;</p>
+<p>这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.</p>
+<h1 id="thymeleaf-模版注入">Thymeleaf 模版注入</h1>
+<h2 id="前言">前言</h2>
 <p>大部分内容是跟着参考文章一步步调试学习的, 所以部分内容看起来会很臃肿, 可以先看小结部分大致了解下有哪几个部分, 再去调试分析重要的部分</p>
 <h2 id="模版引擎">模版引擎</h2>
 <h3 id="模版引擎简介">模版引擎简介</h3>
@@ -714,7 +744,7 @@ ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达�
 <li>（11）核心控制器将response返回给客户端</li>
 </ul>
 <p>直接在 Controller 下断点, 看调用栈</p>
-<p><img src="assets/image-20250421144626-tjph652.png" alt="image"></p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504221507097.png" alt="image"></p>
 <p>其实可以看到, 最开始就是之前java agent内存马看到的, 会先经过<code>FilterChain</code>​使用过滤器进行数据过滤</p>
 <p>再到<code>HttpServlet</code>​对请求进行处理, 然后会传入到<code>DispatcherServlet#doService</code>​进行实际处理</p>
 <div class="highlight"><div class="chroma">
