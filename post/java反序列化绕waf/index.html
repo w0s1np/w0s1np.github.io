@@ -55,7 +55,7 @@
   <meta itemprop="description" content="Hack the word!">
   <meta itemprop="datePublished" content="2025-04-19T20:49:33+08:00">
   <meta itemprop="dateModified" content="2025-04-19T20:49:33+08:00">
-  <meta itemprop="wordCount" content="8392">
+  <meta itemprop="wordCount" content="8380">
   <meta itemprop="keywords" content="Java,Waf">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Java反序列化绕WAF">
@@ -143,7 +143,7 @@
         <div class="post-category">
             <a href="/categories/java/"> Java </a>
             </div>
-          <span class="more-meta"> 8392 words </span>
+          <span class="more-meta"> 8380 words </span>
           <span class="more-meta"> 17 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -154,7 +154,7 @@
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#java反序列化绕waf">Java反序列化绕WAF</a>
+    <li>
       <ul>
         <li><a href="#utf-8-overlong-encoding原理">UTF-8 Overlong Encoding原理</a>
           <ul>
@@ -184,8 +184,7 @@
   </div>
 </div>
     <div class="post-content">
-      <h1 id="java反序列化绕waf">Java反序列化绕WAF</h1>
-<p>前段时间导师叫搭建一个漏洞环境, 然后以使用一些混淆手段以绕过IDS为目标, 就找了一个java反序列化的洞搭起来, 使用了下<code>UTF-8 Overlong Encoding</code>​就绕了, 然后又搭建了下雷池waf试了下, 因为java-chains上的混淆, 导致执行的命令还是没有完全混淆, 而且不太方便自定义修改, 故学了一下这个绕过方式</p>
+      <p>前段时间导师叫搭建一个漏洞环境, 然后以使用一些混淆手段以绕过IDS为目标, 就找了一个java反序列化的洞搭起来, 使用了下<code>UTF-8 Overlong Encoding</code>​就绕了, 然后又搭建了下雷池waf试了下, 因为java-chains上的混淆, 导致执行的命令还是没有完全混淆, 而且不太方便自定义修改, 故学了一下这个绕过方式</p>
 <p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504192053608.png" alt="image"></p>
 <h2 id="utf-8-overlong-encoding原理">UTF-8 Overlong Encoding原理</h2>
 <h3 id="utf-8编码原理">UTF-8编码原理</h3>
