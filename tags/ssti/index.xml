@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Ssti on w0s1np&#39;s blog</title>
-    <link>http://w0s1np.github.io/tags/ssti/</link>
+    <link>http://localhost:1313/tags/ssti/</link>
     <description>Recent content in Ssti on w0s1np&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en</language>
     <lastBuildDate>Tue, 22 Apr 2025 14:34:57 +0800</lastBuildDate>
-    <atom:link href="http://w0s1np.github.io/tags/ssti/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/tags/ssti/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Thymeleaf 模版注入</title>
-      <link>http://w0s1np.github.io/post/thymeleaf-%E6%A8%A1%E7%89%88%E6%B3%A8%E5%85%A5/</link>
+      <link>http://localhost:1313/post/thymeleaf-%E6%A8%A1%E7%89%88%E6%B3%A8%E5%85%A5/</link>
       <pubDate>Tue, 22 Apr 2025 14:34:57 +0800</pubDate>
-      <guid>http://w0s1np.github.io/post/thymeleaf-%E6%A8%A1%E7%89%88%E6%B3%A8%E5%85%A5/</guid>
+      <guid>http://localhost:1313/post/thymeleaf-%E6%A8%A1%E7%89%88%E6%B3%A8%E5%85%A5/</guid>
       <description>&lt;p&gt;跟着网上学习了一下thymeleaf模版注入,其实主要就是分析Spirng MVC框架在处理HTTP请求的时候,如何根据url寻找对应的处理器进行处理(即Controller实现的具体方法), 再看如何对返回的ModelAndView进行渲染的;&lt;/p&gt;&#xA;&lt;p&gt;这个漏洞的利用点就是若用户可控Controller返回的视图值, 那在使用ThymeleafView渲染的时候, 就会进行预处理最后通过SPEL执行表达式.&lt;/p&gt;</description>
     </item>
   </channel>
